@@ -1,0 +1,478 @@
+Report Date,Route,Time,Day,Location,Incident,Delay,Gap,Direction,Vehicle
+1-Jun-20,805,3:40:00 AM,Monday,SPADINA AND QUEEN,Overhead - Pantograph,28,33,E/B,4473
+1-Jun-20,501,5:40:00 AM,Monday,Queen and Roncesvalles,Held By,13,25,E/B,4502
+1-Jun-20,506,11:48:00 AM,Monday,College and Beverley,Held By,12,28,E/B,4599
+1-Jun-20,506,1:12:00 PM,Monday,Main station,Mechanical,24,42,W/B,4472
+1-Jun-20,504,2:01:00 PM,Monday,Distaliry Loop,Mechanical,6,14,W/B,4569
+1-Jun-20,511,4:00:00 PM,Monday,Bathurst Station,Investigation,4,8,S/B,1361
+1-Jun-20,504,4:33:00 PM,Monday,Brant/ King,Investigation,9,25,E/B,4438
+1-Jun-20,504,4:40:00 PM,Monday,King/Brant,Emergency Services,13,21,E/B,4480
+1-Jun-20,505,5:21:00 PM,Monday,Dundas and Huron,Investigation,9,18,E/B,4406
+1-Jun-20,705,6:04:00 PM,Monday,St clair stn,Mechanical,4,13,W/B,4479
+1-Jun-20,505,10:00:00 PM,Monday,Parliament and Dundas,Emergency Services,1,1,S/B,4533
+2-Jun-20,501,2:07:00 AM,Tuesday,CONNAUGHT AND QUEEN,Mechanical,10,17,E/B,4425
+2-Jun-20,511,8:12:00 AM,Tuesday,Spadina at Front,Mechanical,4,8,N/B,1013
+2-Jun-20,501,9:18:00 AM,Tuesday,Queen Sackville,Diversion,,,B/W,4495
+2-Jun-20,506,9:28:00 AM,Tuesday,Gerrard  Jones,Diversion,1,1,W/B,4543
+2-Jun-20,506,2:35:00 PM,Tuesday,College and University,Emergency Services,414,423,B/W,4542
+2-Jun-20,509,4:05:00 PM,Tuesday,CNE,Mechanical,8,16,E/B,4559
+2-Jun-20,506,4:10:00 PM,Tuesday,Gerrard and Coxwell,Emergency Services,9,18,E/B,9045
+2-Jun-20,501,6:02:00 PM,Tuesday,Queen/Carlaw,Investigation,10,17,E/B,4510
+2-Jun-20,501,6:22:00 PM,Tuesday,Queen/Woodfield,Investigation,9,16,W/B,4497
+2-Jun-20,501,10:00:00 PM,Tuesday,Queen and Glen Holm,Held By,11,20,E/B,4400
+2-Jun-20,501,10:06:00 PM,Tuesday,Queen and Sumach,Held By,9,18,E/B,4413
+2-Jun-20,501,10:40:00 PM,Tuesday,Queen and Kingston Rd,Emergency Services,1,1,W/B,4431
+2-Jun-20,501,11:09:00 PM,Tuesday,Queen and Sumach,Held By,9,18,E/B,4538
+3-Jun-20,301,3:17:00 AM,Wednesday,Connaught and Queen,Mechanical,15,30,E/B,4491
+3-Jun-20,510,6:36:00 AM,Wednesday,Spadina and Front,Held By,49,53,N/B,4454
+3-Jun-20,504,7:30:00 AM,Wednesday,Roncesvalles and Garden,Emergency Services,14,19,S/B,4558
+3-Jun-20,505,7:49:00 AM,Wednesday,Dundas West Station,Overhead - Pantograph,1,1,E/B,4429
+3-Jun-20,501,8:35:00 AM,Wednesday,Broadview and Queen,Diversion,13,20,W/B,4431
+3-Jun-20,506,10:43:00 AM,Wednesday,Main Station,Mechanical,8,16,E/B,4481
+3-Jun-20,501,11:30:00 AM,Wednesday,Neville Loop,Mechanical,7,14,W/B,4519
+3-Jun-20,501,12:42:00 PM,Wednesday,Humber Loop,Mechanical,8,15,E/B,4430
+3-Jun-20,501,2:18:00 PM,Wednesday,Queen/Jarvis,Held By,8,15,E/B,4487
+3-Jun-20,501,2:30:00 PM,Wednesday,Queen/King,Investigation,8,15,B/W,4422
+3-Jun-20,501,4:16:00 PM,Wednesday,Queen/Sumach,Held By,19,26,B/W,4425
+3-Jun-20,504,5:19:00 PM,Wednesday,King/Sumach,Mechanical,8,16,S/B,4578
+3-Jun-20,511,6:20:00 PM,Wednesday,CNE,Mechanical,5,10,N/B,1104
+3-Jun-20,506,7:44:00 PM,Wednesday,Main STN,Mechanical,9,18,E/B,4429
+3-Jun-20,510,8:45:00 PM,Wednesday,Spadina and Queen's Quay,Diversion,10,20,S/B,4525
+3-Jun-20,506,11:24:00 PM,Wednesday,HIPK,Mechanical,9,18,E/B,4595
+3-Jun-20,504,11:25:00 PM,Wednesday,King and Simcoe,Held By,92,102,B/W,4589
+3-Jun-20,504,11:55:00 PM,Wednesday,Spadina and King,Investigation,48,58,S/B,4446
+4-Jun-20,511,5:25:00 AM,Thursday,Exhibition Loop,Mechanical,5,10,N/B,1516
+4-Jun-20,501,5:33:00 AM,Thursday,Queen St E and Sumach Ave,Emergency Services,999,999,E/B,4401
+4-Jun-20,501,6:30:00 AM,Thursday,Queen St E and Connaught,Mechanical,4,6,W/B,4521
+4-Jun-20,505,8:00:00 AM,Thursday,Braodview Danforth,Mechanical,1,1,N/B,4556
+4-Jun-20,511,1:42:00 PM,Thursday,CNE,Mechanical,4,8,N/B,1097
+4-Jun-20,501,4:05:00 PM,Thursday,Queen/Gladstone,Mechanical,59,66,E/B,4497
+4-Jun-20,510,6:21:00 PM,Thursday,Spadina,Emergency Services,25,10,S/B,4532
+5-Jun-20,505,5:31:00 AM,Friday,Dundas and Parliament,Mechanical,0,0,W/B,4428
+5-Jun-20,505,5:32:00 AM,Friday,Parliament and Dundas,Mechanical,9,18,W/B,4583
+5-Jun-20,506,8:20:00 AM,Friday,College and Dufferin,Held By,75,90,B/W,4534
+5-Jun-20,511,8:45:00 AM,Friday,Bathurst Stn,Utilized Off Route,5,10,S/B,1074
+5-Jun-20,504,9:33:00 AM,Friday,Dufferin Loop,Mechanical,7,14,E/B,4459
+5-Jun-20,505,1:00:00 PM,Friday,Dudnas and Yonge,Held By,20,29,B/W,4450
+5-Jun-20,505,1:56:00 PM,Friday,Dundas and Yonge,Held By,14,23,B/W,4462
+5-Jun-20,501,3:04:00 PM,Friday,Lakeshore/Parklawn,Mechanical,7,14,E/B,1359
+5-Jun-20,501,6:01:00 PM,Friday,Queen/Connaught,Late Leaving Garage,8,15,E/B,4499
+5-Jun-20,501,6:27:00 PM,Friday,Humber loop,Mechanical,7,14,W/B,1215
+5-Jun-20,505,8:28:00 PM,Friday,Broadview Station,Mechanical,17,25,W/B,4428
+5-Jun-20,511,9:02:00 PM,Friday,Exhibition Loop,Mechanical,5,10,N/B,1066
+5-Jun-20,506,10:33:00 PM,Friday,College and Landsdowne,Mechanical,9,13,W/B,4554
+6-Jun-20,512,12:49:00 AM,Saturday,LANSDOWNE AND ST.CLAIR,Mechanical,19,38,W/B,4541
+6-Jun-20,501,1:38:00 AM,Saturday,CONNAUGHT AND QUEEN,Mechanical,1,1,W/B,4501
+6-Jun-20,505,2:28:00 AM,Saturday,Leslie and Eastern,Investigation,1,2,S/B,4545
+6-Jun-20,301,2:30:00 AM,Saturday,QUEEN AND SHERBOURNE,Investigation,24,48,E/B,4430
+6-Jun-20,301,2:49:00 AM,Saturday,LONG BRANCH LOOP,Mechanical,8,13,W/B,4509
+6-Jun-20,301,3:14:00 AM,Saturday,HUMBER LOOP,Mechanical,7,15,W/B,4515
+6-Jun-20,504,5:38:00 AM,Saturday,Queern and Broadview,Held By,4,16,E/B,4568
+6-Jun-20,509,5:44:00 AM,Saturday,Leslie Barns,Late Leaving Garage,10,20,W/B,4599
+6-Jun-20,511,6:14:00 AM,Saturday,Exhibition Loop,Mechanical,9,18,N/B,1586
+6-Jun-20,511,9:35:00 AM,Saturday,Bathurst Stn,Utilized Off Route,7,14,S/B,1137
+6-Jun-20,511,11:59:00 AM,Saturday,Exhibition Loop,Utilized Off Route,5,10,N/B,1067
+6-Jun-20,501,12:44:00 PM,Saturday,Humber Loop,Utilized Off Route,7,13,E/B,4513
+6-Jun-20,501,1:11:00 PM,Saturday,Humber Loop,Utilized Off Route,9,18,E/B,4412
+6-Jun-20,505,2:01:00 PM,Saturday,Dundas and Yonge,Held By,60,69,B/W,4561
+6-Jun-20,511,2:51:00 PM,Saturday,Bathurst and Dundas,Diversion,14,19,B/W,1144
+6-Jun-20,506,2:53:00 PM,Saturday,College and Major,Held By,15,23,B/W,4575
+6-Jun-20,501,3:03:00 PM,Saturday,King / River,Investigation,6,13,W/B,4512
+6-Jun-20,511,3:43:00 PM,Saturday,Bathurst STN,Utilized Off Route,5,10,S/B,1359
+6-Jun-20,501,3:47:00 PM,Saturday,Humber Loop,Utilized Off Route,10,19,E/B,4530
+6-Jun-20,505,4:13:00 PM,Saturday,Dundas and Dufferin,Held By,28,48,W/B,4595
+6-Jun-20,510,4:17:00 PM,Saturday,Union STN,Mechanical,7,14,S/B,4439
+6-Jun-20,512,4:38:00 PM,Saturday,Gunns Loop,Investigation,9,18,E/B,4590
+6-Jun-20,505,4:59:00 PM,Saturday,Dundas and Bay,Held By,13,26,W/B,4455
+6-Jun-20,504,6:30:00 PM,Saturday,Leslie and Queen Street,Mechanical,8,16,N/B,4597
+6-Jun-20,511,10:03:00 PM,Saturday,Bathurst Station,Emergency Services,6,14,S/B,1137
+6-Jun-20,505,11:21:00 PM,Saturday,Dundas W Station,Mechanical,20,40,E/B,4561
+6-Jun-20,505,11:54:00 PM,Saturday,Dundas and Jarvis,Mechanical,9,19,W/B,4468
+7-Jun-20,306,2:55:00 AM,Sunday,DUNDAS WEST STATION,Investigation,17,35,E/B,4421
+7-Jun-20,501,4:23:00 AM,Sunday,LONG BRANCH LOOP,Investigation,15,30,E/B,4486
+7-Jun-20,501,5:36:00 AM,Sunday,Humber Loop,Mechanical,17,0,E/B,4504
+7-Jun-20,505,9:45:00 AM,Sunday,Broadview Station,Emergency Services,16,32,W/B,4440
+7-Jun-20,504,10:04:00 AM,Sunday,Distillary Loop,Mechanical,7,14,W/B,4442
+7-Jun-20,511,12:30:00 PM,Sunday,Bathurst STN,Utilized Off Route,5,10,S/B,1081
+7-Jun-20,504,1:17:00 PM,Sunday,Dundas West Staion,Mechanical,8,16,E/B,4557
+7-Jun-20,512,1:25:00 PM,Sunday,st.clair and yonge,Mechanical,6,12,W/B,4584
+7-Jun-20,509,4:06:00 PM,Sunday,CNE Loop,Mechanical,1,1,E/B,4427
+7-Jun-20,512,9:00:00 PM,Sunday,Gunns Loop,Mechanical,7,13,E/B,4584
+7-Jun-20,501,10:05:00 PM,Sunday,Queen Shaw,Emergency Services,7,17,E/B,4422
+7-Jun-20,510,11:43:00 PM,Sunday,SPADINA AND QUEENS QUAY,Investigation,20,30,W/B,4456
+8-Jun-20,511,12:58:00 AM,Monday,Front/Portland,Mechanical,9,18,W/B,1137
+8-Jun-20,512,1:54:00 AM,Monday,ST.CLAIR AND DUFFERIN,Mechanical,34,51,WB,4401
+8-Jun-20,310,4:15:00 AM,Monday,spadina station,Investigation,11,26,S/B,4479
+8-Jun-20,511,6:45:00 AM,Monday,Exhibition Loop,Mechanical,5,10,N/B,1057
+8-Jun-20,504,7:46:00 AM,Monday,Distrillery Loop,Mechanical,5,15,W/B,4601
+8-Jun-20,506,8:20:00 AM,Monday,Main Station,Mechanical,8,16,E/B,4574
+8-Jun-20,511,1:50:00 PM,Monday,King and Bathurst,Investigation,4,8,S/B,1423
+8-Jun-20,505,3:10:00 PM,Monday,Dundas West STN,Mechanical,9,18,W/B,4602
+8-Jun-20,512,6:01:00 PM,Monday,St. Clair and Lansdowne,Mechanical,7,14,W/B,4582
+8-Jun-20,504,6:21:00 PM,Monday,King/Wilson park rd,General Delay,16,22,E/B,4576
+8-Jun-20,504,6:30:00 PM,Monday,King/Parliament,Investigation,1,1,E/B,4563
+8-Jun-20,509,9:50:00 PM,Monday,EXHIBITION LOOP,Mechanical,9,18,E/B,4505
+8-Jun-20,504,10:21:00 PM,Monday,KING AND UNIVERSITY,Mechanical,10,20,W/B,4450
+8-Jun-20,510,10:30:00 PM,Monday,SPADINA AND KING,Utilized Off Route,1,1,S/B,4466
+9-Jun-20,512,4:49:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,5,10,E/B,4429
+9-Jun-20,505,4:50:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,11,22,N/B,4574
+9-Jun-20,506,4:53:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,6,16,E/B,4477
+9-Jun-20,512,4:55:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,5,10,E/B,4531
+9-Jun-20,505,4:55:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,9,18,N/B,4556
+9-Jun-20,509,4:56:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,11,22,W/B,4473
+9-Jun-20,506,4:59:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,8,16,E/B,4449
+9-Jun-20,512,5:00:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,5,10,W/B,4600
+9-Jun-20,505,5:01:00 AM,Tuesday,Leslie Barns,Late Leaving Garage,9,18,W/B,4555
+9-Jun-20,506,6:38:00 AM,Tuesday,Upper Gerard and Coxwell,Investigation,8,16,W/B,4475
+9-Jun-20,506,7:00:00 AM,Tuesday,Gerrard Parliament,Mechanical,8,16,W/B,4570
+9-Jun-20,506,8:30:00 AM,Tuesday,Dufferin and College,Mechanical,8,16,W/B,4445
+9-Jun-20,506,9:10:00 AM,Tuesday,Coxwell and Gerrard,Mechanical,1,1,S/B,4510
+9-Jun-20,506,10:46:00 AM,Tuesday,College and Spadina,Mechanical,1,1,E/B,4441
+9-Jun-20,504,4:05:00 PM,Tuesday,Roncesvalles/Constance,Emergency Services,11,17,S/B,4571
+9-Jun-20,705,4:26:00 PM,Tuesday,Broadview/Gerrard,General Delay,20,26,S/B,4542
+9-Jun-20,505,4:28:00 PM,Tuesday,Broadview south of Gerrard,Diversion,28,32,S/B,4452
+9-Jun-20,501,6:28:00 PM,Tuesday,Long Branch,Mechanical,1,1,W/B,1086
+9-Jun-20,501,9:12:00 PM,Tuesday,Queen and Parliament,Mechanical,9,18,W/B,4500
+9-Jun-20,509,10:41:00 PM,Tuesday,Union Station,Mechanical,9,18,W/B,4508
+9-Jun-20,511,11:37:00 PM,Tuesday,Bathurst and Dundas,Investigation,8,16,N/B,1020
+10-Jun-20,301,1:02:00 AM,Wednesday,Lakeshore and Brooker's Lane,Emergency Services,58,66,E/B,4500
+10-Jun-20,511,5:22:00 AM,Wednesday,Bathurst Station,Mechanical,2,10,S/B,1095
+10-Jun-20,501,7:45:00 AM,Wednesday,Niagara and Queen,Mechanical,7,14,E/B,4416
+10-Jun-20,504,11:42:00 AM,Wednesday,Roncesvalles & Fermanagh,Investigation,38,45,N/B,4586
+10-Jun-20,511,1:28:00 PM,Wednesday,Spadina and Front,Mechanical,4,8,N/B,1378
+10-Jun-20,511,9:42:00 PM,Wednesday,Bathurst and Robinson,Emergency Services,9,18,S/B,1349
+10-Jun-20,506,10:37:00 PM,Wednesday,Upper Gerrard and Glenmount,Held By,143,151,W/B,4533
+10-Jun-20,504,11:31:00 PM,Wednesday,King and Joe Shuster,Investigation,70,80,W/B,4447
+11-Jun-20,306,1:00:00 AM,Thursday,Upper Gerrard and Glenmount,Investigation,180,195,W/B,4533
+11-Jun-20,501,1:46:00 AM,Thursday,Queen and Greenwood Ave,Diversion,7,31,E/B,4502
+11-Jun-20,505,6:45:00 AM,Thursday,Dundas Denision,Investigation,1,1,W/B,4438
+11-Jun-20,504,7:16:00 AM,Thursday,Dundas West Station,Mechanical,9,16,E/B,4474
+11-Jun-20,504,7:33:00 AM,Thursday,Dufferin Loop,Investigation,7,14,E/B,4543
+11-Jun-20,506,8:30:00 AM,Thursday,Main Station,Mechanical,8,16,W/B,4554
+11-Jun-20,504,10:00:00 AM,Thursday,Roncy and Howard park,Investigation,18,25,W/B,4432
+11-Jun-20,504,10:33:00 AM,Thursday,Dundas West Station,Mechanical,7,14,E/B,4592
+11-Jun-20,509,10:51:00 AM,Thursday,Spadina and Queens Quay,Mechanical,8,16,E/B,4521
+11-Jun-20,505,10:56:00 AM,Thursday,Dundas Parliament,Overhead - Pantograph,8,16,W/B,4563
+11-Jun-20,504,11:08:00 AM,Thursday,Dufferin Loop,Mechanical,7,14,E/B,4443
+11-Jun-20,511,12:18:00 PM,Thursday,King and Bathurst,Emergency Services,4,8,S/B,1065
+11-Jun-20,501,12:53:00 PM,Thursday,The Queensway and Sunnyside Ave,Emergency Services,7,15,E/B,4526
+11-Jun-20,505,1:45:00 PM,Thursday,Lansdowne  Dundas,Investigation,8,16,W/B,4572
+11-Jun-20,506,2:46:00 PM,Thursday,Gerrard Parliament,Overhead - Pantograph,1,1,W/B,4550
+11-Jun-20,506,5:20:00 PM,Thursday,Coxwell and Gerrard,Mechanical,9,18,W/B,4550
+11-Jun-20,504,7:12:00 PM,Thursday,Broadview station,Investigation,10,16,W/B,4476
+11-Jun-20,501,9:57:00 PM,Thursday,Queen and Shaw,Mechanical,9,18,W/B,4400
+11-Jun-20,509,10:08:00 PM,Thursday,Union Station,Mechanical,9,18,W/B,4555
+11-Jun-20,510,10:18:00 PM,Thursday,Spadina and Queen,Investigation,9,18,S/B,4440
+11-Jun-20,501,10:34:00 PM,Thursday,Lakeshore and Parklawn,Emergency Services,42,51,W/B,4422
+12-Jun-20,501,1:17:00 AM,Friday,QUEEN AND AUGUSTA,Investigation,23,33,E/B,4423
+12-Jun-20,306,6:00:00 AM,Friday,Main Station,Investigation,20,0,W/B,4553
+12-Jun-20,505,8:02:00 AM,Friday,Dundas West Station,Emergency Services,9,18,E/B,4549
+12-Jun-20,509,11:04:00 AM,Friday,CNE Loop,Mechanical,1,1,E/B,4521
+12-Jun-20,501,3:15:00 PM,Friday,Neville Loop,Mechanical,8,16,W/B,4500
+12-Jun-20,506,6:45:00 PM,Friday,Gerrard and Pape,Held By,11,28,E/B,4467
+12-Jun-20,504,7:28:00 PM,Friday,King and Church St.,Investigation,1,1,E/B,4548
+12-Jun-20,501,8:17:00 PM,Friday,LAKESHORE AND TWENTY SEVENTH STREET,Held By,19,49,W/B,4494
+12-Jun-20,506,8:25:00 PM,Friday,Main Station,Emergency Services,15,24,W/B,4568
+12-Jun-20,512,8:45:00 PM,Friday,GUNNS LOOP,Mechanical,7,22,E/B,4437
+12-Jun-20,511,11:51:00 PM,Friday,Bathurst Station,Mechanical,8,15,S/B,1012
+12-Jun-20,501,11:53:00 PM,Friday,LONG BRANCH LOOP,Investigation,10,12,E/B,4499
+13-Jun-20,510,6:00:00 AM,Saturday,Spadina and King,General Delay,17,10,N/B,4569
+13-Jun-20,504,10:25:00 AM,Saturday,King and Portland,Held By,8,16,E/B,4468
+13-Jun-20,504,10:30:00 AM,Saturday,Parliament and Dundas Street,General Delay,15,21,E/B,4429
+13-Jun-20,501,10:40:00 AM,Saturday,Queen & Sherbourne,Held By,1,1,B/W,4496
+13-Jun-20,512,10:47:00 AM,Saturday,St Clair & Bathurst,Investigation,10,19,E/B,4542
+13-Jun-20,505,10:47:00 AM,Saturday,Dundas and Broadview,Held By,30,37,E/B,4545
+13-Jun-20,504,10:47:00 AM,Saturday,Dundas and Broadview,Diversion,27,35,E/B,4599
+13-Jun-20,501,10:47:00 AM,Saturday,Dundas & Broadview,Investigation,25,32,E/B,4416
+13-Jun-20,504,12:47:00 PM,Saturday,Queen and Rpncesvalles,Late Leaving Garage,4,8,W/B,4529
+13-Jun-20,505,1:07:00 PM,Saturday,Dundas and Dovercourt,Held By,21,28,B/W,4602
+13-Jun-20,501,2:14:00 PM,Saturday,Humber Loop,Utilized Off Route,6,13,E/B,4523
+13-Jun-20,501,2:40:00 PM,Saturday,Queen and Shaw,Emergency Services,6,13,E/B,4513
+13-Jun-20,501,3:41:00 PM,Saturday,Parliament and Dundas,General Delay,25,31,E/B,4508
+13-Jun-20,504,3:54:00 PM,Saturday,King and University Avenue,Mechanical,8,16,E/B,4432
+13-Jun-20,505,3:58:00 PM,Saturday,Broadview and Gerrard,Diversion,68,74,W/B,4545
+13-Jun-20,504,4:00:00 PM,Saturday,Broadview Avenue and Gerrard Street,Held By,68,74,S/B,4554
+13-Jun-20,501,4:11:00 PM,Saturday,Humber Loop,Utilized Off Route,6,13,E/B,4496
+13-Jun-20,501,4:31:00 PM,Saturday,Humber Loop,Utilized Off Route,6,13,E/B,4492
+13-Jun-20,501,10:39:00 PM,Saturday,HUMBER LOOP,Mechanical,10,20,E/B,4494
+13-Jun-20,505,10:41:00 PM,Saturday,Dundas and College,Mechanical,0,0,W/B,
+14-Jun-20,504,2:45:00 AM,Sunday,Dundas West Station,Mechanical,6,15,E/B,4468
+14-Jun-20,509,5:46:00 AM,Sunday,Bathurst and Fleet,Held By,10,0,E/B,4516
+14-Jun-20,512,7:15:00 AM,Sunday,St Clair Stn,Held By,17,29,W/B,4586
+14-Jun-20,509,10:11:00 AM,Sunday,Queens Quay & Dan Leckie,Mechanical,9,18,E/B,4402
+14-Jun-20,509,12:15:00 PM,Sunday,Leslie Barns,Late Leaving Garage,5,10,W/B,4488
+14-Jun-20,504,12:22:00 PM,Sunday,,Late Leaving Garage,5,10,E/B,4591
+14-Jun-20,509,12:31:00 PM,Sunday,,Late Leaving Garage,5,10,W/B,4427
+14-Jun-20,501,1:17:00 PM,Sunday,Queen and Woodfield,Mechanical,7,14,W/B,4489
+14-Jun-20,512,4:14:00 PM,Sunday,Gunns loop,Emergency Services,19,27,E/B,4569
+14-Jun-20,506,8:46:00 PM,Sunday,Gerrard and Prust,Mechanical,10,20,W/B,4531
+14-Jun-20,511,9:12:00 PM,Sunday,Exhibition Loop,Mechanical,10,20,S/B,1035
+14-Jun-20,510,9:38:00 PM,Sunday,SPADINA STATION,Mechanical,5,10,S/B,4444
+14-Jun-20,501,10:25:00 PM,Sunday,Queensway and Sunnyside,Held By,10,20,W/B,4526
+14-Jun-20,505,11:05:00 PM,Sunday,Dundas and University,Mechanical,10,20,W/B,4540
+15-Jun-20,506,7:09:00 AM,Monday,Howard Park Sunnyside Avenue,Held By,1,1,W/B,1044
+15-Jun-20,511,9:04:00 AM,Monday,Bathurst Station,Mechanical,4,8,N/B,1555
+15-Jun-20,511,10:48:00 AM,Monday,Bathurst Statoin,Mechanical,4,8,S/B,8
+15-Jun-20,511,11:52:00 AM,Monday,Bathurst and Harbord,Diversion,4,8,N/B,
+15-Jun-20,506,1:27:00 PM,Monday,Coxwell Gerrard,Mechanical,8,16,E/B,4587
+15-Jun-20,501,3:58:00 PM,Monday,Longbranch Loop,Mechanical,8,16,E/B,1064
+15-Jun-20,511,4:01:00 PM,Monday,Bathurst and Harbord,Mechanical,4,8,N/B,1021
+15-Jun-20,504,4:20:00 PM,Monday,King and Spadina,Mechanical,6,12,W/B,4597
+15-Jun-20,501,4:43:00 PM,Monday,Queen/Church,Held By,7,14,E/B,4492
+15-Jun-20,511,5:29:00 PM,Monday,Spadina and Fort York Blvd,Mechanical,4,8,N/B,1269
+15-Jun-20,504,9:48:00 PM,Monday,EXHIBITION WEST LOOP,Mechanical,8,16,E/B,4594
+15-Jun-20,505,10:44:00 PM,Monday,Dundas and Parliament,Diversion,193,203,W/B,4452
+15-Jun-20,505,10:59:00 PM,Monday,Dundas and Bay,Diversion,178,188,E/B,4535
+16-Jun-20,304,3:41:00 AM,Tuesday,WILSON PARK DRIVE AND KING,Mechanical,15,30,E/B,4556
+16-Jun-20,505,12:45:00 PM,Tuesday,Dundas Church St,Mechanical,8,16,W/B,4452
+16-Jun-20,504,2:53:00 PM,Tuesday,King/Dufferin,Investigation,23,29,W/B,4435
+16-Jun-20,511,4:10:00 PM,Tuesday,CNE Loop,Mechanical,4,8,S/B,1079
+16-Jun-20,511,5:41:00 PM,Tuesday,Bathurst and Ulster,Mechanical,4,8,S/B,1010
+16-Jun-20,510,5:41:00 PM,Tuesday,King and Parliament,Investigation,1,1,E/B,4445
+17-Jun-20,504,12:29:00 AM,Wednesday,Dufferin and Liberty,Held By,25,35,S/B,4465
+17-Jun-20,501,12:54:00 AM,Wednesday,Parliament north of Queen,Investigation,11,20,W/B,4504
+17-Jun-20,501,12:58:00 AM,Wednesday,Queensway and Roncesvalles,Held By,12,20,W/B,7371
+17-Jun-20,501,7:30:00 AM,Wednesday,Queen/University,Mechanical,8,15,W/B,4496
+17-Jun-20,504,8:33:00 AM,Wednesday,springhurst loop,Mechanical,5,11,N/B,4564
+17-Jun-20,504,10:30:00 AM,Wednesday,Ronce and Marion,Held By,10,17,N/B,4451
+17-Jun-20,505,12:13:00 PM,Wednesday,Dundas West Ossington Ave,Overhead - Pantograph,105,113,E/B,4472
+17-Jun-20,505,12:22:00 PM,Wednesday,Dundas St West and Sterling,Investigation,8,16,W/B,4578
+17-Jun-20,510,2:30:00 PM,Wednesday,Spadina and College,Held By,97,105,S/B,4572
+17-Jun-20,505,2:30:00 PM,Wednesday,Spadina south of College,Investigation,9,18,S/B,4528
+17-Jun-20,510,2:45:00 PM,Wednesday,Spadina and College,Investigation,4,8,E/B,4454
+17-Jun-20,504,2:52:00 PM,Wednesday,Dundas/Bloor,Mechanical,50,62,E/B,4556
+17-Jun-20,501,3:13:00 PM,Wednesday,Humber Loop,Investigation,8,16,W/B,4400
+17-Jun-20,506,5:09:00 PM,Wednesday,Dundas and Bloor,Held By,28,37,W/B,4602
+17-Jun-20,505,5:09:00 PM,Wednesday,Dundas and Bloor,Held By,28,37,W/B,4578
+18-Jun-20,301,1:14:00 AM,Thursday,Queen and Bellfair,Emergency Services,15,25,W/B,4492
+18-Jun-20,306,4:45:00 AM,Thursday,Dundas West Station,Investigation,20,40,E/B,4451
+18-Jun-20,501,5:30:00 AM,Thursday,Queen & Jameson,Investigation,13,26,E/B,4494
+18-Jun-20,504,8:28:00 AM,Thursday,Roncy and Queen,Mechanical,6,12,E/B,4520
+18-Jun-20,505,10:10:00 AM,Thursday,Dundas Parliament,Mechanical,8,16,E/B,4582
+18-Jun-20,511,10:52:00 AM,Thursday,Bathurst station,Utilized Off Route,4,8,S/B,1003
+18-Jun-20,501,3:39:00 PM,Thursday,Lakeshore/Superior,Investigation,28,40,E/B,4574
+18-Jun-20,501,4:37:00 PM,Thursday,Queensway/Glendale,Investigation,41,49,B/W,4422
+18-Jun-20,504,4:55:00 PM,Thursday,King/Dowling,General Delay,222,228,B/W,4576
+18-Jun-20,506,6:25:00 PM,Thursday,Gerrard and Marjory,Investigation,19,28,E/B,4528
+18-Jun-20,501,10:08:00 PM,Thursday,Lakeshore and 5th,Held By,27,36,W/B,4504
+18-Jun-20,506,10:47:00 PM,Thursday,Parkside and Jeffrey,Mechanical,10,20,N/B,1085
+18-Jun-20,501,10:55:00 PM,Thursday,Dundas and Parliament,Investigation,16,25,W/B,4419
+18-Jun-20,501,11:00:00 PM,Thursday,Queen and Wynona,Held By,19,29,E/B,4500
+18-Jun-20,505,11:10:00 PM,Thursday,Dundas and Jarvis,Held By,21,30,W/B,4477
+18-Jun-20,501,11:35:00 PM,Thursday,Lakeshort and 5th,Mechanical,9,18,E/B,8117
+19-Jun-20,301,3:00:00 AM,Friday,Boradview Ave and Dundas St,Held By,21,31,E/B,4504
+19-Jun-20,504,3:10:00 AM,Friday,Broadview and Dundas,Held By,30,45,W/B,4594
+19-Jun-20,506,7:10:00 AM,Friday,Howard Park and Parkside,Investigation,10,20,W/B,1137
+19-Jun-20,501,8:24:00 AM,Friday,Humber Loop,Utilized Off Route,8,15,W/B,4566
+19-Jun-20,506,8:35:00 AM,Friday,College and Yonge,Held By,627,635,B/W,4438
+19-Jun-20,511,9:16:00 AM,Friday,Bathurst Station,Utilized Off Route,4,8,S/B,1356
+19-Jun-20,505,9:36:00 AM,Friday,Broadview Station,Mechanical,9,18,W/B,4589
+19-Jun-20,501,9:50:00 AM,Friday,Queen and Bathurst,Emergency Services,28,22,E/B,4427
+19-Jun-20,511,11:16:00 AM,Friday,Bathurst Station,Mechanical,4,8,S/B,1549
+19-Jun-20,511,11:35:00 AM,Friday,Bathurst Station,Utilized Off Route,4,8,S/B,1044
+19-Jun-20,512,12:05:00 PM,Friday,St. Clair and Lansdowne Street,Emergency Services,274,279,E/B,4464
+19-Jun-20,505,1:34:00 PM,Friday,Dundas and Bay,Held By,18,27,E/B,4535
+19-Jun-20,505,2:29:00 PM,Friday,Dundas and Bay,Held By,218,226,B/W,4448
+19-Jun-20,505,3:29:00 PM,Friday,Dundas and College,Investigation,8,16,E/B,4533
+19-Jun-20,505,4:40:00 PM,Friday,Broadview and Dundas1,Investigation,8,16,W/B,4448
+19-Jun-20,501,4:54:00 PM,Friday,Neville Loop,Mechanical,8,14,W/B,4529
+19-Jun-20,501,5:04:00 PM,Friday,Queen/Bay,Held By,57,65,B/W,4482
+19-Jun-20,512,5:56:00 PM,Friday,st.clair west station,Investigation,5,10,W/B,4574
+19-Jun-20,501,5:58:00 PM,Friday,Parliament-Dundas,Investigation,8,15,E/B,4494
+19-Jun-20,501,8:49:00 PM,Friday,QUUEN AND PETER,Held By,12,20,W/B,4566
+19-Jun-20,511,9:58:00 PM,Friday,Bathurst and Bloor,Investigation,5,10,S/B,1149
+19-Jun-20,501,10:00:00 PM,Friday,NEVILLE LOOP,Mechanical,5,10,W/B,4492
+19-Jun-20,512,10:03:00 PM,Friday,ST.CLAIR AND BATHURST,Investigation,14,29,W/B,4458
+19-Jun-20,506,11:17:00 PM,Friday,Dundas and Sorauren,Investigation,32,41,W/B,4438
+20-Jun-20,501,12:54:00 AM,Saturday,QUEEN AND RONCESSVALLES,Mechanical,10,20,W/B,4416
+20-Jun-20,501,3:17:00 AM,Saturday,DUNDAS AND RIVER,Investigation,31,53,E/B,4496
+20-Jun-20,504,3:25:00 AM,Saturday,Dundas and River,Investigation,25,40,E/B,4592
+20-Jun-20,501,4:18:00 AM,Saturday,QUEEN AND PARLIAMENT,Investigation,10,20,W/B,8594
+20-Jun-20,504,8:24:00 AM,Saturday,Parliament and Dundas,Emergency Services,69,79,N/B,4567
+20-Jun-20,501,9:00:00 AM,Saturday,Queen & Roncesvalles,Mechanical,9,18,W/B,4520
+20-Jun-20,504,12:30:00 PM,Saturday,King and Jefferson,General Delay,1,2,E/B,4543
+20-Jun-20,504,12:46:00 PM,Saturday,King and Sumach,Utilized Off Route,8,16,E/B,4451
+20-Jun-20,510,12:54:00 PM,Saturday,Dundas and Spadina,Emergency Services,8,16,N/B,4522
+20-Jun-20,510,12:54:00 PM,Saturday,Spadina and Queen,Diversion,8,16,N/B,4531
+20-Jun-20,504,1:09:00 PM,Saturday,Dundas West Station,Mechanical,8,16,S/B,4594
+20-Jun-20,504,4:07:00 PM,Saturday,Roncesvalles and Marion Street,Mechanical,8,16,S/B,4555
+20-Jun-20,501,6:06:00 PM,Saturday,parliament and queen,Investigation,37,44,N/B,4514
+20-Jun-20,504,6:14:00 PM,Saturday,Church and King Street,Held By,30,38,E/B,4462
+20-Jun-20,501,7:39:00 PM,Saturday,Queen and sudbury,Mechanical,24,33,E/B,4510
+20-Jun-20,511,7:45:00 PM,Saturday,Bathurst STN,Utilized Off Route,6,12,S/B,1051
+20-Jun-20,511,7:45:00 PM,Saturday,CNE Loop,Utilized Off Route,6,12,W/B,1418
+20-Jun-20,501,7:47:00 PM,Saturday,Queen and Dovercourt,Held By,24,33,W/B,4494
+20-Jun-20,511,8:00:00 PM,Saturday,Sunnyside Loop,Held By,6,12,W/B,1418
+20-Jun-20,501,8:24:00 PM,Saturday,PARLIAMENT AND QUEEN,Held By,71,80,E/B,4498
+20-Jun-20,505,8:48:00 PM,Saturday,Broadview Station,Mechanical,8,25,W/B,4435
+20-Jun-20,505,8:54:00 PM,Saturday,Dundas and Parliament,Emergency Services,39,56,W/B,4550
+20-Jun-20,504,9:25:00 PM,Saturday,Dundas West Station,Held By,13,23,E/B,4476
+20-Jun-20,501,9:43:00 PM,Saturday,PARLIAMENT AND DUNDAS,Emergency Services,9,18,E/B,4526
+20-Jun-20,501,10:13:00 PM,Saturday,QUEEN AND GEORGE,Diversion,48,57,E/B,4434
+20-Jun-20,505,10:49:00 PM,Saturday,Queen and Spadina,Mechanical,20,40,W/B,4550
+20-Jun-20,501,10:52:00 PM,Saturday,QUEEN AND SPADINA,Diversion,87,97,W/B,4502
+20-Jun-20,505,11:17:00 PM,Saturday,Dundas and Landsdowne,Diversion,32,42,W/B,4535
+21-Jun-20,506,12:45:00 AM,Sunday,College and Clinton,Mechanical,20,30,E/B,4603
+21-Jun-20,501,1:10:00 AM,Sunday,NEVILLE LOOP,Mechanical,10,20,W/B,4419
+21-Jun-20,501,1:53:00 AM,Sunday,QUEEN AND JARVIS,Investigation,10,20,W/B,4499
+21-Jun-20,501,4:06:00 AM,Sunday,LAKESHORE AND ISLINGTON,Mechanical,20,40,W/B,4502
+21-Jun-20,505,4:45:00 AM,Sunday,Broadview/Dundas,Investigation,48,48,B/W,4581
+21-Jun-20,501,4:45:00 AM,Sunday,Queen/Leslie,Held By,0,24,W/B,4482
+21-Jun-20,504,4:45:00 AM,Sunday,Leslie/Queen,General Delay,26,36,W/B,4564
+21-Jun-20,310,5:35:00 AM,Sunday,King/Sumach,Investigation,0,0,E/B,4484
+21-Jun-20,509,5:41:00 AM,Sunday,Spadina and queensquay,Held By,55,55,W/B,4452
+21-Jun-20,512,7:10:00 AM,Sunday,SCW Stn,Investigation,12,23,W/B,4457
+21-Jun-20,504,1:55:00 PM,Sunday,Adelaide and Parliament,Mechanical,28,37,W/B,4465
+21-Jun-20,509,2:50:00 PM,Sunday,CNE,Investigation,35,42,E/B,4441
+21-Jun-20,506,4:24:00 PM,Sunday,College and Spadina,Mechanical,7,14,W/B,8523
+21-Jun-20,501,5:55:00 PM,Sunday,Queen and Greenwood,Mechanical,10,20,E/B,4499
+21-Jun-20,501,11:12:00 PM,Sunday,QUEEN AND JOHN,Investigation,3,13,E/B,4426
+21-Jun-20,501,11:21:00 PM,Sunday,QUEEN AND PARLIAMENT,Mechanical,10,20,E/B,4431
+22-Jun-20,501,12:03:00 AM,Monday,QUEEN AND JARVIS,Mechanical,10,20,E/B,4499
+22-Jun-20,510,12:15:00 AM,Monday,Spadina and Sussex,Investigation,51,61,S/B,4469
+22-Jun-20,511,12:33:00 AM,Monday,Spadina Station,Utilized Off Route,9,18,S/B,1092
+22-Jun-20,510,3:51:00 AM,Monday,Harbourfront Tunnel Entrance,Held By,23,38,E/B,4489
+22-Jun-20,504,5:27:00 AM,Monday,Queen and Degrassi,Overhead - Pantograph,33,39,W/B,4567
+22-Jun-20,505,5:38:00 AM,Monday,Queen/Empire,Held By,15,25,E/B,4406
+22-Jun-20,501,5:40:00 AM,Monday,Queen & Degrassi,Held By,25,35,W/B,4400
+22-Jun-20,504,6:16:00 AM,Monday,Broadview and Queen,Late Leaving Garage,4,8,E/B,4445
+22-Jun-20,503,6:30:00 AM,Monday,Queen and Degrassi,Overhead - Pantograph,21,30,W/B,4541
+22-Jun-20,510,6:35:00 AM,Monday,Spadina and King,Late Leaving Garage,4,8,N/B,4469
+22-Jun-20,509,6:38:00 AM,Monday,CNE Loop,Held By,10,20,E/B,4474
+22-Jun-20,509,6:41:00 AM,Monday,SPADINA AND QUEENSQUAY,Late Leaving Garage,4,9,W/B,4588
+22-Jun-20,504,7:00:00 AM,Monday,Queen and Degrassi,Held By,13,19,W/B,4595
+22-Jun-20,505,7:20:00 AM,Monday,Broadview and Dundas,Held By,8,17,E/B,4593
+22-Jun-20,510,9:10:00 AM,Monday,Spadina Stn,Mechanical,22,27,S/B,4490
+22-Jun-20,504,9:11:00 AM,Monday,Broadview and Dundas,Overhead - Pantograph,59,65,E/B,4567
+22-Jun-20,511,9:12:00 AM,Monday,Spadina Station,Utilized Off Route,4,8,S/B,1261
+22-Jun-20,505,9:12:00 AM,Monday,Dundas and broadview,Overhead - Pantograph,31,40,E/B,4509
+22-Jun-20,512,9:15:00 AM,Monday,SCW Stn,Mechanical,5,10,E/B,4437
+22-Jun-20,511,9:24:00 AM,Monday,Exhibition,Utilized Off Route,4,8,N/B,1143
+22-Jun-20,506,9:30:00 AM,Monday,Main Station,Utilized Off Route,6,12,W/B,8615
+22-Jun-20,504,9:42:00 AM,Monday,Dundas West Station,Investigation,6,12,E/B,4558
+22-Jun-20,506,10:35:00 AM,Monday,Dundas West Station,Utilized Off Route,6,12,E/B,8699
+22-Jun-20,504,11:12:00 AM,Monday,Roncy and Fermanagh,Investigation,14,20,E/B,4447
+22-Jun-20,505,11:36:00 AM,Monday,Dundas at Broadview,Diversion,19,28,E/B,4593
+22-Jun-20,504,11:43:00 AM,Monday,Broadview and Dundas,Diversion,18,24,E/B,4445
+22-Jun-20,505,11:57:00 AM,Monday,Russell Yard,Mechanical,9,18,E/B,4593
+22-Jun-20,512,12:42:00 PM,Monday,St. Clair West Station,Investigation,7,12,W/B,4475
+22-Jun-20,511,1:14:00 PM,Monday,Spadina Station,Investigation,4,8,S/B,1258
+22-Jun-20,504,2:32:00 PM,Monday,Broadview and Dundas,Investigation,6,12,S/B,4441
+22-Jun-20,504,2:43:00 PM,Monday,Dufferin and Springhurst,Emergency Services,9,15,S/B,4587
+22-Jun-20,501,8:41:00 PM,Monday,BROADVIEW AND QUEEN,Mechanical,10,20,E/B,4518
+22-Jun-20,504,9:21:00 PM,Monday,King and John,Held By,12,22,W/B,4473
+22-Jun-20,505,9:30:00 PM,Monday,Broadview Station,Mechanical,9,18,W/B,4505
+22-Jun-20,504,10:03:00 PM,Monday,King and York,Investigation,32,42,E/B,4602
+23-Jun-20,511,6:15:00 AM,Tuesday,Exhibition Loop,Mechanical,5,10,N/B,1092
+23-Jun-20,506,8:00:00 AM,Tuesday,College and Dufferin,Held By,160,166,B/W,7954
+23-Jun-20,506,8:30:00 AM,Tuesday,Dundas West Station,Mechanical,5,10,E/B,8544
+23-Jun-20,505,11:14:00 AM,Tuesday,Broadview and Gerrard,Mechanical,9,18,E/B,4539
+23-Jun-20,506,12:13:00 PM,Tuesday,College and Crawford,Investigation,6,12,W/B,8541
+23-Jun-20,501,1:08:00 PM,Tuesday,lakeshore and Islingtion,Emergency Services,17,25,E/B,4426
+23-Jun-20,510,6:34:00 PM,Tuesday,Spadina Station,Mechanical,4,8,S/B,4501
+24-Jun-20,504,1:01:00 AM,Wednesday,king and yonge,Investigation,15,30,E/B,4421
+24-Jun-20,304,2:43:00 AM,Wednesday,HORWARD PARK AND DUNDAS,Investigation,15,30,E/B,4543
+24-Jun-20,505,6:31:00 AM,Wednesday,Leslie Barns,Late Leaving Garage,1,1,N/B,4520
+24-Jun-20,503,6:35:00 AM,Wednesday,Leslie Barns,Late Leaving Garage,1,1,E/B,4563
+24-Jun-20,506,7:00:00 AM,Wednesday,Main Station,Emergency Services,1,2,W/B,8047
+24-Jun-20,511,7:30:00 AM,Wednesday,Exhibition Loop,Mechanical,4,8,N/B,1077
+24-Jun-20,512,11:25:00 AM,Wednesday,St Clair/Old Weston,Investigation,153,158,b/w,4475
+24-Jun-20,504,11:33:00 AM,Wednesday,Parliament and Adelaide,Held By,15,22,W/B,4477
+24-Jun-20,503,11:33:00 AM,Wednesday,Parliament and Adelaide,Held By,15,24,E/B,4448
+24-Jun-20,511,11:37:00 AM,Wednesday,Spadina and Bloor,Investigation,4,8,S/B,1014
+24-Jun-20,506,11:40:00 AM,Wednesday,Dundas West Station,Utilized Off Route,6,12,E/B,7931
+24-Jun-20,511,12:00:00 PM,Wednesday,Spadina Station,Utilized Off Route,4,8,S/B,1043
+24-Jun-20,501,12:58:00 PM,Wednesday,kipling loop,General Delay,24,34,W/B,4419
+24-Jun-20,506,1:30:00 PM,Wednesday,Gerrard and Sackville,Investigation,6,12,E/B,9209
+24-Jun-20,506,1:38:00 PM,Wednesday,Main Station,Mechanical,6,12,W/B,8490
+24-Jun-20,501,2:03:00 PM,Wednesday,Queensway and Windermere,Investigation,8,16,E/B,4489
+24-Jun-20,501,2:16:00 PM,Wednesday,Queen and dunn,Held By,8,16,E/B,4499
+24-Jun-20,501,3:16:00 PM,Wednesday,Queen and Broadview,General Delay,32,40,E/B,4499
+24-Jun-20,501,3:30:00 PM,Wednesday,parliament and dundas,General Delay,30,38,E/B,4423
+24-Jun-20,501,3:32:00 PM,Wednesday,Queen and Dovercourt,Emergency Services,12,20,E/B,4426
+24-Jun-20,503,4:18:00 PM,Wednesday,King & Younge,Utilized Off Route,10,20,E/B,4593
+24-Jun-20,503,4:38:00 PM,Wednesday,queen and kingston road,Utilized Off Route,10,20,E/B,4540
+24-Jun-20,501,6:08:00 PM,Wednesday,Queen and Mccaul,Mechanical,8,16,E/B,4524
+24-Jun-20,511,6:53:00 PM,Wednesday,CNE,Mechanical,5,10,S/B,1603
+24-Jun-20,511,8:13:00 PM,Wednesday,Spadina Station,Mechanical,5,10,N/B,1101
+25-Jun-20,509,5:37:00 AM,Thursday,Broadview and Dundas,Mechanical,10,20,W/B,4529
+25-Jun-20,504,7:48:00 AM,Thursday,King and Spadina,Investigation,6,12,W/B,4458
+25-Jun-20,504,8:13:00 AM,Thursday,Springhurst Loop,Mechanical,74,80,E/B,4444
+25-Jun-20,504,8:13:00 AM,Thursday,Springhurst Loop,Utilized Off Route,6,12,W/B,4567
+25-Jun-20,512,9:58:00 AM,Thursday,SCW Stn,Investigation,5,10,W/B,4468
+25-Jun-20,501,12:15:00 PM,Thursday,Queen and pape,Investigation,27,35,W/B,4482
+25-Jun-20,503,12:17:00 PM,Thursday,Queen and Coxwell,Investigation,25,35,W/B,4550
+25-Jun-20,511,2:35:00 PM,Thursday,Bathurst and Dundas,Held By,4,8,S/B,1258
+25-Jun-20,501,3:20:00 PM,Thursday,Queen and dufferin,Mechanical,14,22,E/B,4431
+25-Jun-20,506,3:22:00 PM,Thursday,Dundas West Station,Utilized Off Route,6,12,W/B,8901
+25-Jun-20,512,3:48:00 PM,Thursday,Gunns Loop,Held By,52,57,B/W,4450
+25-Jun-20,506,4:11:00 PM,Thursday,Dundas West Station,Utilized Off Route,6,12,W/B,7918
+25-Jun-20,511,6:11:00 PM,Thursday,Spadina station,Investigation,4,8,N/B,1072
+25-Jun-20,506,6:46:00 PM,Thursday,Main Street Station,Mechanical,8,16,W/B,8746
+25-Jun-20,501,9:32:00 PM,Thursday,Queen and Victoria,Investigation,33,43,E/B,4496
+25-Jun-20,512,11:28:00 PM,Thursday,St.Clair and Keele,Held By,23,33,W/B,4404
+26-Jun-20,501,12:45:00 AM,Friday,Roncesvalles and Queen,Mechanical,10,20,W/B,4505
+26-Jun-20,301,3:10:00 AM,Friday,Queen and Connaught (Russell Trailer Track),Mechanical,10,20,E/B,4518
+26-Jun-20,301,5:13:00 AM,Friday,Queen/Yonge,Emergency Services,14,28,E/B,4498
+26-Jun-20,505,5:21:00 AM,Friday,Dundas & Broadview,Late Leaving Garage,3,12,E/B,4416
+26-Jun-20,505,5:30:00 AM,Friday,Dundas & Broadview,Late Leaving Garage,3,12,E/B,4512
+26-Jun-20,510,5:39:00 AM,Friday,King & Spadina,Mechanical,8,16,N/B,4401
+26-Jun-20,501,12:20:00 PM,Friday,Bathurst,Investigation,20,30,E/B,4425
+26-Jun-20,504,4:47:00 PM,Friday,King and Church,Investigation,6,12,E/B,4599
+26-Jun-20,510,6:18:00 PM,Friday,Spadina station.,Held By,11,16,N/B,4592
+26-Jun-20,511,6:32:00 PM,Friday,Spadina Station,Emergency Services,59,64,S/B,1083
+26-Jun-20,504,9:13:00 PM,Friday,Broadview Station,Mechanical,10,20,W/B,4595
+26-Jun-20,501,10:07:00 PM,Friday,Queen and Yonge,Investigation,56,66,W/B,4520
+27-Jun-20,505,2:13:00 AM,Saturday,Dundas and Premboke,Held By,17,26,E/B,4513
+27-Jun-20,505,4:57:00 AM,Saturday,Dundas st E and Sherbourne st,Diversion,46,56,W/B,4515
+27-Jun-20,505,5:47:00 AM,Saturday,Dundas and Parliament,Overhead - Pantograph,10,20,E/B,4588
+27-Jun-20,511,12:48:00 PM,Saturday,Exhibition Loop,Investigation,8,16,E/B,1077
+27-Jun-20,505,2:10:00 PM,Saturday,Dovercourt,Emergency Services,13,22,E/B,4493
+27-Jun-20,504,6:04:00 PM,Saturday,Distillery Loop,Mechanical,8,17,E/B,4589
+27-Jun-20,506,8:33:00 PM,Saturday,Carlton and Ontario,Mechanical,10,20,E/B,7951
+28-Jun-20,501,12:10:00 AM,Sunday,Queen St E and Greenwood Ave,Mechanical,10,20,E/B,4423
+28-Jun-20,504,12:43:00 AM,Sunday,King and Strachan,Mechanical,10,20,W/B,4568
+28-Jun-20,501,12:52:00 AM,Sunday,QUEEN AND CARLAW,Mechanical,10,20,W/B,4491
+28-Jun-20,501,3:37:00 AM,Sunday,Queen and Bathurst,Held By,10,20,E/B,4425
+28-Jun-20,510,7:05:00 AM,Sunday,Spadina Station,Mechanical,15,30,S/B,4538
+28-Jun-20,510,9:27:00 AM,Sunday,Spadina And King,Late Leaving Garage,4,8,N/B,4527
+28-Jun-20,501,10:35:00 AM,Sunday,Queen/Jarvis,Mechanical,10,20,E/B,4530
+28-Jun-20,501,10:47:00 AM,Sunday,Queen/Greenwood,Mechanical,10,20,E/B,4510
+28-Jun-20,510,10:49:00 AM,Sunday,Charlotte Loop,Mechanical,4,8,S/B,4527
+28-Jun-20,501,11:33:00 AM,Sunday,Queen/Greenwood,Mechanical,10,20,E/B,4413
+28-Jun-20,505,12:36:00 PM,Sunday,Dundas and Beverley,Emergency Services,8,17,W/B,4549
+28-Jun-20,505,3:45:00 PM,Sunday,Broadview Station,Mechanical,7,14,W/B,4512
+28-Jun-20,509,3:57:00 PM,Sunday,CNE,Mechanical,7,14,E/B,4539
+28-Jun-20,501,4:56:00 PM,Sunday,Bay and Queen,Mechanical,10,20,W/B,4425
+28-Jun-20,510,5:01:00 PM,Sunday,Charlotte Loop,Mechanical,7,14,N/B,4469
+28-Jun-20,505,8:32:00 PM,Sunday,Broadview and Dundas,Investigation,4,11,E/B,4582
+28-Jun-20,501,9:41:00 PM,Sunday,QUEEN AND PARLIAMENT.,Mechanical,10,20,W/B,4508
+28-Jun-20,501,11:25:00 PM,Sunday,QUEEN AND JONES,Mechanical,10,20,E/B,4495
+28-Jun-20,512,11:32:00 PM,Sunday,ST.CLAIR STATION,Emergency Services,16,26,W/B,4472
+28-Jun-20,501,11:45:00 PM,Sunday,NEVILLE LOOP,Utilized Off Route,5,10,W/B,4425
+29-Jun-20,501,12:04:00 AM,Monday,LAKESHORE AND ISLINGTON,Mechanical,10,20,E/B,4423
+29-Jun-20,511,7:23:00 AM,Monday,Bathurst and Niagara,Investigation,5,10,N/B,1093
+29-Jun-20,504,9:32:00 AM,Monday,Dufferin and King,Mechanical,31,37,W/B,4477
+29-Jun-20,501,10:12:00 AM,Monday,Queen & Carlaw,Emergency Services,8,18,E/B,4500
+29-Jun-20,506,11:36:00 AM,Monday,Dundas West Station,Investigation,6,12,E/B,3113
+29-Jun-20,504,11:57:00 AM,Monday,Dufferin and Liberty,Held By,93,100,S/B,4565
+29-Jun-20,501,3:41:00 PM,Monday,Queen and Broadview,Held By,28,36,W/B,4495
+29-Jun-20,503,3:50:00 PM,Monday,Queen and Grant,Held By,23,33,W/B,4549
+29-Jun-20,503,4:51:00 PM,Monday,Bingham Loop,Mechanical,10,20,W/B,4581
+29-Jun-20,512,10:13:00 PM,Monday,ST.CLAIR AND AVENUE,Held By,104,114,W/B,4436
+29-Jun-20,511,10:28:00 PM,Monday,Spadina Station,Utilized Off Route,8,16,S/B,1108
+30-Jun-20,301,4:00:00 AM,Tuesday,long branch loop,Emergency Services,5,16,E/B,4489
+30-Jun-20,504,6:40:00 AM,Tuesday,Queen and Broadview,Investigation,7,14,W/B,4420
+30-Jun-20,511,7:15:00 AM,Tuesday,Exhibition Loop,Investigation,5,10,N/B,1102
+30-Jun-20,509,8:47:00 AM,Tuesday,Queen Quay and York,Held By,16,22,E/B,4527
+30-Jun-20,510,8:49:00 AM,Tuesday,Queens Quay/York st,Investigation,14,19,E/B,4523
+30-Jun-20,506,8:56:00 AM,Tuesday,Dundas and Roncesvalles,Investigation,5,10,E/B,8032
+30-Jun-20,501,8:57:00 AM,Tuesday,Neville Loop,Emergency Services,10,20,W/B,4530
+30-Jun-20,501,1:55:00 PM,Tuesday,Long branch loop,Emergency Services,24,32,E/B,4500
+30-Jun-20,506,2:23:00 PM,Tuesday,Dundas West Station,Mechanical,6,12,E/B,8040
+30-Jun-20,511,3:19:00 PM,Tuesday,Spadina and Front,Diversion,11,17,N/B,1102
+30-Jun-20,501,4:36:00 PM,Tuesday,Queen and Sackville,Held By,11,19,W/B,4500
+30-Jun-20,511,5:15:00 PM,Tuesday,CNE,Investigation,4,8,S/B,1268
+30-Jun-20,510,6:50:00 PM,Tuesday,Spadina Station,Mechanical,5,10,S/B,4469
+30-Jun-20,506,8:07:00 PM,Tuesday,Gerrard at Sumach,Investigation,8,16,E/B,3145
+30-Jun-20,505,11:53:00 PM,Tuesday,Dundas at Lansdowne,Mechanical,10,20,W/B,4429

@@ -1,0 +1,179 @@
+Report Date,Route,Time,Day,Location,Incident,Min Delay,Min Gap,Direction,Vehicle
+2014/02/01,504,11:45:00 AM,Saturday,,General Delay,0,0,E/B,
+2014/02/01,501,5:43:00 PM,Saturday,Broadview and queen,Mechanical,9,15,E/B,4208
+2014/02/03,511,5:51:00 AM,Monday,queen and Roncesvales,Late Leaving Garage,5,10,E/B,4095
+2014/02/03,401,6:01:00 AM,Monday,queen and roncesvalles,Late Leaving Garage,10,20,W/B,4241
+2014/02/03,512,6:08:00 AM,Monday,queen and Roincesvalles,Late Leaving Garage,4,8,E/B,4100
+2014/02/03,512,6:12:00 AM,Monday,queen and roncesvalles,Late Leaving Garage,4,8,E/B,4188
+2014/02/03,511,6:15:00 AM,Monday,Queen and Roncesvalles,Late Leaving Garage,5,10,E/B,4141
+2014/02/03,506,7:06:00 AM,Monday,queen and roncesvalles,Late Leaving Garage,7,14,E/B,4167
+2014/02/03,506,9:35:00 AM,Monday,College and Bathurst,Investigation,17,23,W/B,4015
+2014/02/03,505,10:11:00 AM,Monday,McCaul at Dundas,Held By,6,12,W/B,4051
+2014/02/03,506,11:44:00 AM,Monday,College at Havelock,Investigation,0,0,W/B,4180
+2014/02/03,501,12:16:00 PM,Monday,Humber Loop to Neville,General Delay,10,16,E/B,4223
+2014/02/03,511,3:27:00 PM,Monday,Bathurst and ulster,Utilized Off Route,14,18,N/B,4029
+2014/02/03,504,8:35:00 PM,Monday,king and Feramanagh,General Delay,38,42,S/B,4044
+2014/02/03,501,8:43:00 PM,Monday,Queen and Shaw,General Delay,6,11,W/B,4209
+2014/02/03,509,8:45:00 PM,Monday,Exhibition loop,General Delay,4,8,E/B,9449
+2014/02/03,509,8:45:00 PM,Monday,Exhibition Loop,General Delay,4,8,E/B,7509
+2014/02/03,501,9:19:00 PM,Monday,Queen and Broadview,General Delay,5,11,E/B,4228
+2014/02/04,501,6:56:00 AM,Tuesday,queensway and Roncesvalles,General Delay,10,16,E/B,4225
+2014/02/04,503,7:15:00 AM,Tuesday,Bingham Loop,General Delay,30,42,S/B,4066
+2014/02/04,502,7:18:00 AM,Tuesday,Bingham Loop,General Delay,26,38,W/B,4014
+2014/02/04,509,8:19:00 AM,Tuesday,CNE Loop,Investigation,5,10,E/B,7517
+2014/02/04,504,9:43:00 AM,Tuesday,Dundas West Stn,General Delay,7,9,N/B,4176
+2014/02/04,506,12:38:00 PM,Tuesday,Howard Park and Parkside,General Delay,47,52,W/B,4022
+2014/02/04,502,12:45:00 PM,Tuesday,Queen and Connaught,Late Leaving Garage,32,48,E/B,4137
+2014/02/04,504,1:13:00 PM,Tuesday,Broadview @ Dundas,Late Leaving Garage,3,6,W/B,4091
+2014/02/04,905,1:26:00 PM,Tuesday,Lakeshore and 23rd Street,Investigation,0,0,W/B,4244
+2014/02/04,504,1:56:00 PM,Tuesday,Broadview @ Dundas,Late Leaving Garage,3,6,W/B,4066
+2014/02/04,506,3:35:00 PM,Tuesday,Carlton and Sherborne,Emergency Services,19,24,E/B,4000
+2014/02/04,512,6:40:00 PM,Tuesday,St.Clair Stn,Emergency Services,22,25,W/B,4161
+2014/02/04,504,8:06:00 PM,Tuesday,Roncesnalles and Howard Pk,Utilized Off Route,21,25,W/B,4172
+2014/02/04,511,8:58:00 PM,Tuesday,King and Bathurst,Utilized Off Route,5,10,N/B,4017
+2014/02/07,506,6:52:00 AM,Friday,Russell Yard,Late Leaving Garage,4,7,E/B,4073
+2014/02/07,504,7:51:00 AM,Friday,Queen and Roncesvalles,Late Leaving Garage,2,4,E/B,
+2014/02/07,510,7:53:00 AM,Friday,Spadina Station,Late Leaving Garage,6,8,N/B,4098
+2014/02/07,501,10:15:00 AM,Friday,Queen and Victoria,Investigation,4,9,W/B,4209
+2014/02/07,504,1:00:00 PM,Friday,Broadview Stn to Dundas W Stn,General Delay,20,8,B/W,
+2014/02/07,504,1:48:00 PM,Friday,Roncesvalles and Garden,Held By,12,16,W/B,4127
+2014/02/07,501,2:03:00 PM,Friday,Queen and River,Investigation,43,48,B/W,4219
+2014/02/07,504,2:06:00 PM,Friday,Queen and River,Held By,40,44,B/W,4079
+2014/02/07,502,2:11:00 PM,Friday,Queen and River,Held By,38,53,W/B,4013
+2014/02/07,508,4:33:00 PM,Friday,Roncesvalles Yard,Late Leaving Garage,30,45,E/B,4170
+2014/02/07,511,5:00:00 PM,Friday,Bathurst Stn to CNE,General Delay,20,15,B/W,
+2014/02/07,504,6:18:00 PM,Friday,King and Duffrin,Held By,75,78,W/B,4185
+2014/02/07,504,6:33:00 PM,Friday,Roncesvalles and Grenadier,Investigation,44,48,E/B,4087
+2014/02/07,504,8:30:00 PM,Friday,Dundas W to Broadview Stn,General Delay,30,20,B/W,
+2014/02/08,501,12:03:00 AM,Saturday,Queen and Abell,Mechanical,13,23,E/B,4160
+2014/02/08,501,12:26:00 PM,Saturday,Queen and Simcoe,Investigation,18,25,W/B,4242
+2014/02/08,506,2:28:00 PM,Saturday,Gerrard and Carlaw,Held By,9,15,E/B,4089
+2014/02/08,501,2:32:00 PM,Saturday,Lakeshore and 31 Street,Held By,38,50,E/B,4228
+2014/02/08,509,8:10:00 PM,Saturday,CNE Loop,Utilized Off Route,4,8,E/B,8205
+2014/02/08,509,8:17:00 PM,Saturday,CNE Loop,Utilized Off Route,4,8,E/B,7657
+2014/02/08,501,9:10:00 PM,Saturday,Queen and Ossington,Held By,10,17,W/B,4241
+2014/02/09,505,12:21:00 AM,Sunday,McCaul and Dundas,Held By,12,24,E/B,4095
+2014/02/09,501,5:55:00 AM,Sunday,Roncesvalles Yard,Late Leaving Garage,21,27,W/B,4181
+2014/02/09,511,2:30:00 PM,Sunday,Bathurst Route,General Delay,15,10,B/W,
+2014/02/09,505,2:32:00 PM,Sunday,College and McCaul,Held By,6,12,S/B,4185
+2014/02/09,506,4:00:00 PM,Sunday,Carlton Route,General Delay,18,12,B/W,
+2014/02/09,504,4:20:00 PM,Sunday,King and Spencer,Investigation,20,24,W/B,4181
+2014/02/09,506,5:44:00 PM,Sunday,Howard Park and Dundas,Emergency Services,13,22,E/B,4026
+2014/02/09,501,6:21:00 PM,Sunday,Queen and Shaw,Investigation,5,11,W/B,4230
+2014/02/09,510,6:55:00 PM,Sunday,Spadina and Dundas,Investigation,3,6,N/B,7818
+2014/02/09,504,7:37:00 PM,Sunday,Roncesvalles and Marion,Held By,11,20,E/B,4114
+2014/02/09,504,8:10:00 PM,Sunday,Roncesvalles and Howard Park,Held By,30,40,E/B,4195
+2014/02/09,506,9:05:00 PM,Sunday,Gerard @ Pape,Held By,26,41,E/B,4026
+2014/02/09,506,11:23:00 PM,Sunday,Gerard and Logan,Held By,47,58,E/B,4029
+2014/02/09,510,11:40:00 PM,Sunday,Spadina Station,Utilized Off Route,5,10,S/B,1557
+2014/02/10,501,12:01:00 AM,Monday,Queen and Abell,Held By,10,18,B/W,4213
+2014/02/10,501,5:36:00 AM,Monday,Queen and Lee,Investigation,31,41,W/B,4218
+2014/02/10,511,7:00:00 AM,Monday,Bathurst Station to CNE,General Delay,12,10,B/W,
+2014/02/10,501,7:39:00 AM,Monday,Roncesvalles Yard,Late Leaving Garage,6,12,W/B,
+2014/02/10,501,7:49:00 AM,Monday,Roncesvalles Yard,Mechanical,6,12,W/B,
+2014/02/10,501,8:00:00 AM,Monday,Roncesvalles car house,Mechanical,6,12,W/B,
+2014/02/10,504,8:22:00 AM,Monday,Parliament and Queen,Utilized Off Route,48,50,E/B,4078
+2014/02/10,504,8:49:00 AM,Monday,King and Brant,Investigation,16,20,W/B,4138
+2014/02/10,504,9:37:00 AM,Monday,Broadview and Dundas,Utilized Off Route,24,28,E/B,4103
+2014/02/10,501,1:15:00 PM,Monday,Queen and Carlaw,Held By,26,32,W/B,4012
+2014/02/10,506,3:46:00 PM,Monday,Gerrard and Coxwell,Held By,16,21,W/B,4028
+2014/02/10,506,4:24:00 PM,Monday,Upper Gerrard and Golfview,Investigation,9,13,W/B,4153
+2014/02/10,508,4:33:00 PM,Monday,Roncesvalles Car House,Mechanical,15,30,E/B,
+2014/02/10,508,6:28:00 PM,Monday,King and Duffrin,Held By,15,0,W/B,4122
+2014/02/11,504,5:25:00 AM,Tuesday,Roncesvalles and Queen,Held By,3,6,W/B,4098
+2014/02/11,504,6:34:00 AM,Tuesday,King and York,Held By,30,32,W/B,4048
+2014/02/11,504,7:15:00 AM,Tuesday,Roncesvalles car house,Mechanical,3,6,W/B,
+2014/02/11,504,7:19:00 AM,Tuesday,Roncesvalles car house,Mechanical,3,6,W/B,
+2014/02/11,504,7:23:00 AM,Tuesday,Roncesvalles yard,Mechanical,3,6,W/B,
+2014/02/11,501,7:28:00 AM,Tuesday,Roncesvalles car house,Mechanical,6,12,W/B,
+2014/02/11,501,7:39:00 AM,Tuesday,Roncesvalles car house,Mechanical,6,12,W/B,
+2014/02/11,501,7:49:00 AM,Tuesday,Roncesvalles car house,Mechanical,6,12,W/B,
+2014/02/11,504,7:55:00 AM,Tuesday,Roncesvalles car house,Mechanical,3,6,W/B,
+2014/02/11,501,8:00:00 AM,Tuesday,Roncesvalles car house,Mechanical,6,12,W/B,
+2014/02/11,504,8:03:00 AM,Tuesday,King and Brant,Utilized Off Route,12,16,W/B,4066
+2014/02/11,511,8:21:00 AM,Tuesday,Bathurst and Fleet,Held By,8,12,N/B,4068
+2014/02/11,501,10:27:00 PM,Tuesday,Queen and Broadview,Held By,72,81,E/B,4218
+2014/02/24,504,3:00:00 PM,Monday,route,General Delay,30,20,B/W,
+2014/02/25,511,7:00:00 AM,Tuesday,Bathurst Station,General Delay,25,20,B/W,
+2014/02/25,502,8:02:00 AM,Tuesday,Queen and Jones,General Delay,8,20,E/B,4033
+2014/02/25,504,8:41:00 AM,Tuesday,Broadview and Dundas,Utilized Off Route,2,4,N/B,4003
+2014/02/25,25,8:43:00 AM,Tuesday,King and Close,General Delay,19,21,W/B,4073
+2014/02/25,504,10:16:00 AM,Tuesday,Broadview and Danforth,Investigation,4,8,W/B,4044
+2014/02/25,506,12:05:00 PM,Tuesday,Gerrard and Blackburn,Utilized Off Route,5,10,E/B,4061
+2014/02/25,501,12:53:00 PM,Tuesday,queen and woodbine,General Delay,12,18,E/B,4237
+2014/02/25,501,1:26:00 PM,Tuesday,Queen and Elmer,General Delay,46,52,E/B,4210
+2014/02/25,506,1:46:00 PM,Tuesday,Kingsmount and Upper Gerrard,Utilized Off Route,23,28,E/B,4109
+2014/02/25,511,3:24:00 PM,Tuesday,Bath and Richmond,Utilized Off Route,24,28,N/B,4023
+2014/02/26,504,6:14:00 AM,Wednesday,Roncesvalles and Queen,Late Leaving Garage,3,7,W/B,4062
+2014/02/26,504,6:18:00 AM,Wednesday,Roncesvalles and Queen,Late Leaving Garage,7,10,W/B,4065
+2014/02/26,506,6:45:00 AM,Wednesday,Main and Gerard,Utilized Off Route,17,21,E/B,4059
+2014/02/26,501,7:05:00 AM,Wednesday,Greenwood and Queen,Utilized Off Route,13,19,W/B,4219
+2014/02/26,501,7:10:00 AM,Wednesday,Greenwood to Long Branch,General Delay,15,17,B/W,
+2014/02/26,504,7:13:00 AM,Wednesday,Roncesvalles and Queen,Mechanical,2,6,W/B,
+2014/02/26,504,7:21:00 AM,Wednesday,Roncesvalles and Queen,Mechanical,2,4,W/B,
+2014/02/26,504,7:25:00 AM,Wednesday,Roncesvalles and Queen,Mechanical,2,4,W/B,
+2014/02/26,504,7:33:00 AM,Wednesday,Roncesvalles and Queen,Utilized Off Route,2,3,W/B,4228
+2014/02/26,506,7:44:00 AM,Wednesday,Gerard and Jarvis,Utilized Off Route,16,20,E/B,4026
+2014/02/26,501,7:49:00 AM,Wednesday,Parliament and Queen,Utilized Off Route,19,25,W/B,4135
+2014/02/26,505,7:55:00 AM,Wednesday,Dundas and Lansdowne,Held By,6,11,E/B,4037
+2014/02/26,504,8:15:00 AM,Wednesday,Queen and Parliament,Utilized Off Route,17,19,W/B,4085
+2014/02/26,511,8:42:00 AM,Wednesday,Fleet and Fort York,Investigation,25,29,E/B,4134
+2014/02/26,505,10:26:00 AM,Wednesday,McCaul and Dundas,Held By,5,10,E/B,4140
+2014/02/26,504,1:03:00 PM,Wednesday,Queen and River,Utilized Off Route,11,15,W/B,4138
+2014/02/26,501,1:05:00 PM,Wednesday,Queen and River,Held By,9,15,W/B,4217
+2014/02/26,502,1:07:00 PM,Wednesday,Queen and River,Held By,7,33,W/B,4114
+2014/02/26,511,1:09:00 PM,Wednesday,Wolesley Loop,Investigation,4,8,N/B,4134
+2014/02/26,511,2:31:00 PM,Wednesday,Roncesvalles Yard,Late Leaving Garage,2,5,NB,4189
+2014/02/26,504,3:28:00 PM,Wednesday,Queen and Roncesvalles,Mechanical,2,4,W/B,
+2014/02/26,503,5:15:00 PM,Wednesday,Queen and Connaught,Mechanical,12,24,W/B,4062
+2014/02/26,511,5:22:00 PM,Wednesday,Bathurst at Adelaide,Held By,9,14,N/B,4160
+2014/02/26,504,8:29:00 PM,Wednesday,King and Wilson Park,Held By,11,15,E/B,4040
+2014/02/27,504,6:30:00 AM,Thursday,Roncesvalles Yard,Late Leaving Garage,4,8,W/B,4153
+2014/02/27,504,7:00:00 AM,Thursday,King Route,General Delay,20,14,B/W,
+2014/02/27,504,7:02:00 AM,Thursday,King and Church,Investigation,7,11,W/B,4004
+2014/02/27,504,10:36:00 AM,Thursday,Queen and Broadview,Investigation,24,28,E/B,4197
+2014/02/27,506,10:48:00 AM,Thursday,College and Dovercourt,Held By,16,21,E/B,4144
+2014/02/27,504,11:23:00 AM,Thursday,route,General Delay,8,12,W/B,4016
+2014/02/27,504,11:30:00 AM,Thursday,route,General Delay,10,14,W/B,4197
+2014/02/27,502,12:55:00 PM,Thursday,Queen and Jones,Investigation,16,32,W/B,4114
+2014/02/27,501,2:08:00 PM,Thursday,Humber Loop,Investigation,4,10,E/B,4247
+2014/02/27,501,2:09:00 PM,Thursday,Queen and Sorauren,Investigation,51,57,W/B,4229
+2014/02/27,511,2:15:00 PM,Thursday,Bathurst and Bloor,Utilized Off Route,19,23,S/B,4032
+2014/02/27,509,2:18:00 PM,Thursday,CNE,Utilized Off Route,5,10,E/B,9407
+2014/02/27,511,2:34:00 PM,Thursday,Bathurst Station,Investigation,4,8,S/B,4176
+2014/02/27,511,3:05:00 PM,Thursday,College and Nassau,Held By,6,10,S/B,4145
+2014/02/27,506,4:50:00 PM,Thursday,College and Bay,Investigation,30,35,E/B,4104
+2014/02/27,506,5:30:00 PM,Thursday,Main Station to High Park,General Delay,15,8,B/W,
+2014/02/27,504,5:41:00 PM,Thursday,Parliament and Queen,Held By,16,20,E/B,4072
+2014/02/27,504,5:41:00 PM,Thursday,Queen and Parliament,Investigation,50,54,W/B,4147
+2014/02/27,501,5:44:00 PM,Thursday,Queen and Parliament,Held By,13,19,E/B,4249
+2014/02/27,509,5:59:00 PM,Thursday,Bay and Adelaide,Utilized Off Route,4,8,E/B,7609
+2014/02/27,505,6:18:00 PM,Thursday,Broadview Station,Utilized Off Route,6,12,W/B,4177
+2014/02/27,506,8:48:00 PM,Thursday,Gerard and Broadview,Investigation,8,15,E/B,4159
+2014/02/27,512,10:02:00 PM,Thursday,St. Clair and Old Weston,Emergency Services,13,21,W/B,4148
+2014/02/28,504,7:04:00 AM,Friday,roncesvales yard,Held By,4,8,W/B,4120
+2014/02/28,506,7:06:00 AM,Friday,roncesvalles yard,Held By,6,12,E/B,4189
+2014/02/28,504,7:07:00 AM,Friday,roncesvales yard,Held By,4,8,W/B,4245
+2014/02/28,504,7:19:00 AM,Friday,Roncesvalles Yard,Mechanical,4,8,W/B,4203
+2014/02/28,506,7:31:00 AM,Friday,dundas and college,Investigation,4,8,E/B,4147
+2014/02/28,505,7:32:00 AM,Friday,dundas and college,Held By,5,15,E/B,4176
+2014/02/28,504,9:29:00 AM,Friday,king & jameson,Held By,10,12,E/B,4130
+2014/02/28,501,9:40:00 AM,Friday,church and queen,Investigation,6,12,E/B,4109
+2014/02/28,504,10:10:00 AM,Friday,route,General Delay,15,19,W/B,4081
+2014/02/28,501,11:05:00 AM,Friday,,Investigation,6,12,W/B,4217
+2014/02/28,504,11:31:00 AM,Friday,route,General Delay,7,11,W/B,4085
+2014/02/28,501,12:25:00 PM,Friday,roncesvales and queen,General Delay,6,12,E/B,4109
+2014/02/28,501,12:50:00 PM,Friday,queen / river,General Delay,11,17,E/B,4224
+2014/02/28,510,1:45:00 PM,Friday,Spadina and Dundas,Utilized Off Route,26,29,N/B,4111
+2014/02/28,501,2:15:00 PM,Friday,queen / church,General Delay,15,20,E/B,4135
+2014/02/28,501,2:45:00 PM,Friday,queen and roncesvales,General Delay,6,12,E/B,4249
+2014/02/28,501,3:30:00 PM,Friday,queen / pape,General Delay,9,14,E/B,4249
+2014/02/28,506,3:55:00 PM,Friday,Carlton and Yonge,Emergency Services,5,10,W/B,4142
+2014/02/28,501,4:24:00 PM,Friday,queen and lansdowne,Investigation,5,11,W/B,4220
+2014/02/28,506,6:00:00 PM,Friday,Gerard and DeGrassi,Emergency Services,13,18,E/B,4035
+2014/02/28,511,6:13:00 PM,Friday,bathurst and dundas,Investigation,18,22,E/B,4143
+2014/02/28,503,6:52:00 PM,Friday,church and wellington,Investigation,12,24,W/B,4124
+2014/02/28,506,7:00:00 PM,Friday,Route,General Delay,20,10,B/W,
+2014/02/28,504,7:35:00 PM,Friday,broadview station,Held By,25,30,W/B,4129
+2014/02/28,505,7:36:00 PM,Friday,broadview station,Held By,24,32,W/B,4086
+2014/02/28,501,10:55:00 PM,Friday,,General Delay,7,12,E/B,4209

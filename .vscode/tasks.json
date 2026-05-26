@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Merge CSV (window)",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/scripts/merge_csv_gui.py"],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "close": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Merge CSV (config file)",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/scripts/merge_csv_run.py"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

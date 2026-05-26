@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Merge CSV (window)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/merge_csv_gui.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Merge CSV (config)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/merge_csv_run.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Merge CSV (CLI example)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/merge_csv.py",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-o",
+        "raw_data_sources/Buses/ttc-bus-delay-2014-merged.csv",
+        "raw_data_sources/Buses/ttc-bus-delay-data-2014/ttc-bus-delay-data-2014-Jan 2014.csv",
+        "raw_data_sources/Buses/ttc-bus-delay-data-2014/ttc-bus-delay-data-2014-Feb 2014.csv"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}
