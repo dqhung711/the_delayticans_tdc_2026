@@ -1,0 +1,27 @@
+# Dependencies & local env
+node_modules/
+frontend/node_modules/
+.venv/
+
+# Dev-only (ingest, backups, GTFS rebuild) — not required to run the app
+.dev/
+
+# Build output
+frontend/dist/
+.vite/
+*.tsbuildinfo
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Unpacked from delays.db.gz (npm run prepare-data)
+data/delays.db
+
+# Regenerated at runtime (live feed, GTFS download cache)
+data/_gtfs_cache.zip
+data/live-advisories.json
+
+# OS / logs
+.DS_Store
+*.log

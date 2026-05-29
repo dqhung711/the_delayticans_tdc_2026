@@ -1,0 +1,19 @@
+# IDE
+.idea/
+
+# Website app (see website/.gitignore)
+website/node_modules/
+website/frontend/node_modules/
+website/.venv/
+website/.dev/
+website/frontend/dist/
+website/**/__pycache__/
+website/**/*.pyc
+website/data/delays.db
+website/data/_gtfs_cache.zip
+website/data/live-advisories.json
+website/**/*.tsbuildinfo
+website/.vite/
+
+.DS_Store
+*.log

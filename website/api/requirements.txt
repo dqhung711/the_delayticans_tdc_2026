@@ -1,0 +1,6 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gtfs-realtime-bindings==1.0.0
+protobuf==5.29.3
+httpx==0.28.1
+apscheduler==3.11.0
