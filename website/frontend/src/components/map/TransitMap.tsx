@@ -27,7 +27,12 @@ import {
   ROUTE_LINE_OPACITY_HEAT_EXPR,
   ROUTE_LINE_WIDTH_EXPR,
   TORONTO_CENTER,
+  TORONTO_MAX_BOUNDS,
+  inTorontoBbox,
 } from "../../lib/mapStyles";
+import { filterRouteShapesToToronto } from "../../lib/torontoBounds";
+import { selectMapRouteFeatures } from "../../lib/routeNetworkFilter";
+import { collectLiveAdvisoryRouteIds } from "../../lib/visibleRoutes";
 import type { Direction, LiveAdvisory, LiveSnapshot, Mode } from "../../types";
 import { MapSidebar, type MapExploreState } from "./MapSidebar";
 
@@ -75,6 +80,7 @@ function advisoriesToGeoJSON(
   for (const advisory of advisories) {
     const coords = advisoryCoords(advisory);
     if (!coords) continue;
+    if (!inTorontoBbox(coords[0], coords[1])) continue;
     const modeKey =
       advisory.mode in MODE_COLORS
         ? (advisory.mode as keyof typeof MODE_COLORS)
@@ -145,7 +151,10 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const themeRef = useRef(theme);
   const prevThemeRef = useRef(theme);
   const showHeatmapRef = useRef(false);
+  const showAllRoutesRef = useRef(false);
+  const modeRef = useRef(mode);
   themeRef.current = theme;
+  modeRef.current = mode;
 
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
   const [liveRefreshing, setLiveRefreshing] = useState(false);
@@ -170,11 +179,13 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const [mapReady, setMapReady] = useState(false);
   const [networkLoaded, setNetworkLoaded] = useState(false);
   const [routeShapesReady, setRouteShapesReady] = useState(false);
+  const [routesShownCount, setRoutesShownCount] = useState(0);
   const [networkHint, setNetworkHint] = useState<string | null>(null);
   const [explore, setExplore] = useState<MapExploreState>({
     histStart: "2014",
     histEnd: "2026",
     showHeatmap: false,
+    showAllRoutes: false,
     routeSearch: "",
     compareA: "",
     compareB: "",
@@ -182,6 +193,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     nearbyKm: 1,
   });
   showHeatmapRef.current = explore.showHeatmap;
+  showAllRoutesRef.current = explore.showAllRoutes;
   const [routeRows, setRouteRows] = useState<RouteDelayRow[]>([]);
   const [routeDetail, setRouteDetail] = useState<RouteDetail | null>(null);
   const [compareA, setCompareA] = useState<RouteDetail | null>(null);
@@ -218,44 +230,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
     hoverPopupRef.current?.remove();
     hoverPopupRef.current = null;
   }, []);
-
-  const filterRoutesByMode = useCallback(
-    (
-      collection: GeoJSON.FeatureCollection,
-      activeMode: Mode,
-      delayRoutes: RouteDelayRow[],
-    ) => {
-      const delayRouteIds = new Set(
-        delayRoutes.map((r) => {
-          const norm = r.route.replace(/^0+/, "") || r.route;
-          return norm;
-        }),
-      );
-      const seen = new Set<string>();
-      const features = collection.features.filter((f) => {
-        const route = String(f.properties?.route ?? "");
-        const norm = normalizeRouteId(route);
-        const lineMode = String(f.properties?.mode ?? "");
-        const match =
-          lineMode === activeMode ||
-          delayRouteIds.has(route) ||
-          delayRouteIds.has(norm);
-        if (!match) return false;
-        const shapeId = String(f.properties?.shape_id ?? "");
-        const coords =
-          f.geometry.type === "LineString"
-            ? (f.geometry.coordinates as [number, number][])
-            : [];
-        const start = coords[0] ? `${coords[0][0].toFixed(4)},${coords[0][1].toFixed(4)}` : "";
-        const dedupeKey = `${norm}:${shapeId || start}`;
-        if (seen.has(dedupeKey)) return false;
-        seen.add(dedupeKey);
-        return true;
-      });
-      return { type: "FeatureCollection" as const, features };
-    },
-    [],
-  );
 
   const addNetworkLayers = useCallback((map: maplibregl.Map) => {
     if (!map.getSource("ttc-routes")) {
@@ -437,12 +411,18 @@ export function TransitMap({ mode, onModeChange }: Props) {
     const restoreRouteLinePaint = () => {
       if (!map.getLayer(layerId)) return;
       const heatOn = showHeatmapRef.current;
-      map.setPaintProperty(layerId, "line-width", ROUTE_LINE_WIDTH_EXPR);
-      map.setPaintProperty(
-        layerId,
-        "line-opacity",
-        heatOn ? ROUTE_LINE_OPACITY_HEAT_EXPR : ROUTE_LINE_OPACITY_EXPR,
-      );
+      const showAll = showAllRoutesRef.current;
+      if (showAll) {
+        map.setPaintProperty(layerId, "line-width", 2.5);
+        map.setPaintProperty(layerId, "line-opacity", heatOn ? 0.55 : 0.75);
+      } else {
+        map.setPaintProperty(layerId, "line-width", ROUTE_LINE_WIDTH_EXPR);
+        map.setPaintProperty(
+          layerId,
+          "line-opacity",
+          heatOn ? ROUTE_LINE_OPACITY_HEAT_EXPR : ROUTE_LINE_OPACITY_EXPR,
+        );
+      }
     };
 
     const clearRouteHover = () => {
@@ -463,15 +443,22 @@ export function TransitMap({ mode, onModeChange }: Props) {
         lineMode === "streetcar" ? "Streetcar" : lineMode === "bus" ? "Bus" : "Route";
       const color = String(feature.properties?.color ?? "#94a3b8");
 
-      const baseOpacity = showHeatmapRef.current
-        ? ROUTE_LINE_OPACITY_HEAT_EXPR
-        : ROUTE_LINE_OPACITY_EXPR;
+      const showAll = showAllRoutesRef.current;
+      const heatOn = showHeatmapRef.current;
+      const baseWidth = showAll ? 2.5 : ROUTE_LINE_WIDTH_EXPR;
+      const baseOpacity = showAll
+        ? heatOn
+          ? 0.55
+          : 0.75
+        : heatOn
+          ? ROUTE_LINE_OPACITY_HEAT_EXPR
+          : ROUTE_LINE_OPACITY_EXPR;
 
       map.setPaintProperty(layerId, "line-width", [
         "case",
         ["==", ["get", "route"], route],
         8,
-        ROUTE_LINE_WIDTH_EXPR,
+        baseWidth,
       ]);
       map.setPaintProperty(layerId, "line-opacity", [
         "case",
@@ -509,21 +496,33 @@ export function TransitMap({ mode, onModeChange }: Props) {
     map.on("mouseleave", layerId, clearRouteHover);
   }, []);
 
-  const setRouteLinesForHeatmap = useCallback((map: maplibregl.Map, heatmapOn: boolean) => {
-    if (!map.getLayer("ttc-routes-line")) return;
-    map.setPaintProperty("ttc-routes-line", "line-width", ROUTE_LINE_WIDTH_EXPR);
-    map.setPaintProperty(
-      "ttc-routes-line",
-      "line-opacity",
-      heatmapOn ? ROUTE_LINE_OPACITY_HEAT_EXPR : ROUTE_LINE_OPACITY_EXPR,
-    );
-    if (map.getLayer("ttc-routes-highlight")) {
-      map.setLayoutProperty("ttc-routes-highlight", "visibility", "visible");
-    }
-    if (map.getLayer("delay-heat-layer") && map.getLayer("ttc-routes-line")) {
-      map.moveLayer("delay-heat-layer", "ttc-routes-line");
-    }
-  }, []);
+  const setRouteLinePaint = useCallback(
+    (map: maplibregl.Map, heatmapOn: boolean, showAll: boolean) => {
+      if (!map.getLayer("ttc-routes-line")) return;
+      if (showAll) {
+        map.setPaintProperty("ttc-routes-line", "line-width", 2.5);
+        map.setPaintProperty(
+          "ttc-routes-line",
+          "line-opacity",
+          heatmapOn ? 0.55 : 0.75,
+        );
+      } else {
+        map.setPaintProperty("ttc-routes-line", "line-width", ROUTE_LINE_WIDTH_EXPR);
+        map.setPaintProperty(
+          "ttc-routes-line",
+          "line-opacity",
+          heatmapOn ? ROUTE_LINE_OPACITY_HEAT_EXPR : ROUTE_LINE_OPACITY_EXPR,
+        );
+      }
+      if (map.getLayer("ttc-routes-highlight")) {
+        map.setLayoutProperty("ttc-routes-highlight", "visibility", "visible");
+      }
+      if (map.getLayer("delay-heat-layer") && map.getLayer("ttc-routes-line")) {
+        map.moveLayer("delay-heat-layer", "ttc-routes-line");
+      }
+    },
+    [],
+  );
 
   const applyNetworkData = useCallback(
     (
@@ -531,6 +530,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       activeMode: Mode,
       highlighted: string[],
       delays: RouteDelayRow[],
+      liveAdvisories: LiveAdvisory[],
       center: [number, number] | null,
       heatmapOn: boolean,
     ) => {
@@ -561,16 +561,30 @@ export function TransitMap({ mode, onModeChange }: Props) {
       );
       const maxDelay = Math.max(1, ...delays.map((d) => d.delay_minutes));
 
-      const routeFeatures = filterRoutesByMode(routes, activeMode, delays).features.map((f) => {
+      const visibleRouteIds = explore.showAllRoutes
+        ? null
+        : collectLiveAdvisoryRouteIds(liveAdvisories, activeMode);
+
+      const showAll = explore.showAllRoutes;
+      const lineFeatures = selectMapRouteFeatures({
+        collection: routes,
+        activeMode,
+        showAllRoutes: showAll,
+        visibleRouteIds,
+      });
+
+      const routeFeatures = lineFeatures.map((f) => {
         const route = String(f.properties?.route ?? "");
         const norm = route.replace(/^0+/, "") || route;
         const delay = delayByRoute.get(norm) ?? delayByRoute.get(route) ?? 0;
-        const delayNorm = delay / maxDelay;
+        const delayNorm = showAll ? 0.5 : delay / maxDelay;
         const isMapFocused =
-          hasMapFocus && (focusSet.has(norm) || focusSet.has(route));
-        const isDimmed = hasMapFocus && !isMapFocused;
+          !showAll && hasMapFocus && (focusSet.has(norm) || focusSet.has(route));
+        const isDimmed = !showAll && hasMapFocus && !isMapFocused;
         const isSelected =
-          !hasMapFocus && (norm === selectedNorm || route === explore.routeSearch);
+          !showAll &&
+          !hasMapFocus &&
+          (norm === selectedNorm || route === explore.routeSearch);
         const isCompareA = norm === compareNormA || route === explore.compareA;
         const isCompareB = norm === compareNormB || route === explore.compareB;
         return {
@@ -581,14 +595,15 @@ export function TransitMap({ mode, onModeChange }: Props) {
             delay_norm: delayNorm,
             focused: isMapFocused,
             dimmed: isDimmed,
-            highlighted:
-              isMapFocused ||
-              (!hasMapFocus &&
-                (highlightSet.has(norm) ||
-                  highlightSet.has(route) ||
-                  isSelected ||
-                  isCompareA ||
-                  isCompareB)),
+            highlighted: showAll
+              ? false
+              : isMapFocused ||
+                (!hasMapFocus &&
+                  (highlightSet.has(norm) ||
+                    highlightSet.has(route) ||
+                    isSelected ||
+                    isCompareA ||
+                    isCompareB)),
             selected: isMapFocused || isSelected,
             compare_a: !hasMapFocus && isCompareA,
             compare_b: !hasMapFocus && isCompareB,
@@ -596,10 +611,12 @@ export function TransitMap({ mode, onModeChange }: Props) {
         };
       });
 
+      setRoutesShownCount(routeFeatures.length);
+
       const routeSource = map.getSource("ttc-routes") as maplibregl.GeoJSONSource;
       routeSource?.setData({ type: "FeatureCollection", features: routeFeatures });
 
-      setRouteLinesForHeatmap(map, heatmapOn);
+      setRouteLinePaint(map, heatmapOn, showAll);
 
       if (center) {
         addressMarkerRef.current?.remove();
@@ -612,12 +629,12 @@ export function TransitMap({ mode, onModeChange }: Props) {
       }
     },
     [
-      filterRoutesByMode,
       explore.routeSearch,
       explore.compareA,
       explore.compareB,
+      explore.showAllRoutes,
       mapFocusedRoutes,
-      setRouteLinesForHeatmap,
+      setRouteLinePaint,
     ],
   );
 
@@ -630,18 +647,18 @@ export function TransitMap({ mode, onModeChange }: Props) {
           map.setLayoutProperty("delay-heat-layer", "visibility", "none");
         }
         heatSource?.setData({ type: "FeatureCollection", features: [] });
-        setRouteLinesForHeatmap(map, false);
+        setRouteLinePaint(map, false, showAllRoutesRef.current);
         return;
       }
 
-      setRouteLinesForHeatmap(map, true);
+      setRouteLinePaint(map, true, showAllRoutesRef.current);
       const geo = await fetchDelayHotspots(mapQuery);
       heatSource?.setData(geo);
       if (map.getLayer("delay-heat-layer")) {
         map.setLayoutProperty("delay-heat-layer", "visibility", "visible");
       }
     },
-    [mapQuery, setRouteLinesForHeatmap],
+    [mapQuery, setRouteLinePaint],
   );
 
   const setupRouteClick = useCallback(
@@ -862,6 +879,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       zoom: 11.3,
       pitch: pitchForZoom(11.3),
       bearing: -18,
+      maxBounds: TORONTO_MAX_BOUNDS,
       ...MAP_SMOOTH_OPTIONS,
     });
 
@@ -924,6 +942,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
         mode,
         snapshot?.highlightedRoutes ?? [],
         routeRows,
+        filtered,
         addressCenter,
         explore.showHeatmap,
       );
@@ -959,6 +978,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       mode,
       snapshot?.highlightedRoutes ?? [],
       routeRows,
+      filtered,
       addressCenter,
       explore.showHeatmap,
     );
@@ -980,6 +1000,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     explore.routeSearch,
     explore.compareA,
     explore.compareB,
+    explore.showAllRoutes,
   ]);
 
   useEffect(() => {
@@ -989,8 +1010,9 @@ export function TransitMap({ mode, onModeChange }: Props) {
   useEffect(() => {
     let cancelled = false;
     fetchRouteShapes()
-      .then((data) => {
+      .then((raw) => {
         if (cancelled) return;
+        const data = filterRouteShapesToToronto(raw);
         routeShapesCache.current = data;
         routesRef.current = data;
         setRouteShapesReady(true);
@@ -1120,9 +1142,11 @@ export function TransitMap({ mode, onModeChange }: Props) {
     fetchRouteDetail(route, mapQuery).then(setRouteDetail);
     const map = mapRef.current;
     if (!map) return;
-    const features = routesRef.current?.features.filter(
-      (f) => String(f.properties?.route) === route,
-    );
+    const norm = normalizeRouteId(route);
+    const features = routesRef.current?.features.filter((f) => {
+      const r = String(f.properties?.route ?? "");
+      return r === route || normalizeRouteId(r) === norm;
+    });
     if (features?.length) {
       const coords = (features[0].geometry as GeoJSON.LineString).coordinates[0] as [
         number,
@@ -1182,8 +1206,21 @@ export function TransitMap({ mode, onModeChange }: Props) {
             {snapshot
               ? `Updated ${new Date(snapshot.updatedAt).toLocaleString()} · auto every ${snapshot.refreshIntervalMinutes} min`
               : "Loading…"}
-            {showDevUI && networkLoaded && " · GTFS route lines"}
+            {networkLoaded &&
+              (routesShownCount > 0
+                ? ` · ${routesShownCount} route line${routesShownCount === 1 ? "" : "s"}`
+                : " · live alert routes only — or Display all")}
           </p>
+          <button
+            type="button"
+            className={`map-live-refresh-btn ${explore.showAllRoutes ? "map-live-refresh-btn--active" : ""}`}
+            onClick={() =>
+              setExplore((p) => ({ ...p, showAllRoutes: !p.showAllRoutes }))
+            }
+            aria-pressed={explore.showAllRoutes}
+          >
+            {explore.showAllRoutes ? "Filtered routes" : "Display all"}
+          </button>
           <button
             type="button"
             className="map-live-refresh-btn"
@@ -1212,7 +1249,11 @@ export function TransitMap({ mode, onModeChange }: Props) {
             <span className="text-[var(--muted)]">
               {explore.showHeatmap
                 ? "Red heat = delay density · route lines faded"
-                : "Line thickness = historical delay · pins = live"}
+                : explore.showAllRoutes
+                  ? mode === "streetcar"
+                    ? "All streetcar lines · pins = live"
+                    : "All bus lines · pins = live"
+                  : "Live alert routes only · Display all for full network"}
             </span>
           </div>
         </div>

@@ -11,6 +11,7 @@ import advisories
 import db
 import geocode_search
 from filters import parse_query
+from gtfs_data import filter_route_shapes_geojson, filter_stops_geojson
 
 app = FastAPI(title="TTC Delays API")
 app.add_middleware(
@@ -125,12 +126,21 @@ async def live_refresh():
         return JSONResponse(status_code=502, content={"error": str(exc)})
 
 
+@app.get("/api/route-modes")
+def route_modes():
+    modes_path = Path(__file__).resolve().parents[1] / "data" / "route-modes.json"
+    if not modes_path.exists():
+        return {}
+    return json.loads(modes_path.read_text())
+
+
 @app.get("/api/route-shapes")
 def route_shapes():
     shapes_path = Path(__file__).resolve().parents[1] / "data" / "route-shapes.json"
     if not shapes_path.exists():
         return {"type": "FeatureCollection", "features": []}
-    return json.loads(shapes_path.read_text())
+    raw = json.loads(shapes_path.read_text())
+    return filter_route_shapes_geojson(raw)
 
 
 @app.get("/api/map/route-delays")
@@ -175,7 +185,7 @@ def map_stops(mode: str | None = None):
     stops_path = Path(__file__).resolve().parents[1] / "data" / "stops.geojson"
     if not stops_path.exists():
         return {"type": "FeatureCollection", "features": []}
-    collection = json.loads(stops_path.read_text())
+    collection = filter_stops_geojson(json.loads(stops_path.read_text()))
     if not mode or mode not in ("bus", "streetcar"):
         return collection
     features = [

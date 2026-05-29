@@ -70,6 +70,12 @@ export async function refreshLive(): Promise<LiveSnapshot> {
   return res.json();
 }
 
+export async function fetchRouteModes(): Promise<Record<string, string>> {
+  const res = await fetch(apiUrl("/api/route-modes"));
+  if (!res.ok) return {};
+  return res.json();
+}
+
 export async function fetchRouteShapes(): Promise<GeoJSON.FeatureCollection> {
   const res = await fetch(apiUrl("/api/route-shapes"));
   if (!res.ok) return { type: "FeatureCollection", features: [] };

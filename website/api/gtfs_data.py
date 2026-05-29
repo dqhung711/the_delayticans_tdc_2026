@@ -23,6 +23,54 @@ def in_toronto_bbox(lon: float, lat: float) -> bool:
     )
 
 
+def clip_linestring_to_bbox(coords: list) -> list | None:
+    """Keep in-bbox vertices only; drop lines with fewer than 2 points."""
+    if not coords:
+        return None
+    clipped: list = []
+    for pt in coords:
+        if len(pt) < 2:
+            continue
+        lon, lat = float(pt[0]), float(pt[1])
+        if in_toronto_bbox(lon, lat):
+            clipped.append([lon, lat])
+    return clipped if len(clipped) >= 2 else None
+
+
+def filter_route_shapes_geojson(data: dict) -> dict:
+    features = []
+    for feat in data.get("features") or []:
+        geom = feat.get("geometry") or {}
+        if geom.get("type") != "LineString":
+            continue
+        clipped = clip_linestring_to_bbox(geom.get("coordinates") or [])
+        if not clipped:
+            continue
+        features.append(
+            {
+                **feat,
+                "geometry": {"type": "LineString", "coordinates": clipped},
+            }
+        )
+    return {"type": "FeatureCollection", "features": features}
+
+
+def filter_stops_geojson(data: dict) -> dict:
+    features = []
+    for feat in data.get("features") or []:
+        geom = feat.get("geometry") or {}
+        if geom.get("type") != "Point":
+            continue
+        coords = geom.get("coordinates") or []
+        if len(coords) < 2:
+            continue
+        lon, lat = float(coords[0]), float(coords[1])
+        if not in_toronto_bbox(lon, lat):
+            continue
+        features.append(feat)
+    return {"type": "FeatureCollection", "features": features}
+
+
 @lru_cache(maxsize=1)
 def get_stops_lookup() -> dict:
     if not STOPS_LOOKUP_PATH.exists():

@@ -12,10 +12,13 @@ from pathlib import Path
 
 import httpx
 
-from gtfs_data import resolve_alert_coordinates
+from gtfs_data import in_toronto_bbox, resolve_alert_coordinates
 
 TTC_ALERTS_URL = "https://www.ttc.ca/ttcapi/routedetail/getallroutesandstopsalerts"
 CACHE_PATH = Path(__file__).resolve().parents[1] / "data" / "live-advisories.json"
+ROUTE_MODES_PATH = Path(__file__).resolve().parents[1] / "data" / "route-modes.json"
+
+_route_modes_cache: dict[str, str] | None = None
 
 SUBWAY_LINE_NUMBERS = frozenset({"1", "2", "3", "4", "5", "6"})
 
@@ -144,6 +147,19 @@ def route_label(route: str) -> str:
         return f"Route {route}"
 
 
+def get_route_modes() -> dict[str, str]:
+    global _route_modes_cache
+    if _route_modes_cache is None:
+        if ROUTE_MODES_PATH.exists():
+            try:
+                _route_modes_cache = json.loads(ROUTE_MODES_PATH.read_text())
+            except json.JSONDecodeError:
+                _route_modes_cache = {}
+        else:
+            _route_modes_cache = {}
+    return _route_modes_cache
+
+
 def infer_mode(routes: list[str], route_type: str | None = None, category: str | None = None) -> str:
     rt = (route_type or "").lower()
     cat = (category or "").lower()
@@ -151,6 +167,17 @@ def infer_mode(routes: list[str], route_type: str | None = None, category: str |
         return "streetcar"
     if rt == "bus" or cat == "bus":
         return "bus"
+
+    modes = get_route_modes()
+    for route in routes:
+        key = (route or "").strip()
+        if not key:
+            continue
+        norm = key.lstrip("0") or key
+        from_db = modes.get(key) or modes.get(norm) or modes.get(key.upper())
+        if from_db in ("bus", "streetcar"):
+            return from_db
+
     for route in routes:
         try:
             if int(re.sub(r"\D", "", route)) >= 500:
@@ -330,6 +357,8 @@ def enrich_map_advisories(items: list[dict]) -> list[dict]:
         if lon is None or lat is None:
             lon, lat = geocode_item(header, description, stops, routes)
         if lon is None or lat is None:
+            continue
+        if not in_toronto_bbox(float(lon), float(lat)):
             continue
 
         seen.add(aid)

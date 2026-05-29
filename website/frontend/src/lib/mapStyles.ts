@@ -9,6 +9,8 @@ export const BASEMAP: Record<Theme, string> = {
 
 export const TORONTO_CENTER: [number, number] = [-79.3832, 43.6532];
 
+export { TORONTO_BBOX, TORONTO_MAX_BOUNDS, inTorontoBbox } from "./torontoBounds";
+
 export const MODE_COLORS = {
   bus: "#e53935",
   streetcar: "#ff6f61",
@@ -46,6 +48,8 @@ export const MAP_SMOOTH_OPTIONS = {
   renderWorldCopies: false,
   antialias: true,
   maxPitch: 55,
+  minZoom: 10,
+  maxZoom: 17,
   scrollZoom: { around: "center" as const },
   touchPitch: true,
   dragRotate: true,

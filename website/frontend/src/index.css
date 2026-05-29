@@ -1406,6 +1406,12 @@ body {
   font-size: 0.75rem;
 }
 
+.map-live-refresh-btn--active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .live-alerts__title-row {
   display: flex;
   align-items: center;

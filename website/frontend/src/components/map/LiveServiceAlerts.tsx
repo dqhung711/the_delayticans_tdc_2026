@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchRouteModes } from "../../api";
+import { routeMatchesMode as routeMatchesModeMap } from "../../lib/routeMode";
+import type { RouteModesMap } from "../../lib/routeMode";
 import type { LiveAlertCategory, LiveAlertItem, LiveSnapshot, Mode } from "../../types";
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -31,16 +34,10 @@ function formatUpdated(iso?: string | null): string {
   }
 }
 
-function routeMatchesMode(route: string, mode: Mode): boolean {
-  const num = parseInt(route.replace(/\D/g, ""), 10);
-  if (!Number.isFinite(num)) return true;
-  return mode === "streetcar" ? num >= 500 : num < 500;
-}
-
-function alertMatchesMode(alert: LiveAlertItem, mode: Mode): boolean {
+function alertMatchesMode(alert: LiveAlertItem, mode: Mode, routeModes: RouteModesMap): boolean {
   const routes = alert.routes ?? [];
   if (!routes.length) return true;
-  return routes.some((r) => routeMatchesMode(r, mode));
+  return routes.some((r) => routeMatchesModeMap(r, mode, routeModes));
 }
 
 export function LiveServiceAlerts({
@@ -52,6 +49,11 @@ export function LiveServiceAlerts({
   refreshing = false,
 }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [routeModes, setRouteModes] = useState<RouteModesMap>({});
+
+  useEffect(() => {
+    fetchRouteModes().then(setRouteModes).catch(() => setRouteModes({}));
+  }, []);
 
   const categories = (snapshot?.categories ?? []).filter((c) => c.totalCount > 0);
 
@@ -59,7 +61,7 @@ export function LiveServiceAlerts({
   const modeLabel = mode === "streetcar" ? "Streetcar" : "Bus";
 
   const renderAlertList = (alerts: LiveAlertItem[], catName: string) => {
-    const filtered = alerts.filter((a) => alertMatchesMode(a, mode));
+    const filtered = alerts.filter((a) => alertMatchesMode(a, mode, routeModes));
     if (!filtered.length) {
       return (
         <p className="live-alerts__hint">
@@ -138,7 +140,9 @@ export function LiveServiceAlerts({
         {categories.map((cat) => {
           const expanded = openId === cat.id;
           const icon = CATEGORY_ICONS[cat.name] ?? "•";
-          const routes = (cat.routeCounts ?? []).filter((r) => routeMatchesMode(r.route, mode));
+          const routes = (cat.routeCounts ?? []).filter((r) =>
+            routeMatchesModeMap(r.route, mode, routeModes),
+          );
           const alerts = cat.alerts ?? [];
           const isServiceChanges = cat.name === "Service changes";
 

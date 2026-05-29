@@ -174,11 +174,12 @@ def get_delay_hotspots_geojson(
     interval: dict[str, str],
     directions: list[str],
     routes: list[str],
-    limit: int = 1200,
+    limit: int = 500,
 ):
     from gtfs_data import in_toronto_bbox, lookup_delay_location
 
     where, values = build_where(mode, interval, directions, routes)
+    sql_limit = min(max(limit * 4, 800), 2500)
     with get_conn() as conn:
         rows = conn.execute(
             f"""
@@ -188,15 +189,18 @@ def get_delay_hotspots_geojson(
             FROM delays
             WHERE {where} AND location != ''
             GROUP BY location
+            HAVING COUNT(*) >= 2 OR SUM(min_delay) >= 15
             ORDER BY delay_minutes DESC
             LIMIT ?
             """,
-            [*values, limit],
+            [*values, sql_limit],
         ).fetchall()
 
     features = []
     weights: list[float] = []
     for row in rows:
+        if len(features) >= limit:
+            break
         coords = lookup_delay_location(row["location"])
         if not coords:
             continue

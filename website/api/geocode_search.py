@@ -6,6 +6,8 @@ import re
 
 import httpx
 
+from gtfs_data import in_toronto_bbox
+
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 TORONTO_VIEWBOX = "-79.64,43.58,-79.12,43.86"
 USER_AGENT = "TTC-Delays-Dashboard/1.0 (university project; contact via repo)"
@@ -55,6 +57,8 @@ async def search_addresses(query: str, limit: int = 6) -> list[dict]:
             lat = float(row["lat"])
             lon = float(row["lon"])
         except (KeyError, TypeError, ValueError):
+            continue
+        if not in_toronto_bbox(lon, lat):
             continue
         results.append(
             {

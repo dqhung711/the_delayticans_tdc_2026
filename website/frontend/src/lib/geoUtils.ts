@@ -1,4 +1,5 @@
 import { apiUrl } from "./appConfig";
+import { inTorontoBbox } from "./torontoBounds";
 
 /** Haversine distance in km between two WGS84 points */
 export function distanceKm(
@@ -44,7 +45,7 @@ export async function searchAddresses(query: string): Promise<GeocodeResult[]> {
   const res = await fetch(apiUrl(`/api/geocode/search?${new URLSearchParams({ q })}`));
   if (!res.ok) return [];
   const data = (await res.json()) as { results?: GeocodeResult[] };
-  return data.results ?? [];
+  return (data.results ?? []).filter((r) => inTorontoBbox(r.lon, r.lat));
 }
 
 export async function geocodeAddress(query: string): Promise<GeocodeResult | null> {

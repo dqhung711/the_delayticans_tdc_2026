@@ -8,6 +8,7 @@ export interface MapExploreState {
   histStart: string;
   histEnd: string;
   showHeatmap: boolean;
+  showAllRoutes: boolean;
   routeSearch: string;
   compareA: string;
   compareB: string;
@@ -95,8 +96,9 @@ export function MapSidebar({
         <div className="map-sidebar__section">
           <p className="map-sidebar__heading">Historical delay layer</p>
           <p className="map-sidebar__hint">
-            Route line thickness reflects total delay minutes in the selected year range.
-            Heatmap plots delay totals at each CSV location (matched to TTC stop/intersection coordinates).
+            By default the map shows live-alert routes, the top delayed routes in your year range, or
+            routes you search — not the full network. Use &quot;Show route on map&quot; to highlight one line.
+            Heatmap mode hides route lines unless a live alert route is active or Display all is on.
           </p>
           <div className="map-sidebar__row">
             <label className="map-sidebar__label">
@@ -122,6 +124,14 @@ export function MapSidebar({
               />
             </label>
           </div>
+          <label className="map-sidebar__check">
+            <input
+              type="checkbox"
+              checked={explore.showAllRoutes}
+              onChange={(e) => onExploreChange({ showAllRoutes: e.target.checked })}
+            />
+            Display all routes on map
+          </label>
           <label className="map-sidebar__check">
             <input
               type="checkbox"
