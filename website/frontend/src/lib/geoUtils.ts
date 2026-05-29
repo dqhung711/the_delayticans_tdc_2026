@@ -1,3 +1,5 @@
+import { apiUrl } from "./appConfig";
+
 /** Haversine distance in km between two WGS84 points */
 export function distanceKm(
   lon1: number,
@@ -39,7 +41,7 @@ export interface GeocodeResult {
 export async function searchAddresses(query: string): Promise<GeocodeResult[]> {
   const q = query.trim();
   if (q.length < 2) return [];
-  const res = await fetch(`/api/geocode/search?${new URLSearchParams({ q })}`);
+  const res = await fetch(apiUrl(`/api/geocode/search?${new URLSearchParams({ q })}`));
   if (!res.ok) return [];
   const data = (await res.json()) as { results?: GeocodeResult[] };
   return data.results ?? [];
