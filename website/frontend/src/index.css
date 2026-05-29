@@ -826,6 +826,7 @@ body {
 
 .advisory-card__mode--bus { background: #e5393522; color: #e53935; }
 .advisory-card__mode--streetcar { background: #ff6f6122; color: #ff6f61; }
+.advisory-card__mode--subway { background: #ffcc3322; color: #ffcc33; }
 .advisory-card__mode--unknown { background: #9ca3af22; color: #9ca3af; }
 
 /* Map */
@@ -880,6 +881,7 @@ body {
 
 .legend-dot--bus { background: #e53935; }
 .legend-dot--streetcar { background: #ff6f61; }
+.legend-dot--subway { background: #ffcc33; }
 
 /* Transit pins — outer node is positioned by MapLibre; do not transform it */
 .transit-pin {
@@ -1043,6 +1045,7 @@ body {
 
 .map-popup__badge--bus { background: #e5393525; color: #e53935; }
 .map-popup__badge--streetcar { background: #ff6f6125; color: #ff6f61; }
+.map-popup__badge--subway { background: #ffcc3325; color: #ffcc33; }
 
 .map-popup strong {
   display: block;

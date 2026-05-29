@@ -44,7 +44,7 @@ export default function App() {
         {tab === "live" ? (
           <TransitMap mode={mode} onModeChange={setMode} />
         ) : (
-          <DataExplorer mode={mode} meta={meta} />
+          <DataExplorer mode={mode} meta={meta} onModeChange={setMode} />
         )}
       </main>
     </div>

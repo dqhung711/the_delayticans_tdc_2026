@@ -21,9 +21,10 @@ import type {
 interface Props {
   mode: Mode;
   meta: Meta | null;
+  onModeChange: (mode: Mode) => void;
 }
 
-export function DataExplorer({ mode, meta }: Props) {
+export function DataExplorer({ mode, meta, onModeChange }: Props) {
   const [view, setView] = useState<ViewMode>("overview");
   const [granularity, setGranularity] = useState<Granularity>("year");
   const [timeToggle, setTimeToggle] = useState<"year" | "date">("year");
@@ -144,6 +145,7 @@ export function DataExplorer({ mode, meta }: Props) {
         compareIntervals={compareIntervals}
         onCompareIntervalsChange={setCompareIntervals}
         mode={mode}
+        onModeChange={onModeChange}
       />
 
       {loading && showDevUI && <p className="explorer-status">Loading analytics…</p>}

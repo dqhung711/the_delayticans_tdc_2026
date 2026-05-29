@@ -1190,7 +1190,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     <div className="page-enter">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex gap-2">
-          {(["streetcar", "bus"] as Mode[]).map((m) => (
+          {(["streetcar", "bus", "subway"] as Mode[]).map((m) => (
             <button
               key={m}
               type="button"
@@ -1246,6 +1246,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
           <div className="map-legend map-legend--wide">
             <span><i className="legend-dot legend-dot--bus" /> Bus</span>
             <span><i className="legend-dot legend-dot--streetcar" /> Streetcar</span>
+            <span><i className="legend-dot legend-dot--subway" /> Subway</span>
             <span className="text-[var(--muted)]">
               {explore.showHeatmap
                 ? "Red heat = delay density · route lines faded"

@@ -14,6 +14,7 @@ export { TORONTO_BBOX, TORONTO_MAX_BOUNDS, inTorontoBbox } from "./torontoBounds
 export const MODE_COLORS = {
   bus: "#e53935",
   streetcar: "#ff6f61",
+  subway: "#ffcc33",
   unknown: "#9ca3af",
 } as const;
 
