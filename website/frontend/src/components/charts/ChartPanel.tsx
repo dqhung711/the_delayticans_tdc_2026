@@ -8,6 +8,7 @@ interface Props<T extends string> {
   chartType?: T;
   options?: SelectOption<T>[];
   onChartTypeChange?: (value: T) => void;
+  legend?: ReactNode;
   children: ReactNode;
   className?: string;
   height?: number;
@@ -25,6 +26,7 @@ export function ChartPanel<T extends string>({
   chartType,
   options,
   onChartTypeChange,
+  legend,
   children,
   className = "",
   height,
@@ -41,19 +43,22 @@ export function ChartPanel<T extends string>({
       className={`chart-panel ${primary ? "chart-panel--primary" : ""} ${fluid ? "chart-panel--fluid" : ""} ${className}`}
     >
       <header className="chart-panel__header">
-        <div className="chart-panel__titles">
-          {badge && <span className="chart-panel__badge">{badge}</span>}
-          <h3 className="chart-panel__title">{title}</h3>
-          {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
+        <div className="chart-panel__title-row">
+          <div className="chart-panel__titles">
+            {badge && <span className="chart-panel__badge">{badge}</span>}
+            <h3 className="chart-panel__title">{title}</h3>
+            {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
+          </div>
+          {chartType && options && onChartTypeChange && (
+            <ChartTypeSelect
+              value={chartType}
+              options={options}
+              onChange={onChartTypeChange}
+              ariaLabel={`${title} visualization type`}
+            />
+          )}
         </div>
-        {chartType && options && onChartTypeChange && (
-          <ChartTypeSelect
-            value={chartType}
-            options={options}
-            onChange={onChartTypeChange}
-            ariaLabel={`${title} visualization type`}
-          />
-        )}
+        {legend && <div className="chart-panel__legend">{legend}</div>}
       </header>
       <div
         className="chart-panel__body"

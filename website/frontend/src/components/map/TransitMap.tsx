@@ -231,13 +231,13 @@ export function TransitMap({ mode, onModeChange }: Props) {
     () => ({
       mode,
       view: "overview" as const,
-      granularity: explore.timeToggle === "year" ? ("year" as const) : ("date" as const),
+      granularity: explore.timeToggle === "year" ? ("year" as const) : ("month" as const),
       timeToggle: explore.timeToggle,
       start: explore.histStart,
       end: explore.histEnd,
       directions: [] as Direction[],
       routes: [],
-      bucket: explore.timeToggle === "year" ? ("year" as const) : ("day" as const),
+      bucket: explore.timeToggle === "year" ? ("year" as const) : ("month" as const),
     }),
     [mode, explore.histStart, explore.histEnd, explore.timeToggle],
   );
@@ -1267,10 +1267,23 @@ export function TransitMap({ mode, onModeChange }: Props) {
             <span className="map-filter-label">Time Range</span>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                {(["year", "date"] as const).map((t) => (
+                {(["year", "month"] as const).map((t) => (
                   <button
                     key={t}
-                    onClick={() => setExplore((p) => ({ ...p, timeToggle: t }))}
+                    onClick={() => {
+                      setExplore((p) => {
+                        const patch: Partial<MapExploreState> = { timeToggle: t };
+                        if (t === "year") {
+                          const y = p.histStart.slice(0, 4);
+                          patch.histStart = y;
+                          patch.histEnd = y;
+                        } else if (p.histStart.length === 4) {
+                          patch.histStart = `${p.histStart}-01`;
+                          patch.histEnd = `${p.histStart}-12`;
+                        }
+                        return { ...p, ...patch };
+                      });
+                    }}
                     className={`relative text-[11px] font-bold pb-0.5 transition-all ${
                       explore.timeToggle === t ? "text-[var(--text)]" : "text-[var(--muted)]"
                     }`}
@@ -1283,19 +1296,35 @@ export function TransitMap({ mode, onModeChange }: Props) {
                 ))}
               </div>
               <div className="flex items-center gap-1.5">
-                <input
-                  type={explore.timeToggle === "year" ? "number" : "date"}
-                  value={explore.histStart}
-                  onChange={(e) => setExplore((p) => ({ ...p, histStart: e.target.value }))}
-                  className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none ${explore.timeToggle === "year" ? "w-16" : "w-28"}`}
-                />
-                <span className="text-[var(--muted)] text-[10px]">→</span>
-                <input
-                  type={explore.timeToggle === "year" ? "number" : "date"}
-                  value={explore.histEnd}
-                  onChange={(e) => setExplore((p) => ({ ...p, histEnd: e.target.value }))}
-                  className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none ${explore.timeToggle === "year" ? "w-16" : "w-28"}`}
-                />
+                {explore.timeToggle === "year" ? (
+                  <input
+                    type="number"
+                    value={explore.histStart}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setExplore((p) => ({ ...p, histStart: val, histEnd: val }));
+                    }}
+                    min={2000}
+                    max={2099}
+                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-16"
+                  />
+                ) : (
+                  <>
+                    <input
+                      type="month"
+                      value={explore.histStart}
+                      onChange={(e) => setExplore((p) => ({ ...p, histStart: e.target.value }))}
+                      className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-28"
+                    />
+                    <span className="text-[var(--muted)] text-[10px]">→</span>
+                    <input
+                      type="month"
+                      value={explore.histEnd}
+                      onChange={(e) => setExplore((p) => ({ ...p, histEnd: e.target.value }))}
+                      className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-28"
+                    />
+                  </>
+                )}
               </div>
             </div>
           </div>

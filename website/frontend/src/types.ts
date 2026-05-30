@@ -2,7 +2,7 @@ export type Tab = "live" | "explorer";
 export type Mode = "streetcar" | "bus" | "subway";
 export type ViewMode = "overview" | "compare";
 export type Granularity = "year" | "month" | "date" | "datetime" | "quarter";
-export type TimeToggle = "year" | "date";
+export type TimeToggle = "year" | "month";
 export type Bucket = "hour" | "day" | "month" | "year";
 export type Direction = "EB" | "WB" | "NB" | "SB";
 

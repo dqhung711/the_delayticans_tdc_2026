@@ -16,18 +16,28 @@ export function chartTooltipStyle(theme: Theme) {
     contentStyle: {
       background: p.tooltipBg,
       border: `1px solid ${p.tooltipBorder}`,
-      borderRadius: "8px",
-      color: p.tooltipText,
+      borderRadius: "12px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      padding: "8px 12px",
       fontSize: "12px",
     },
-    labelStyle: { color: p.tooltipText, fontWeight: 600 },
-    itemStyle: { color: p.tick },
+    labelStyle: { 
+      color: p.tooltipText, 
+      fontWeight: 700,
+      marginBottom: "4px"
+    },
+    itemStyle: { 
+      padding: "2px 0",
+      fontSize: "11px",
+      fontWeight: 500
+    },
   };
 }
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  "Operator div.": "#e53935",
-  Mechanical: "#5b8def",
+  "Operator div.": "#dc2626",
+  Operator: "#dc2626",
+  Mechanical: "#3b82f6",
   Traffic: "#f59e0b",
   Passenger: "#fb923c",
   Other: "#94a3b8",
@@ -51,14 +61,14 @@ export const CHART_ANIMATION = {
 export function chartLegendProps(theme: Theme) {
   const p = chartPalette(theme);
   return {
-    verticalAlign: "bottom" as const,
-    align: "center" as const,
-    iconType: "line" as const,
-    iconSize: 10,
+    verticalAlign: "top" as const,
+    align: "left" as const,
+    iconType: "circle" as const,
+    iconSize: 8,
     wrapperStyle: {
       fontSize: "11px",
       color: p.tick,
-      paddingTop: "4px",
+      paddingBottom: "12px",
     },
   };
 }

@@ -17,20 +17,19 @@ export function ChartTypeSelect<T extends string>({
   ariaLabel = "Chart type",
 }: Props<T>) {
   return (
-    <label className="chart-select">
-      <span className="chart-select__label">View</span>
-      <select
-        className="chart-select__input"
-        value={value}
-        aria-label={ariaLabel}
-        onChange={(e) => onChange(e.target.value as T)}
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className="chart-type-tabs" role="radiogroup" aria-label={ariaLabel}>
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          role="radio"
+          aria-checked={value === opt.value}
+          className={`chart-type-tab ${value === opt.value ? "chart-type-tab--active" : ""}`}
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
   );
 }

@@ -14,12 +14,12 @@ export function chartPalette(theme: Theme) {
     };
   }
   return {
-    primary: "#c41e14",
-    secondary: "#e07a5f",
-    grid: "#e4e8ef",
-    tick: "#5a6478",
+    primary: "#dc2626",
+    secondary: "#fca5a5",
+    grid: "#f1f5f9",
+    tick: "#94a3b8",
     tooltipBg: "#ffffff",
-    tooltipBorder: "#d4d9e2",
-    tooltipText: "#0f1218",
+    tooltipBorder: "#e2e8f0",
+    tooltipText: "#0f172a",
   };
 }

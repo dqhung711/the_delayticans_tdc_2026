@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   Tooltip,
@@ -22,6 +21,7 @@ import {
   formatBucketTick,
 } from "../../lib/chartTheme";
 import type { Bucket, Mode } from "../../types";
+import { CustomChartLegend } from "./CustomChartLegend";
 import { ChartMilestoneLines, ChartXAxis, ChartYAxis } from "./ChartAxes";
 import { ChartPanel } from "./ChartPanel";
 import { ChartShell } from "./ChartShell";
@@ -37,6 +37,7 @@ interface Point {
 
 interface SeriesRow {
   bucket: string;
+  timestamp: number;
   year: string;
   label: string;
   delay_minutes: number;
@@ -72,43 +73,123 @@ export function TimeSeriesChart({
 }: Props) {
   const { theme } = useTheme();
   const baseTooltip = chartTooltipStyle(theme);
-  const legend = <Legend {...chartLegendProps(theme)} />;
   const isPrimary = primary ?? !compact;
   const plotHeight = compact ? CHART_HEIGHT_COMPACT : CHART_HEIGHT;
-  const hasData = data.length > 0;
-  const margin = CHART_MARGIN.withLegend;
+  const margin = { top: 10, right: 30, left: 10, bottom: 10 };
   const anim = CHART_ANIMATION;
   const colors = chartPalette(theme);
+  const legendItems = [
+    { label: "Delay minutes", color: colors.primary },
+    { label: "Gap minutes", color: colors.secondary, dashed: true },
+  ];
 
   const formatted = useMemo(() => {
-    const mapped: SeriesRow[] = data.map((d) => {
+    const raw = (data ?? []).map((d) => {
       const label = formatBucketTick(bucket, d.bucket);
+      let timestamp = 0;
+      try {
+        if (bucket === "year") {
+          timestamp = new Date(`${d.bucket}-01-01T00:00:00`).getTime();
+        } else if (bucket === "month") {
+          timestamp = new Date(`${d.bucket}-01T00:00:00`).getTime();
+        } else if (bucket === "day") {
+          timestamp = new Date(`${d.bucket}T00:00:00`).getTime();
+        } else {
+          // YYYY-MM-DD HH:00
+          const iso = d.bucket.includes(" ") 
+            ? d.bucket.replace(" ", "T") + ":00"
+            : d.bucket.includes("T") ? d.bucket : `${d.bucket}T00:00:00`;
+          timestamp = new Date(iso).getTime();
+        }
+      } catch (e) {
+        timestamp = 0;
+      }
+      if (isNaN(timestamp)) timestamp = 0;
+
       return {
         ...d,
+        timestamp,
         delay_minutes: Number(d.delay_minutes) || 0,
         gap_minutes: Number(d.gap_minutes) || 0,
         label,
         year: bucket === "year" ? label : label,
       };
     });
-    if (!shouldFillYears(bucket)) return mapped;
-    const parsedStart = parseInt(rangeStart.slice(0, 4), 10);
-    const parsedEnd = parseInt(rangeEnd.slice(0, 4), 10);
-    const fallback = yearRangeFromData(mapped);
-    const start = Number.isFinite(parsedStart) ? parsedStart : fallback.start;
-    const end = Number.isFinite(parsedEnd) ? parsedEnd : fallback.end;
-    return fillYearSeries(mapped, start, end);
+
+    if (shouldFillYears(bucket)) {
+      const parsedStart = parseInt(rangeStart.slice(0, 4), 10);
+      const parsedEnd = parseInt(rangeEnd.slice(0, 4), 10);
+      const fallback = yearRangeFromData(raw);
+      const start = Number.isFinite(parsedStart) ? parsedStart : fallback.start;
+      const end = Number.isFinite(parsedEnd) ? parsedEnd : fallback.end;
+      return fillYearSeries(raw, start, end).map(d => ({
+        ...d,
+        timestamp: new Date(`${d.bucket}-01-01T00:00:00`).getTime(),
+        label: formatBucketTick("year", d.bucket),
+        year: formatBucketTick("year", d.bucket)
+      }));
+    }
+
+    return raw.sort((a, b) => a.timestamp - b.timestamp);
   }, [data, bucket, rangeStart, rangeEnd]);
 
-  const xKey = bucket === "year" ? "year" : "label";
+  const hasData = formatted.length > 0;
 
   const yTicks = useMemo(() => {
+    if (!hasData) return milestoneTicks(0);
     const max = Math.max(
       0,
       ...formatted.map((d) => Math.max(d.delay_minutes, d.gap_minutes)),
     );
     return milestoneTicks(max);
-  }, [formatted]);
+  }, [formatted, hasData]);
+
+  const xTicks = useMemo(() => {
+    if (!hasData) return [];
+    const start = formatted[0].timestamp;
+    const end = formatted[formatted.length - 1].timestamp;
+    const diff = end - start;
+
+    const ticks: number[] = [];
+    const oneHour = 60 * 60 * 1000;
+    const oneDay = 24 * oneHour;
+    const oneMonth = 30 * oneDay;
+    const oneYear = 365 * oneDay;
+
+    if (diff <= oneDay * 2) {
+      for (let t = start; t <= end; t += 4 * oneHour) ticks.push(t);
+    } else if (diff <= oneDay * 14) {
+      for (let t = start; t <= end; t += oneDay) ticks.push(t);
+    } else if (diff <= oneMonth * 6) {
+      for (let t = start; t <= end; t += 14 * oneDay) ticks.push(t);
+    } else if (diff <= oneYear * 2) {
+      for (let t = start; t <= end; t += oneMonth) ticks.push(t);
+    } else {
+      for (let t = start; t <= end; t += oneYear) ticks.push(t);
+    }
+    return ticks;
+  }, [formatted, hasData]);
+
+  const formatXAxis = (ts: number) => {
+    const d = new Date(ts);
+    const start = formatted[0]?.timestamp || 0;
+    const end = formatted[formatted.length - 1]?.timestamp || 0;
+    const diff = end - start;
+
+    const oneDay = 24 * 60 * 60 * 1000;
+    const oneMonth = 30 * oneDay;
+
+    if (diff <= oneDay * 2) {
+      return d.toLocaleTimeString([], { hour: 'numeric', hour12: true });
+    }
+    if (diff <= oneMonth * 3) {
+      return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+    if (diff <= oneMonth * 24) {
+      return d.toLocaleDateString([], { month: 'short', year: '2-digit' });
+    }
+    return d.getFullYear().toString();
+  };
 
   const yMax = yTicks.length ? yTicks[yTicks.length - 1] : undefined;
   const xLabel = bucketAxisLabel(bucket);
@@ -125,7 +206,15 @@ export function TimeSeriesChart({
     <>
       <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} vertical={false} />
       <ChartMilestoneLines theme={theme} ticks={yTicks} />
-      <ChartXAxis theme={theme} dataKey={xKey} type="category" height={48} />
+      <ChartXAxis 
+        theme={theme} 
+        dataKey="timestamp" 
+        type="number" 
+        height={48} 
+        domain={['dataMin', 'dataMax']}
+        ticks={xTicks}
+        tickFormatter={formatXAxis}
+      />
       <ChartYAxis theme={theme} ticks={yTicks} yMax={yMax} width={68} />
     </>
   );
@@ -134,15 +223,14 @@ export function TimeSeriesChart({
     <LineChart width={width} height={chartHeight} data={formatted} margin={margin}>
       {axes}
       <Tooltip {...baseTooltip} labelFormatter={tooltipLabelFormatter} />
-      {legend}
       <Line
         type="monotone"
         dataKey="delay_minutes"
         name={delayName}
         stroke={colors.primary}
         strokeWidth={2.5}
-        dot={{ r: 4, fill: colors.primary, strokeWidth: 0 }}
-        activeDot={{ r: 6 }}
+        dot={{ r: 3, fill: colors.primary, strokeWidth: 0 }}
+        activeDot={{ r: 5 }}
         {...anim}
       />
       <Line
@@ -151,8 +239,8 @@ export function TimeSeriesChart({
         name={gapName}
         stroke={colors.secondary}
         strokeWidth={2}
-        strokeDasharray="6 4"
-        dot={{ r: 3, fill: colors.secondary, strokeWidth: 0 }}
+        strokeDasharray="4 4"
+        dot={false}
         {...anim}
       />
     </LineChart>
@@ -167,11 +255,7 @@ export function TimeSeriesChart({
       primary={isPrimary}
       fluid
       empty={!hasData}
-      emptyMessage={
-        showDevUI
-          ? "No delay data. Run: cd website && npm run ingest"
-          : "No delay data matches your filters. Try a wider year range or different directions."
-      }
+      legend={<CustomChartLegend items={legendItems} />}
       className="main-chart-panel chart-enter"
     >
       <ChartShell

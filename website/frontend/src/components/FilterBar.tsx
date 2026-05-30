@@ -12,8 +12,8 @@ interface FilterBarProps {
   onViewChange: (view: ViewMode) => void;
   granularity: Granularity;
   onGranularityChange: (g: Granularity) => void;
-  timeToggle: "year" | "date";
-  onTimeToggleChange: (t: "year" | "date") => void;
+  timeToggle: "year" | "month";
+  onTimeToggleChange: (t: "year" | "month") => void;
   start: string;
   end: string;
   onStartChange: (v: string) => void;
@@ -160,13 +160,10 @@ export function FilterBar({
           <div className="flex items-center gap-4">
             {/* Year / Date toggle */}
             <div className="flex items-center gap-3">
-              {(["year", "date"] as const).map((t) => (
+              {(["year", "month"] as const).map((t) => (
                 <button
                   key={t}
-                  onClick={() => {
-                    onTimeToggleChange(t);
-                    onGranularityChange(t === "year" ? "year" : granularity === "year" ? "date" : granularity);
-                  }}
+                  onClick={() => onTimeToggleChange(t)}
                   className={`relative text-xs font-medium pb-0.5 transition-all ${
                     timeToggle === t
                       ? "text-[var(--text)] font-bold"
@@ -182,29 +179,38 @@ export function FilterBar({
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type={timeToggle === "year" ? "number" : "date"}
-                value={start}
-                onChange={(e) => onStartChange(e.target.value)}
-                min={timeToggle === "year" ? 2000 : undefined}
-                max={timeToggle === "year" ? 2099 : undefined}
-                className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none ${
-                  timeToggle === "year" ? "w-16" : "w-32"
-                }`}
-                style={{ colorScheme: "dark" }}
-              />
-              <span className="text-[var(--muted)] font-medium text-xs">→</span>
-              <input
-                type={timeToggle === "year" ? "number" : "date"}
-                value={end}
-                onChange={(e) => onEndChange(e.target.value)}
-                min={timeToggle === "year" ? 2000 : undefined}
-                max={timeToggle === "year" ? 2099 : undefined}
-                className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none ${
-                  timeToggle === "year" ? "w-16" : "w-32"
-                }`}
-                style={{ colorScheme: "dark" }}
-              />
+              {timeToggle === "year" ? (
+                <input
+                  type="number"
+                  value={start}
+                  onChange={(e) => {
+                    onStartChange(e.target.value);
+                    onEndChange(e.target.value);
+                  }}
+                  min={2000}
+                  max={2099}
+                  className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-16"
+                  style={{ colorScheme: "dark" }}
+                />
+              ) : (
+                <>
+                  <input
+                    type="month"
+                    value={start}
+                    onChange={(e) => onStartChange(e.target.value)}
+                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-32"
+                    style={{ colorScheme: "dark" }}
+                  />
+                  <span className="text-[var(--muted)] font-medium text-xs">→</span>
+                  <input
+                    type="month"
+                    value={end}
+                    onChange={(e) => onEndChange(e.target.value)}
+                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-32"
+                    style={{ colorScheme: "dark" }}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>

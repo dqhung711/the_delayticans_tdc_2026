@@ -45,7 +45,12 @@ export function ChartXAxis({
   ticks,
 }: XProps) {
   const p = chartPalette(theme);
-  const tick = { ...(tickSmall ? chartTickSmall(theme) : chartTick(theme)), fill: p.tick };
+  const tick = { 
+    ...(tickSmall ? chartTickSmall(theme) : chartTick(theme)), 
+    fill: p.tick,
+    fontSize: 10,
+    fontWeight: 500
+  };
   return (
     <XAxis
       dataKey={dataKey}
@@ -55,11 +60,11 @@ export function ChartXAxis({
       interval={ticks ? 0 : interval}
       minTickGap={0}
       angle={angle}
-      textAnchor={textAnchor}
-      height={height ?? 52}
+      textAnchor={textAnchor ?? "middle"}
+      height={height ?? 40}
       tickFormatter={tickFormatter}
-      tickLine={{ stroke: p.tick }}
-      axisLine={{ stroke: p.tick }}
+      tickLine={{ stroke: p.grid, strokeWidth: 1 }}
+      axisLine={{ stroke: p.grid, strokeWidth: 1 }}
       dy={8}
     />
   );
@@ -67,7 +72,7 @@ export function ChartXAxis({
 
 export function ChartYAxis({
   theme,
-  width = 64,
+  width = 56,
   type,
   dataKey,
   tickFormatter = formatDelayTick,
@@ -75,7 +80,12 @@ export function ChartYAxis({
   yMax,
 }: YProps) {
   const p = chartPalette(theme);
-  const tick = { ...chartTick(theme), fill: p.tick };
+  const tick = { 
+    ...chartTick(theme), 
+    fill: p.tick,
+    fontSize: 10,
+    fontWeight: 500
+  };
   const top = yMax ?? (ticks?.length ? ticks[ticks.length - 1] : undefined);
 
   return (
@@ -88,8 +98,8 @@ export function ChartYAxis({
       domain={top != null ? [0, top] : [0, "auto"]}
       allowDecimals={false}
       tickFormatter={tickFormatter}
-      tickLine={{ stroke: p.tick }}
-      axisLine={{ stroke: p.tick }}
+      tickLine={{ stroke: p.grid, strokeWidth: 1 }}
+      axisLine={{ stroke: p.grid, strokeWidth: 1 }}
       dx={-4}
     />
   );

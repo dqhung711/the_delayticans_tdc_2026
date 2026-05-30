@@ -28,7 +28,7 @@ interface Props {
 export function DataExplorer({ mode, meta, onModeChange }: Props) {
   const [view, setView] = useState<ViewMode>("overview");
   const [granularity, setGranularity] = useState<Granularity>("year");
-  const [timeToggle, setTimeToggle] = useState<"year" | "date">("year");
+  const [timeToggle, setTimeToggle] = useState<"year" | "month">("year");
   const [start, setStart] = useState("2014");
   const [end, setEnd] = useState(String(meta?.overall.max_year ?? 2026));
   const [directions, setDirections] = useState<Direction[]>([]);
@@ -123,6 +123,20 @@ export function DataExplorer({ mode, meta, onModeChange }: Props) {
     }));
   }, [charts]);
 
+  const onTimeToggleChange = (t: "year" | "month") => {
+    setTimeToggle(t);
+    setGranularity(t === "year" ? "year" : granularity === "year" ? "month" : granularity);
+    if (t === "year") {
+      const y = start.includes("-") ? start.slice(0, 4) : start;
+      setStart(y);
+      setEnd(y);
+    } else {
+      const y = start.length === 4 ? start : start.slice(0, 4);
+      setStart(`${y}-01`);
+      setEnd(`${y}-12`);
+    }
+  };
+
   return (
     <div className="page-enter explorer-layout">
       <FilterBar
@@ -131,7 +145,7 @@ export function DataExplorer({ mode, meta, onModeChange }: Props) {
         granularity={granularity}
         onGranularityChange={setGranularity}
         timeToggle={timeToggle}
-        onTimeToggleChange={setTimeToggle}
+        onTimeToggleChange={onTimeToggleChange}
         start={start}
         end={end}
         onStartChange={setStart}
@@ -184,10 +198,10 @@ export function DataExplorer({ mode, meta, onModeChange }: Props) {
           )}
 
           {charts && !charts.compare && view === "overview" && (
-            <div className="explorer-charts-row">
-              <HourlyTotalsChart data={charts.hourlyTotals} mode={mode} />
-              <CategoryChart data={charts.categories} mode={mode} />
-              <HourlyStackedChart rows={charts.hourlyByCategory} mode={mode} />
+            <div className="explorer-charts-grid">
+              <HourlyTotalsChart data={charts.hourlyTotals ?? []} mode={mode} />
+              <CategoryChart data={charts.categories ?? []} mode={mode} />
+              <HourlyStackedChart rows={charts.hourlyByCategory ?? []} mode={mode} />
             </div>
           )}
         </div>
@@ -216,10 +230,10 @@ export function DataExplorer({ mode, meta, onModeChange }: Props) {
                   rangeEnd={period.interval.end.slice(0, 4)}
                 />
               </section>
-              <div className="explorer-charts-row">
-                <HourlyTotalsChart data={period.hourlyTotals} compact />
-                <CategoryChart data={period.categories} compact />
-                <HourlyStackedChart rows={period.hourlyByCategory} compact />
+              <div className="explorer-charts-grid">
+                <HourlyTotalsChart data={period.hourlyTotals ?? []} compact />
+                <CategoryChart data={period.categories ?? []} compact />
+                <HourlyStackedChart rows={period.hourlyByCategory ?? []} compact />
               </div>
             </section>
           ))}

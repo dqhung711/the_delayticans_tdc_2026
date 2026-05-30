@@ -22,6 +22,7 @@ import {
   modeLabel,
 } from "../../lib/chartTheme";
 import type { Mode } from "../../types";
+import { CustomChartLegend } from "./CustomChartLegend";
 import { ChartMilestoneLines, ChartXAxis, ChartYAxis } from "./ChartAxes";
 import { ChartPanel } from "./ChartPanel";
 import { ChartShell } from "./ChartShell";
@@ -64,12 +65,17 @@ export function HourlyTotalsChart({ data, title, compact, mode = "bus" }: Props)
   const anim = CHART_ANIMATION;
   const plotHeight = compact ? 200 : 240;
 
+  const legendItems = [
+    { label: "Delay minutes", color: colors.primary },
+    { label: "Gap minutes", color: colors.secondary },
+  ];
+
   const formatted = useMemo(() => {
     const byHour = new Map<number, Point>();
     for (let h = 0; h < 24; h += 1) {
       byHour.set(h, { hour: h, delay_minutes: 0, gap_minutes: 0 });
     }
-    for (const row of data) {
+    for (const row of data ?? []) {
       byHour.set(row.hour, {
         hour: row.hour,
         delay_minutes: Number(row.delay_minutes) || 0,
@@ -108,7 +114,6 @@ export function HourlyTotalsChart({ data, title, compact, mode = "bus" }: Props)
         <AreaChart width={width} height={h} data={formatted} margin={margin}>
           {axes}
           <Tooltip {...tooltipProps} />
-          {legend}
           <Area type="monotone" dataKey="delay_minutes" name="Delay minutes" stroke={colors.primary} fill={colors.primary} fillOpacity={0.2} strokeWidth={2} {...anim} />
           <Area type="monotone" dataKey="gap_minutes" name="Gap minutes" stroke={colors.secondary} fill={colors.secondary} fillOpacity={0.1} strokeWidth={2} {...anim} />
         </AreaChart>
@@ -119,7 +124,6 @@ export function HourlyTotalsChart({ data, title, compact, mode = "bus" }: Props)
         <LineChart width={width} height={h} data={formatted} margin={margin}>
           {axes}
           <Tooltip {...tooltipProps} />
-          {legend}
           <Line type="monotone" dataKey="delay_minutes" name="Delay minutes" stroke={colors.primary} strokeWidth={2} dot={false} {...anim} />
           <Line type="monotone" dataKey="gap_minutes" name="Gap minutes" stroke={colors.secondary} strokeWidth={2} dot={false} strokeDasharray="5 3" {...anim} />
         </LineChart>
@@ -129,7 +133,6 @@ export function HourlyTotalsChart({ data, title, compact, mode = "bus" }: Props)
       <BarChart width={width} height={h} data={formatted} margin={margin}>
         {axes}
         <Tooltip {...tooltipProps} />
-        {legend}
         <Bar dataKey="delay_minutes" name="Delay minutes" fill={colors.primary} radius={[2, 2, 0, 0]} {...anim} />
         <Bar dataKey="gap_minutes" name="Gap minutes" fill={colors.secondary} radius={[2, 2, 0, 0]} {...anim} />
       </BarChart>
@@ -146,6 +149,7 @@ export function HourlyTotalsChart({ data, title, compact, mode = "bus" }: Props)
       compact={compact}
       fluid
       empty={!hasData}
+      legend={<CustomChartLegend items={legendItems} />}
       className="explorer-chart-cell"
     >
       <ChartShell xAxisLabel={xLabel} yAxisLabel={yLabel} height={plotHeight} empty={!hasData}>

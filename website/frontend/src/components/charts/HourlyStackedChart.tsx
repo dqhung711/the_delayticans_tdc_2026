@@ -21,6 +21,7 @@ import {
   stackedHourlyYLabel,
 } from "../../lib/chartTheme";
 import type { Mode } from "../../types";
+import { CustomChartLegend } from "./CustomChartLegend";
 import { ChartMilestoneLines, ChartXAxis, ChartYAxis } from "./ChartAxes";
 import { ChartPanel } from "./ChartPanel";
 import { ChartShell } from "./ChartShell";
@@ -28,9 +29,8 @@ import { ChartShell } from "./ChartShell";
 export type StackedChartType = "stacked" | "grouped" | "line";
 
 const CHART_OPTIONS = [
-  { value: "stacked" as const, label: "Stacked bars" },
-  { value: "grouped" as const, label: "Grouped bars" },
-  { value: "line" as const, label: "Line (by category)" },
+  { value: "stacked" as const, label: "Stacked" },
+  { value: "line" as const, label: "Line" },
 ];
 
 interface Row {
@@ -47,10 +47,10 @@ interface Props {
 }
 
 function formatHour(h: number): string {
-  if (h === 0) return "12a";
-  if (h === 12) return "12p";
-  if (h < 12) return `${h}a`;
-  return `${h - 12}p`;
+  if (h === 0) return "12 AM";
+  if (h === 12) return "12 PM";
+  if (h < 12) return `${h} AM`;
+  return `${h - 12} PM`;
 }
 
 export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props) {
@@ -59,24 +59,31 @@ export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props
   const colors = chartPalette(theme);
   const tooltipProps = chartTooltipStyle(theme);
   const legend = <Legend {...chartLegendProps(theme)} />;
-  const margin = CHART_MARGIN.withLegend;
+  const margin = { top: 10, right: 30, left: 10, bottom: 10 };
   const anim = CHART_ANIMATION;
   const plotHeight = compact ? 200 : 240;
 
   const { data, categories } = useMemo(() => {
-    const cats = [...new Set(rows.map((r) => r.category))];
+    const cats = [...new Set((rows ?? []).map((r) => r.category))];
     const byHour = new Map<number, Record<string, number | string>>();
     for (let h = 0; h < 24; h += 1) {
       const entry: Record<string, number | string> = { hour: h, label: formatHour(h) };
       for (const cat of cats) entry[cat] = 0;
       byHour.set(h, entry);
     }
-    for (const row of rows) {
+    for (const row of rows ?? []) {
       const entry = byHour.get(row.hour);
       if (entry) entry[row.category] = row.delay_minutes;
     }
     return { data: [...byHour.values()], categories: cats };
   }, [rows]);
+
+  const legendItems = useMemo(() => {
+    return categories.map(cat => ({
+      label: cat,
+      color: CATEGORY_COLORS[cat] ?? "#94a3b8"
+    }));
+  }, [categories]);
 
   const stackId = chartType === "stacked" ? "a" : undefined;
   const hasData = rows.length > 0;
@@ -101,7 +108,12 @@ export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props
     <>
       <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} vertical={false} />
       <ChartMilestoneLines theme={theme} ticks={yTicks} />
-      <ChartXAxis theme={theme} tickSmall interval={2} />
+      <ChartXAxis 
+        theme={theme} 
+        tickSmall 
+        interval={0} 
+        ticks={["6 AM", "12 PM", "6 PM", "11 PM"]}
+      />
       <ChartYAxis
         theme={theme}
         ticks={yTicks}
@@ -116,7 +128,6 @@ export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props
       <LineChart width={width} height={h} data={data} margin={margin}>
         {axes}
         <Tooltip {...tooltipProps} />
-        {legend}
         {categories.map((cat) => (
           <Line
             key={cat}
@@ -134,7 +145,6 @@ export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props
       <BarChart width={width} height={h} data={data} margin={margin}>
         {axes}
         <Tooltip {...tooltipProps} />
-        {legend}
         {categories.map((cat) => (
           <Bar
             key={cat}
@@ -142,7 +152,7 @@ export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props
             name={cat}
             stackId={stackId}
             fill={CATEGORY_COLORS[cat] ?? "#94a3b8"}
-            radius={chartType === "grouped" ? [2, 2, 0, 0] : undefined}
+            radius={chartType === "stacked" ? [0, 0, 0, 0] : [2, 2, 0, 0]}
             {...anim}
           />
         ))}
@@ -159,6 +169,7 @@ export function HourlyStackedChart({ rows, title, compact, mode = "bus" }: Props
       compact={compact}
       fluid
       empty={!hasData}
+      legend={<CustomChartLegend items={legendItems} />}
       className="explorer-chart-cell"
     >
       <ChartShell xAxisLabel={xLabel} yAxisLabel={yLabel} height={plotHeight} empty={!hasData}>
