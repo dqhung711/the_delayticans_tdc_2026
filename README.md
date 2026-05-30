@@ -37,6 +37,52 @@ Historical figures come from archived TTC delay reports. Live information reflec
 
 **Data Sources Statement** (datasets, licences, no PII): [data-license/README.md](data-license/README.md).
 
+## Run locally
+
+**Requirements:** [Node.js](https://nodejs.org/) 18+ and Python 3 (macOS/Linux/Windows).
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/dqhung711/the_delayticans_tdc_2026.git
+   cd the_delayticans_tdc_2026/website
+   ```
+
+2. **First-time setup** (installs dependencies, creates a Python virtual environment, and unpacks the historical database from `data/delays.db.gz`)
+
+   ```bash
+   npm run setup
+   ```
+
+3. **Start the app**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Open in your browser**
+
+   | URL | What it is |
+   |-----|------------|
+   | **http://localhost:5173** | Web app (use this) |
+   | http://localhost:8000 | API only (health check: `/api/health`) |
+
+   Stop the servers with `Ctrl+C` in the terminal.
+
+### Optional
+
+- **AI chat (local):** create `website/api/.env` with `GEMINI_API_KEY=your-key` (see [Google AI Studio](https://aistudio.google.com/apikey)).
+- **Production-style run** (single port, UI + API together):
+
+  ```bash
+  npm run build
+  npm run start
+  ```
+
+  Then open **http://localhost:8000**.
+
+More detail: [website/README.md](website/README.md).
+
 ## Team
 
 Built for **TDC 2026** by The Delayticans.
