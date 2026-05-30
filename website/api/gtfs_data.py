@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 
@@ -18,6 +19,23 @@ _shapes_bytes: dict[str, tuple[bytes, str, bool]] = {}
 _shape_file_mtimes: dict[str, float] = {}
 _stops_cache: dict | None = None
 _stops_bytes: tuple[bytes, str] | None = None
+_stops_file_mtime: float = 0.0
+
+
+def _load_stops_from_disk() -> dict:
+    """Load stops.geojson; reload when the file changes on disk."""
+    global _stops_cache, _stops_bytes, _stops_file_mtime
+    if not STOPS_GEOJSON_PATH.exists():
+        _stops_cache = {"type": "FeatureCollection", "features": []}
+        _stops_file_mtime = 0.0
+        return _stops_cache
+    mtime = STOPS_GEOJSON_PATH.stat().st_mtime
+    if _stops_cache is not None and _stops_file_mtime == mtime:
+        return _stops_cache
+    _stops_cache = filter_stops_geojson(json.loads(STOPS_GEOJSON_PATH.read_text()))
+    _stops_file_mtime = mtime
+    _stops_bytes = None
+    return _stops_cache
 
 # City of Toronto — keep in sync with frontend/src/lib/torontoBounds.ts
 TORONTO_LON_MIN, TORONTO_LON_MAX = -79.639, -79.115
@@ -122,9 +140,11 @@ def get_route_shapes_geojson(mode: str | None = None) -> dict:
 def warm_map_payloads() -> None:
     """Pre-load and serialize map GeoJSON once at startup for fast responses."""
     global _stops_bytes
+    warm_location_geocoder()
     for mode in ("bus", "streetcar"):
         get_route_shapes_response(mode)
 
+    _load_stops_from_disk()
     stops = get_stops_geojson()
     if STOPS_GEOJSON_PATH.exists():
         etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"'
@@ -187,19 +207,14 @@ def get_stops_response(mode: str | None = None) -> tuple[bytes, str] | None:
 
 
 def get_stops_geojson(mode: str | None = None) -> dict:
-    global _stops_cache
-    if _stops_cache is None:
-        if not STOPS_GEOJSON_PATH.exists():
-            _stops_cache = {"type": "FeatureCollection", "features": []}
-        else:
-            _stops_cache = filter_stops_geojson(json.loads(STOPS_GEOJSON_PATH.read_text()))
+    data = _load_stops_from_disk()
 
     if not mode or mode not in ("bus", "streetcar"):
-        return _stops_cache
+        return data
 
     features = [
         f
-        for f in _stops_cache.get("features", [])
+        for f in data.get("features", [])
         if mode
         in (f.get("properties") or {}).get(
             "modes", [(f.get("properties") or {}).get("mode")]
@@ -225,6 +240,37 @@ def lookup_stop(stop_id: str) -> tuple[float, float] | None:
     return float(entry["lon"]), float(entry["lat"])
 
 
+_STOP_TOKEN_INDEX: dict[str, list[tuple[float, float, str]]] | None = None
+
+
+def _build_stop_token_index() -> dict[str, list[tuple[float, float, str]]]:
+    """Word → stops on that street; speeds up intersection / corridor geocoding."""
+    index: dict[str, list[tuple[float, float, str]]] = defaultdict(list)
+    lookup = get_stops_lookup()
+    for name, entry in lookup.items():
+        if len(name) < 5 or "lat" not in entry:
+            continue
+        lon, lat = float(entry["lon"]), float(entry["lat"])
+        if not in_toronto_bbox(lon, lat):
+            continue
+        for token in set(re.findall(r"[a-z0-9']{3,}", name)):
+            index[token].append((lon, lat, name))
+    return dict(index)
+
+
+def _stop_token_index() -> dict[str, list[tuple[float, float, str]]]:
+    global _STOP_TOKEN_INDEX
+    if _STOP_TOKEN_INDEX is None:
+        _STOP_TOKEN_INDEX = _build_stop_token_index()
+    return _STOP_TOKEN_INDEX
+
+
+def warm_location_geocoder() -> None:
+    """Build stop token index once for fast heatmap geocoding."""
+    _stop_token_index()
+
+
+@lru_cache(maxsize=8192)
 def lookup_stop_name(text: str) -> tuple[float, float] | None:
     key = text.strip().lower()
     if not key:
@@ -285,15 +331,13 @@ def lookup_intersection(text: str) -> tuple[float, float] | None:
     streets = _street_tokens(text)
     if len(streets) < 2:
         return None
-    lookup = get_stops_lookup()
+    index = _stop_token_index()
+    candidates = index.get(streets[0], [])
+    if not candidates:
+        return None
     points: list[tuple[float, float]] = []
-    for name, entry in lookup.items():
-        if len(name) < 6 or "lat" not in entry:
-            continue
+    for lon, lat, name in candidates:
         if not all(_street_matches_stop_name(name, s) for s in streets[:2]):
-            continue
-        lon, lat = float(entry["lon"]), float(entry["lat"])
-        if not in_toronto_bbox(lon, lat):
             continue
         points.append((lon, lat))
     return _median_centroid(points)
@@ -304,20 +348,16 @@ def lookup_street_corridor(text: str) -> tuple[float, float] | None:
     if len(streets) != 1:
         return None
     street = streets[0]
-    lookup = get_stops_lookup()
-    points: list[tuple[float, float]] = []
-    for name, entry in lookup.items():
-        if len(name) < 5 or "lat" not in entry:
-            continue
-        if not _street_matches_stop_name(name, street):
-            continue
-        lon, lat = float(entry["lon"]), float(entry["lat"])
-        if not in_toronto_bbox(lon, lat):
-            continue
-        points.append((lon, lat))
+    index = _stop_token_index()
+    points = [
+        (lon, lat)
+        for lon, lat, name in index.get(street, [])
+        if _street_matches_stop_name(name, street)
+    ]
     return _median_centroid(points)
 
 
+@lru_cache(maxsize=8192)
 def lookup_delay_location(text: str) -> tuple[float, float] | None:
     """Resolve delay CSV Location to coordinates using GTFS stop names."""
     if not (text or "").strip():

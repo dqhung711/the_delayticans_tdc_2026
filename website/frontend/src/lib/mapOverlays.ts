@@ -3,27 +3,26 @@ import type { LiveAdvisory } from "../types";
 
 export const STOPS_SOURCE = "ttc-stops";
 export const STOPS_LAYER = "ttc-stops-circle";
-export const SHELTERS_SOURCE = "ttc-shelters";
-export const SHELTERS_LAYER = "ttc-shelters-circle";
+export const ACCESSIBLE_STOPS_SOURCE = "ttc-accessible-stops";
+export const ACCESSIBLE_STOPS_LAYER = "ttc-accessible-stops-circle";
 export const CONSTRUCTION_SOURCE = "construction-advisories";
 export const CONSTRUCTION_LAYER = "construction-circle";
 
-const SHELTER_NAME =
-  /station|loop|terminal|platform|carhouse|shelter|gate|car house|car barn/i;
+/** GTFS wheelchair_boarding: 1 = step-free boarding available. */
+export const WHEELCHAIR_ACCESSIBLE = 1;
 
 const CONSTRUCTION_TEXT =
   /construction|detour|bypass|roadwork|road work|lane closure|track work|watermain|water main|paving|repair/i;
 
-export function isShelterStop(name: string): boolean {
-  return SHELTER_NAME.test(name);
+export function isAccessibleStop(feature: GeoJSON.Feature): boolean {
+  const boarding = Number(feature.properties?.wheelchair_boarding ?? 0);
+  return boarding === WHEELCHAIR_ACCESSIBLE;
 }
 
-export function shelterFeatures(
+export function accessibleStopFeatures(
   collection: GeoJSON.FeatureCollection,
 ): GeoJSON.FeatureCollection {
-  const features = collection.features.filter((f) =>
-    isShelterStop(String(f.properties?.name ?? "")),
-  );
+  const features = collection.features.filter(isAccessibleStop);
   return { type: "FeatureCollection", features };
 }
 
@@ -62,4 +61,13 @@ export function setOverlayVisibility(
 ): void {
   if (!map.getLayer(layerId)) return;
   map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+}
+
+export function accessibleStopLabel(feature: GeoJSON.Feature): string {
+  const name = String(feature.properties?.name ?? "Stop");
+  const boarding = Number(feature.properties?.wheelchair_boarding ?? 0);
+  if (boarding === WHEELCHAIR_ACCESSIBLE) {
+    return `${name} — step-free boarding`;
+  }
+  return name;
 }

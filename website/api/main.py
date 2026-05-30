@@ -1,3 +1,4 @@
+import gzip
 import json
 from pathlib import Path
 
@@ -36,7 +37,13 @@ scheduler = AsyncIOScheduler()
 async def startup() -> None:
     try:
         warm_map_payloads()
-        print("Warmed map route-shape and stop payloads")
+        db.warm_delay_hotspots()
+        acc = sum(
+            1
+            for f in get_stops_geojson("bus").get("features", [])
+            if (f.get("properties") or {}).get("wheelchair_boarding") == 1
+        )
+        print(f"Warmed map payloads and delay hotspots ({acc} accessible bus stops)")
     except Exception as exc:
         print(f"Map payload warm failed: {exc}")
 
@@ -161,8 +168,9 @@ def route_shapes(response: Response, mode: str | None = None):
         response.headers["Cache-Control"] = "public, max-age=86400, immutable"
         response.headers["ETag"] = etag
         if precompressed:
-            response.headers["Content-Encoding"] = "gzip"
-            response.headers["Vary"] = "Accept-Encoding"
+            # Serve plain JSON — GZipMiddleware compresses on the wire.
+            # Raw .gz bytes break fetch().json() when Content-Encoding is stripped.
+            body = gzip.decompress(body)
         return Response(content=body, media_type="application/json")
     return get_route_shapes_geojson(mode)
 

@@ -513,11 +513,17 @@ def write_stops_from_zip(content: bytes, db_route_modes: dict[str, str]) -> tupl
             continue
         modes = sorted(stop_modes.get(stop_id, {"bus"}))
         primary_mode = "streetcar" if "streetcar" in modes else modes[0] if modes else "bus"
+        wheelchair_raw = (row.get("wheelchair_boarding") or "").strip()
+        try:
+            wheelchair_boarding = int(wheelchair_raw) if wheelchair_raw else 0
+        except ValueError:
+            wheelchair_boarding = 0
         stop_lookup[stop_id] = {
             "lat": round(lat, MAP_COORD_DECIMALS_STREETCAR),
             "lon": round(lon, MAP_COORD_DECIMALS_STREETCAR),
             "name": name,
             "modes": modes,
+            "wheelchair_boarding": wheelchair_boarding,
         }
         stop_lookup[name.lower()] = stop_lookup[stop_id]
         stop_features.append(
@@ -528,6 +534,7 @@ def write_stops_from_zip(content: bytes, db_route_modes: dict[str, str]) -> tupl
                     "name": name,
                     "mode": primary_mode,
                     "modes": modes,
+                    "wheelchair_boarding": wheelchair_boarding,
                 },
                 "geometry": {
                     "type": "Point",

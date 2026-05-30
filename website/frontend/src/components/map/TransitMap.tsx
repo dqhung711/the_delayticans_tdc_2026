@@ -2,9 +2,13 @@ import maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchDelayHotspots,
+  getCachedDelayHotspots,
+  prefetchDelayHotspots,
   fetchLive,
   refreshLive,
   fetchMapStops,
+  clearMapStopsCache,
+  clearRouteShapesCache,
   fetchRouteDelays,
   fetchRouteDetail,
   fetchRouteShapes,
@@ -13,16 +17,17 @@ import {
   type RouteDetail,
 } from "../../api";
 import { useTheme } from "../../context/ThemeContext";
+import { useAccessibility } from "../../context/AccessibilityContext";
 import { showDevUI } from "../../lib/appConfig";
+import { getHeatmapColorRamp, getModeColors, routeLineColor, type ColorblindType } from "../../lib/colorPalettes";
+import { ACCESSIBLE_STOP_ICON, ensureAccessibleStopIcon } from "../../lib/accessibleStopIcon";
 import { geocodeAddress, searchAddresses, type GeocodeResult } from "../../lib/geoUtils";
 import {
   BASEMAP,
   MAP_ALIGNED_MARKER,
   MAP_EASE_MS,
   MAP_FOCUS_CLEAR_ZOOM,
-  HEATMAP_RED_COLOR_RAMP,
   MAP_SMOOTH_OPTIONS,
-  MODE_COLORS,
   normalizeRouteId,
   pitchForZoom,
   ROUTE_LINE_OPACITY_EXPR,
@@ -35,12 +40,14 @@ import {
 } from "../../lib/mapStyles";
 import { selectMapRouteFeatures } from "../../lib/routeNetworkFilter";
 import {
+  ACCESSIBLE_STOPS_LAYER,
+  ACCESSIBLE_STOPS_SOURCE,
+  accessibleStopFeatures,
+  accessibleStopLabel,
   CONSTRUCTION_LAYER,
   CONSTRUCTION_SOURCE,
   constructionAdvisoriesToGeoJSON,
   setOverlayVisibility,
-  SHELTERS_LAYER,
-  SHELTERS_SOURCE,
   STOPS_LAYER,
   STOPS_SOURCE,
 } from "../../lib/mapOverlays";
@@ -96,10 +103,27 @@ function advisoryCoords(advisory: LiveAdvisory): [number, number] | null {
   return null;
 }
 
+function routeColorFromShapes(
+  route: string,
+  shapes: GeoJSON.FeatureCollection | null,
+): string | undefined {
+  if (!shapes?.features.length) return undefined;
+  const norm = normalizeRouteId(route);
+  const feat = shapes.features.find((f) => {
+    const r = String(f.properties?.route ?? "");
+    return r === route || normalizeRouteId(r) === norm;
+  });
+  const color = feat?.properties?.color;
+  return color != null ? String(color) : undefined;
+}
+
 function advisoriesToGeoJSON(
   advisories: LiveAdvisory[],
   focusedRoutes: string[],
+  colorblindType: ColorblindType,
+  shapes: GeoJSON.FeatureCollection | null,
 ): GeoJSON.FeatureCollection {
+  const modeColors = getModeColors(colorblindType);
   const focusSet = new Set(focusedRoutes.map(normalizeRouteId));
   const focusActive = focusSet.size > 0;
   const features: GeoJSON.Feature[] = [];
@@ -108,12 +132,17 @@ function advisoriesToGeoJSON(
     if (!coords) continue;
     if (!inTorontoBbox(coords[0], coords[1])) continue;
     const modeKey =
-      advisory.mode in MODE_COLORS
-        ? (advisory.mode as keyof typeof MODE_COLORS)
+      advisory.mode === "bus" || advisory.mode === "streetcar"
+        ? advisory.mode
         : "unknown";
     const routeMatch =
       !focusActive ||
       advisory.routes.some((r) => focusSet.has(normalizeRouteId(r)));
+    const route = advisory.routes[0] ?? "";
+    const originalColor = route ? routeColorFromShapes(route, shapes) : undefined;
+    const pinColor = route
+      ? routeLineColor(route, originalColor, colorblindType)
+      : modeColors[modeKey];
     features.push({
       type: "Feature",
       id: advisory.id,
@@ -121,7 +150,7 @@ function advisoriesToGeoJSON(
       properties: {
         id: advisory.id,
         mode: modeKey,
-        color: MODE_COLORS[modeKey],
+        color: pinColor,
         focusActive,
         routeMatch,
       },
@@ -161,6 +190,7 @@ function routeShapeCenter(
 
 export function TransitMap({ mode, onModeChange }: Props) {
   const { theme } = useTheme();
+  const { colorblindType, colorblindMode } = useAccessibility();
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const hoverPopupRef = useRef<maplibregl.Popup | null>(null);
@@ -179,11 +209,14 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const showHeatmapRef = useRef(false);
   const showAllRoutesRef = useRef(false);
   const showStopsRef = useRef(true);
+  const showAccessibleStopsRef = useRef(false);
   const showConstructionRef = useRef(false);
+  const colorblindRef = useRef(colorblindType);
   const modeRef = useRef(mode);
   const stopsGeoRef = useRef<GeoJSON.FeatureCollection | null>(null);
   themeRef.current = theme;
   modeRef.current = mode;
+  colorblindRef.current = colorblindType;
 
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
   const [liveRefreshing, setLiveRefreshing] = useState(false);
@@ -214,8 +247,9 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const [networkHint, setNetworkHint] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"live" | "historical">("live");
   const [showStops, setShowStops] = useState(true);
-  const [showShelters, setShowShelters] = useState(false);
+  const [showAccessibleStops, setShowAccessibleStops] = useState(true);
   const [showConstruction, setShowConstruction] = useState(false);
+  const [accessibleStopCount, setAccessibleStopCount] = useState(0);
   const [explore, setExplore] = useState<MapExploreState>({
     histStart: "2014",
     histEnd: "2026",
@@ -231,6 +265,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
   showHeatmapRef.current = explore.showHeatmap;
   showAllRoutesRef.current = explore.showAllRoutes;
   showStopsRef.current = showStops;
+  showAccessibleStopsRef.current = showAccessibleStops;
   showConstructionRef.current = showConstruction;
   const [routeRows, setRouteRows] = useState<RouteDelayRow[]>([]);
   const [routeDetail, setRouteDetail] = useState<RouteDetail | null>(null);
@@ -243,6 +278,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const addressPopupRef = useRef<maplibregl.Popup | null>(null);
   const addressMarkerRef = useRef<maplibregl.Marker | null>(null);
   const routeClickBound = useRef(false);
+  const accessibleStopClickBound = useRef(false);
 
   const mapQuery = useMemo(
     () => ({
@@ -350,7 +386,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
               52,
             ],
             "heatmap-opacity": 0.92,
-            "heatmap-color": HEATMAP_RED_COLOR_RAMP,
+            "heatmap-color": getHeatmapColorRamp(colorblindRef.current),
           },
         },
         "ttc-routes-line",
@@ -381,27 +417,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
       );
     }
 
-    if (!map.getSource(SHELTERS_SOURCE)) {
-      map.addSource(SHELTERS_SOURCE, { type: "geojson", data: empty });
-      map.addLayer(
-        {
-          id: SHELTERS_LAYER,
-          type: "circle",
-          source: SHELTERS_SOURCE,
-          minzoom: 11,
-          layout: { visibility: "none" },
-          paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 4, 14, 6, 16, 7],
-            "circle-color": "#0284c7",
-            "circle-opacity": 0.75,
-            "circle-stroke-width": 1.5,
-            "circle-stroke-color": "#ffffff",
-          },
-        },
-        STOPS_LAYER,
-      );
-    }
-
     if (!map.getSource(CONSTRUCTION_SOURCE)) {
       map.addSource(CONSTRUCTION_SOURCE, { type: "geojson", data: empty });
       map.addLayer(
@@ -413,7 +428,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
           layout: { visibility: showConstructionRef.current ? "visible" : "none" },
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 7, 13, 11, 16, 14],
-            "circle-color": "#f59e0b",
+            "circle-color": getModeColors(colorblindRef.current).construction,
             "circle-opacity": 0.85,
             "circle-stroke-width": 2,
             "circle-stroke-color": "#ffffff",
@@ -504,13 +519,44 @@ export function TransitMap({ mode, onModeChange }: Props) {
         },
       });
     }
+
+    if (!map.getSource(ACCESSIBLE_STOPS_SOURCE)) {
+      ensureAccessibleStopIcon(map, getModeColors(colorblindRef.current).accessible);
+      map.addSource(ACCESSIBLE_STOPS_SOURCE, { type: "geojson", data: empty });
+      map.addLayer({
+        id: ACCESSIBLE_STOPS_LAYER,
+        type: "symbol",
+        source: ACCESSIBLE_STOPS_SOURCE,
+        minzoom: 10,
+        layout: {
+          visibility: showAccessibleStopsRef.current ? "visible" : "none",
+          "icon-image": ACCESSIBLE_STOP_ICON,
+          "icon-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10,
+            0.42,
+            13,
+            0.62,
+            16,
+            0.82,
+          ],
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-anchor": "center",
+        },
+      });
+    }
   }, []);
 
   const syncMapOverlays = useCallback(
     (map: maplibregl.Map, advisories: LiveAdvisory[]) => {
       const stops = stopsGeoRef.current;
       const stopsSource = map.getSource(STOPS_SOURCE) as maplibregl.GeoJSONSource | undefined;
-      const sheltersSource = map.getSource(SHELTERS_SOURCE) as maplibregl.GeoJSONSource | undefined;
+      const accessibleSource = map.getSource(ACCESSIBLE_STOPS_SOURCE) as
+        | maplibregl.GeoJSONSource
+        | undefined;
       const constructionSource = map.getSource(CONSTRUCTION_SOURCE) as
         | maplibregl.GeoJSONSource
         | undefined;
@@ -518,12 +564,15 @@ export function TransitMap({ mode, onModeChange }: Props) {
       if (stopsSource && stops) {
         stopsSource.setData(stops);
       }
-      // Shelters: placeholder toggle — no layer data yet.
-      sheltersSource?.setData({ type: "FeatureCollection", features: [] });
+      if (accessibleSource && stops) {
+        const accessible = accessibleStopFeatures(stops);
+        setAccessibleStopCount(accessible.features.length);
+        accessibleSource.setData(accessible);
+      }
       constructionSource?.setData(constructionAdvisoriesToGeoJSON(advisories));
 
       setOverlayVisibility(map, STOPS_LAYER, showStopsRef.current);
-      setOverlayVisibility(map, SHELTERS_LAYER, false);
+      setOverlayVisibility(map, ACCESSIBLE_STOPS_LAYER, showAccessibleStopsRef.current);
       setOverlayVisibility(map, CONSTRUCTION_LAYER, showConstructionRef.current);
     },
     [],
@@ -705,6 +754,12 @@ export function TransitMap({ mode, onModeChange }: Props) {
         const norm = route.replace(/^0+/, "") || route;
         const delay = delayByRoute.get(norm) ?? delayByRoute.get(route) ?? 0;
         const delayNorm = showAll ? 0.5 : delay / maxDelay;
+        const originalColor = String(f.properties?.color ?? "");
+        const lineColor = routeLineColor(
+          route,
+          originalColor || undefined,
+          colorblindRef.current,
+        );
         const isMapFocused =
           !showAll && hasMapFocus && (focusSet.has(norm) || focusSet.has(route));
         const isDimmed = !showAll && hasMapFocus && !isMapFocused;
@@ -718,6 +773,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
           ...f,
           properties: {
             ...f.properties,
+            color: lineColor,
             delay_minutes: delay,
             delay_norm: delayNorm,
             focused: isMapFocused,
@@ -752,7 +808,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       if (center) {
         addressMarkerRef.current?.remove();
         addressMarkerRef.current = new maplibregl.Marker({
-          color: "#da291c",
+          color: getModeColors(colorblindRef.current).addressMarker,
           ...MAP_ALIGNED_MARKER,
         })
           .setLngLat(center)
@@ -769,6 +825,21 @@ export function TransitMap({ mode, onModeChange }: Props) {
     ],
   );
 
+  const applyMapPalette = useCallback((map: maplibregl.Map) => {
+    const palette = getModeColors(colorblindRef.current);
+    const heatRamp = getHeatmapColorRamp(colorblindRef.current);
+    if (map.getLayer("delay-heat-layer")) {
+      map.setPaintProperty("delay-heat-layer", "heatmap-color", heatRamp);
+    }
+    if (map.getLayer(CONSTRUCTION_LAYER)) {
+      map.setPaintProperty(CONSTRUCTION_LAYER, "circle-color", palette.construction);
+    }
+    if (map.getLayer(ACCESSIBLE_STOPS_LAYER)) {
+      ensureAccessibleStopIcon(map, palette.accessible);
+      map.triggerRepaint();
+    }
+  }, []);
+
   const applyHeatmap = useCallback(
     async (map: maplibregl.Map, show: boolean) => {
       const heatSource = map.getSource("delay-heat") as maplibregl.GeoJSONSource | undefined;
@@ -783,6 +854,13 @@ export function TransitMap({ mode, onModeChange }: Props) {
       }
 
       setRouteLinePaint(map, true, showAllRoutesRef.current);
+      const cached = getCachedDelayHotspots(mapQuery);
+      if (cached) {
+        heatSource?.setData(cached);
+        if (map.getLayer("delay-heat-layer")) {
+          map.setLayoutProperty("delay-heat-layer", "visibility", "visible");
+        }
+      }
       const geo = await fetchDelayHotspots(mapQuery);
       heatSource?.setData(geo);
       if (map.getLayer("delay-heat-layer")) {
@@ -791,6 +869,37 @@ export function TransitMap({ mode, onModeChange }: Props) {
     },
     [mapQuery, setRouteLinePaint],
   );
+
+  const setupAccessibleStopInteractions = useCallback((map: maplibregl.Map) => {
+    if (accessibleStopClickBound.current) return;
+    accessibleStopClickBound.current = true;
+
+    map.on("mouseenter", ACCESSIBLE_STOPS_LAYER, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", ACCESSIBLE_STOPS_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+    });
+    map.on("click", ACCESSIBLE_STOPS_LAYER, (e) => {
+      const feature = e.features?.[0];
+      if (!feature?.geometry || feature.geometry.type !== "Point") return;
+      e.originalEvent.stopPropagation();
+      const label = accessibleStopLabel(feature);
+      const coords = feature.geometry.coordinates as [number, number];
+      new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        offset: 12,
+        className: `map-hover-popup map-hover-popup--${themeRef.current}`,
+        maxWidth: "260px",
+      })
+        .setLngLat(coords)
+        .setHTML(
+          `<div class="map-popup"><strong>${escapeHtml(label)}</strong><p class="map-popup__hint">GTFS wheelchair boarding available</p></div>`,
+        )
+        .addTo(map);
+    });
+  }, []);
 
   const setupRouteClick = useCallback(
     (map: maplibregl.Map) => {
@@ -878,7 +987,14 @@ export function TransitMap({ mode, onModeChange }: Props) {
       liveAdvisoriesRef.current = advisories;
       const source = map.getSource("live-advisories") as maplibregl.GeoJSONSource | undefined;
       if (!source) return;
-      source.setData(advisoriesToGeoJSON(advisories, focusedRoutes));
+      source.setData(
+        advisoriesToGeoJSON(
+          advisories,
+          focusedRoutes,
+          colorblindRef.current,
+          routesRef.current,
+        ),
+      );
       for (const advisory of advisories) {
         if (!advisoryCoords(advisory)) continue;
         map.setFeatureState(
@@ -1008,11 +1124,11 @@ export function TransitMap({ mode, onModeChange }: Props) {
       style: BASEMAP[themeRef.current],
       center: TORONTO_CENTER,
       zoom: 11.3,
-      minZoom: TORONTO_MIN_ZOOM,
       pitch: pitchForZoom(11.3),
       bearing: -18,
       maxBounds: TORONTO_MAX_BOUNDS,
       ...MAP_SMOOTH_OPTIONS,
+      minZoom: TORONTO_MIN_ZOOM,
     });
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
@@ -1035,6 +1151,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       addNetworkLayers(map);
       setupRouteHover(map);
       setupRouteClick(map);
+      setupAccessibleStopInteractions(map);
       setupLivePinInteractions(map);
       setupMapFocusHandlers(map);
       syncMapOverlays(map, liveAdvisoriesRef.current);
@@ -1059,6 +1176,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     clearLivePopup,
     setupRouteHover,
     setupRouteClick,
+    setupAccessibleStopInteractions,
     setupLivePinInteractions,
     setupMapFocusHandlers,
   ]);
@@ -1081,6 +1199,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       );
       syncLivePins(map, filtered, hoveredId, selected?.id ?? null, mapFocusedRoutes);
       syncMapOverlays(map, filtered);
+      applyMapPalette(map);
       void applyHeatmap(map, explore.showHeatmap);
     });
   }, [
@@ -1098,6 +1217,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     addressCenter,
     explore.showHeatmap,
     applyHeatmap,
+    applyMapPalette,
     hoveredId,
     selected?.id,
     mapFocusedRoutes,
@@ -1108,6 +1228,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     const map = mapRef.current;
     if (!map || !mapReady) return;
     if (!routeShapesReady) return;
+    applyMapPalette(map);
     applyNetworkData(
       map,
       mode,
@@ -1136,6 +1257,8 @@ export function TransitMap({ mode, onModeChange }: Props) {
     explore.compareA,
     explore.compareB,
     explore.showAllRoutes,
+    colorblindType,
+    applyMapPalette,
   ]);
 
   useEffect(() => {
@@ -1168,6 +1291,11 @@ export function TransitMap({ mode, onModeChange }: Props) {
       cancelled = true;
     };
   }, [mode]);
+
+  useEffect(() => {
+    clearMapStopsCache();
+    clearRouteShapesCache();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1203,11 +1331,18 @@ export function TransitMap({ mode, onModeChange }: Props) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
+    setOverlayVisibility(map, ACCESSIBLE_STOPS_LAYER, showAccessibleStops);
+  }, [showAccessibleStops, mapReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
     setOverlayVisibility(map, CONSTRUCTION_LAYER, showConstruction);
   }, [showConstruction, mapReady]);
 
   useEffect(() => {
     fetchRouteDelays(mapQuery).then(setRouteRows).catch(() => setRouteRows([]));
+    prefetchDelayHotspots(mapQuery);
   }, [mapQuery]);
 
   useEffect(() => {
@@ -1469,10 +1604,10 @@ export function TransitMap({ mode, onModeChange }: Props) {
               <input
                 type="checkbox"
                 className="map-checkbox"
-                checked={showShelters}
-                onChange={(e) => setShowShelters(e.target.checked)}
+                checked={showAccessibleStops}
+                onChange={(e) => setShowAccessibleStops(e.target.checked)}
               />
-              Shelters
+              Accessible stops
             </label>
             <label className="map-checkbox-item">
               <input
@@ -1553,14 +1688,25 @@ export function TransitMap({ mode, onModeChange }: Props) {
             <span><i className="legend-dot legend-dot--bus" /> Bus</span>
             <span><i className="legend-dot legend-dot--streetcar" /> Streetcar</span>
             {showStops && <span className="text-[var(--muted)]">· Stops (zoom in)</span>}
+            {showAccessibleStops && (
+              <span className="text-[var(--muted)]">
+                · <span className="legend-accessible-icon" aria-hidden="true">♿</span> Step-free stops
+                {accessibleStopCount === 0 ? " (reload API)" : ` (${accessibleStopCount.toLocaleString()})`}
+              </span>
+            )}
             {showConstruction && <span className="text-[var(--muted)]">· Construction</span>}
             <span className="text-[var(--muted)]">
               {explore.showHeatmap
-                ? " · Red heat = delay density"
+                ? colorblindMode
+                  ? " · Multi-color heat (CB)"
+                  : " · Red heat = delay density"
                 : explore.showAllRoutes
                   ? ` · All ${mode} lines · pins = live`
                   : " · Live alert routes only"}
             </span>
+            {colorblindMode && (
+              <span className="text-[var(--muted)]"> · {colorblindType} palette</span>
+            )}
           </div>
         </div>
 

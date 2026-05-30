@@ -164,6 +164,9 @@ body {
 .app-header__actions {
   margin-left: auto;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .app-main {
@@ -767,6 +770,164 @@ body {
   color: var(--accent);
 }
 
+.colorblind-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: auto;
+  height: 2.25rem;
+  padding: 0 0.625rem 0 0.5rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(90deg, #0072b2, #e69f00, #009e73) border-box;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.colorblind-toggle__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.colorblind-toggle__dot {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.colorblind-toggle__dot--blue { background: #0072b2; }
+.colorblind-toggle__dot--orange { background: #e69f00; }
+.colorblind-toggle__dot--green { background: #009e73; }
+
+.colorblind-toggle__label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.colorblind-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 114, 178, 0.22);
+}
+
+.colorblind-toggle--active {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #0072b2 18%, var(--card)),
+      color-mix(in srgb, #e69f00 14%, var(--card))
+    )
+    padding-box,
+    linear-gradient(90deg, #0072b2, #e69f00, #009e73) border-box;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.colorblind-toggle--active.colorblind-toggle--deuteranopia {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #0072b2 22%, var(--card)), var(--card)) padding-box,
+    linear-gradient(90deg, #0072b2, #e69f00) border-box;
+}
+
+.colorblind-toggle--active.colorblind-toggle--protanopia {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #005a9e 22%, var(--card)), var(--card)) padding-box,
+    linear-gradient(90deg, #005a9e, #d55e00) border-box;
+}
+
+.colorblind-toggle--active.colorblind-toggle--tritanopia {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #d55e00 20%, var(--card)), var(--card)) padding-box,
+    linear-gradient(90deg, #d55e00, #cc79a7) border-box;
+}
+
+[data-theme="dark"] .colorblind-toggle {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .colorblind-toggle:hover {
+  box-shadow: 0 2px 10px rgba(86, 180, 233, 0.25);
+}
+
+.colorblind-menu {
+  position: relative;
+}
+
+.colorblind-menu__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.colorblind-menu__list {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 50;
+  min-width: 13.5rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  box-shadow: var(--shadow);
+}
+
+.colorblind-menu__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.colorblind-menu__option:hover {
+  background: var(--control-bg);
+}
+
+.colorblind-menu__option--active {
+  background: color-mix(in srgb, var(--accent) 14%, var(--card));
+}
+
+.colorblind-menu__option-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.colorblind-menu__option-desc {
+  font-size: 0.6875rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.legend-accessible-icon {
+  display: inline-block;
+  font-size: 0.875rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .nav-tab {
   border-bottom: 2px solid transparent;
   padding-bottom: 0.25rem;
@@ -882,6 +1043,73 @@ body {
 .legend-dot--bus { background: #e53935; }
 .legend-dot--streetcar { background: #ff6f61; }
 .legend-dot--subway { background: #ffcc33; }
+.legend-dot--accessible { background: #0284c7; border: 2px solid #fff; box-shadow: 0 0 0 1px #0284c7; }
+
+[data-colorblind="true"] .legend-dot--bus { background: #0072B2; }
+[data-colorblind="true"] .legend-dot--streetcar { background: #E69F00; }
+[data-colorblind="true"] .legend-dot--accessible { background: #009E73; box-shadow: 0 0 0 1px #009E73; }
+
+[data-colorblind="true"] .delay-severity-inline--on-time .delay-severity-inline__label,
+[data-colorblind="true"] .delay-severity-badge--on-time {
+  color: #0072B2;
+  background: #e6f2fa;
+  border-color: #0072B2;
+}
+
+[data-colorblind="true"] .delay-severity-inline--minor .delay-severity-inline__label,
+[data-colorblind="true"] .delay-severity-badge--minor {
+  color: #E69F00;
+  background: #fef6e6;
+  border-color: #E69F00;
+}
+
+[data-colorblind="true"] .delay-severity-inline--moderate .delay-severity-inline__label,
+[data-colorblind="true"] .delay-severity-badge--moderate {
+  color: #D55E00;
+  background: #fdeee6;
+  border-color: #D55E00;
+}
+
+[data-colorblind="true"] .delay-severity-inline--severe .delay-severity-inline__label,
+[data-colorblind="true"] .delay-severity-badge--severe {
+  color: #CC79A7;
+  background: #f9eef4;
+  border-color: #CC79A7;
+}
+
+[data-theme="dark"][data-colorblind="true"] .delay-severity-inline--on-time .delay-severity-inline__label,
+[data-theme="dark"][data-colorblind="true"] .delay-severity-badge--on-time {
+  color: #56B4E9;
+  background: #0a2a40;
+  border-color: #0072B2;
+}
+
+[data-theme="dark"][data-colorblind="true"] .delay-severity-inline--minor .delay-severity-inline__label,
+[data-theme="dark"][data-colorblind="true"] .delay-severity-badge--minor {
+  color: #F0E442;
+  background: #3d3200;
+  border-color: #E69F00;
+}
+
+[data-theme="dark"][data-colorblind="true"] .delay-severity-inline--moderate .delay-severity-inline__label,
+[data-theme="dark"][data-colorblind="true"] .delay-severity-badge--moderate {
+  color: #E69F00;
+  background: #3d2200;
+  border-color: #D55E00;
+}
+
+[data-theme="dark"][data-colorblind="true"] .delay-severity-inline--severe .delay-severity-inline__label,
+[data-theme="dark"][data-colorblind="true"] .delay-severity-badge--severe {
+  color: #CC79A7;
+  background: #3a1a2e;
+  border-color: #CC79A7;
+}
+
+.map-popup__hint {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
 
 /* Transit pins — outer node is positioned by MapLibre; do not transform it */
 .transit-pin {
