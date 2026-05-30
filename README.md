@@ -35,7 +35,7 @@ Explore more than a decade of Toronto Transit Commission **bus and streetcar** d
 
 Historical figures come from archived TTC delay reports. Live information reflects conditions at refresh time and may change without notice. This project is for **information and research**; for official service status, use [ttc.ca](https://www.ttc.ca).
 
-**Data sources** and confirmation that we do **not use personal data**: [data-license/README.md](data-license/README.md).
+**Data Sources Statement** (datasets, licences, no PII): [data-license/README.md](data-license/README.md).
 
 ## Team
 
