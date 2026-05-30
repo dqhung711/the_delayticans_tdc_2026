@@ -3,9 +3,6 @@ node_modules/
 frontend/node_modules/
 .venv/
 
-# Dev-only (ingest, backups, GTFS rebuild) — not required to run the app
-.dev/
-
 # Build output
 frontend/dist/
 .vite/

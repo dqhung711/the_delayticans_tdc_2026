@@ -5,7 +5,6 @@
 website/node_modules/
 website/frontend/node_modules/
 website/.venv/
-website/.dev/
 website/frontend/dist/
 website/**/__pycache__/
 website/**/*.pyc
