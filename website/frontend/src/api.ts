@@ -1,12 +1,12 @@
 import { apiUrl } from "./lib/appConfig";
 import type { CompareInterval, LiveSnapshot, Meta, Mode, OverviewCharts } from "./types";
-import type { Bucket, Direction, Granularity, ViewMode } from "./types";
+import type { Bucket, Direction, Granularity, TimeToggle, ViewMode } from "./types";
 
 export interface QueryParams {
   mode: Mode;
   view: ViewMode;
   granularity: Granularity;
-  timeToggle: "year" | "month";
+  timeToggle: TimeToggle;
   start: string;
   end: string;
   directions: Direction[];

@@ -79,7 +79,9 @@ export function ExplorerKpis({
         <div className="flex flex-col mt-1">
           {pctChange(totalGap, comparison?.total_gap)}
           <p className="text-[10px] text-[var(--muted)] mt-0.5">
-            {rangeLength ? `Avg ${fmt(totalGap ? totalGap / parseInt(rangeLength, 10) : 0)} min / year` : `${totalDelay ? (totalGap / totalDelay).toFixed(1) : 0}x more than pure delay`}
+            {rangeLength
+              ? `Avg ${fmt(totalGap ? totalGap / parseInt(rangeLength, 10) : 0)} min / year`
+              : `${totalDelay ? ((totalGap ?? 0) / totalDelay).toFixed(1) : 0}x more than pure delay`}
           </p>
         </div>
       </div>
