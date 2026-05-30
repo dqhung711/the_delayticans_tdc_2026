@@ -63,6 +63,7 @@ export function LiveServiceAlerts({
           // Mocking some delay data if not present in description
           const delayMatch = a.description.match(/(\d+) min/);
           const delayVal = delayMatch ? parseInt(delayMatch[1], 10) : 15;
+          const isMockDelay = !delayMatch;
           const delay = delayMatch ? `+${delayMatch[1]} min` : "+15 min";
           const status = a.effect === "DETOUR" ? "detour" : "ongoing";
 
@@ -88,9 +89,16 @@ export function LiveServiceAlerts({
                   <h3 className="text-base font-bold text-[var(--text)] truncate">
                     {routeNum} {routeName}
                   </h3>
-                  <span className={`text-sm font-semibold ${delayColor} whitespace-nowrap`}>
-                    {delay}
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className={`text-sm font-semibold ${delayColor} whitespace-nowrap`}>
+                      {delay}
+                    </span>
+                    {isMockDelay && (
+                      <span className="text-[8px] font-bold px-1 py-0 rounded bg-amber-500/10 text-amber-600 uppercase tracking-tighter mt-0.5">
+                        Mockup
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="text-xs text-[var(--muted)] truncate">

@@ -126,6 +126,22 @@ def get_hourly_totals(mode: str, interval: dict[str, str], directions: list[str]
     return [dict(row) for row in rows]
 
 
+def get_daily_totals(mode: str, interval: dict[str, str], directions: list[str], routes: list[str]):
+    where, values = build_where(mode, interval, directions, routes)
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"""
+            SELECT CAST(strftime('%w', report_datetime) AS INTEGER) AS day,
+                   COALESCE(SUM(min_delay), 0) AS delay_minutes,
+                   COALESCE(SUM(min_gap), 0) AS gap_minutes
+            FROM delays WHERE {where}
+            GROUP BY day ORDER BY day
+            """,
+            values,
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def get_categories(mode: str, interval: dict[str, str], directions: list[str], routes: list[str]):
     where, values = build_where(mode, interval, directions, routes)
     with get_conn() as conn:
@@ -141,6 +157,71 @@ def get_categories(mode: str, interval: dict[str, str], directions: list[str], r
             values,
         ).fetchall()
     return [dict(row) for row in rows]
+
+
+def get_ranked_routes_with_comparison(
+    mode: str,
+    interval: dict[str, str],
+    comp_interval: dict[str, str] | None,
+    directions: list[str],
+    routes: list[str],
+    limit: int = 10,
+):
+    where, values = build_where(mode, interval, directions, routes)
+    with get_conn() as conn:
+        # 1. Get current period totals
+        rows = conn.execute(
+            f"""
+            SELECT route,
+                   COALESCE(SUM(min_delay), 0) AS delay_minutes,
+                   COALESCE(SUM(min_gap), 0) AS gap_minutes,
+                   COUNT(*) AS incidents
+            FROM delays
+            WHERE {where} AND route != ''
+            GROUP BY route
+            ORDER BY delay_minutes DESC
+            LIMIT ?
+            """,
+            [*values, limit],
+        ).fetchall()
+        
+        current_data = [dict(row) for row in rows]
+        if not current_data or not comp_interval:
+            return current_data
+
+        # 2. Get comparison period totals for the same routes
+        comp_where, comp_values = build_where(mode, comp_interval, directions, routes)
+        route_ids = [r["route"] for r in current_data]
+        placeholders = ", ".join("?" for _ in route_ids)
+        
+        comp_rows = conn.execute(
+            f"""
+            SELECT route,
+                   COALESCE(SUM(min_delay), 0) AS delay_minutes,
+                   COALESCE(SUM(min_gap), 0) AS gap_minutes,
+                   COUNT(*) AS incidents
+            FROM delays
+            WHERE {comp_where} AND route IN ({placeholders})
+            GROUP BY route
+            """,
+            [*comp_values, *route_ids],
+        ).fetchall()
+        
+        comp_map = {row["route"]: dict(row) for row in comp_rows}
+        
+        # 3. Merge
+        for item in current_data:
+            comp = comp_map.get(item["route"])
+            if comp:
+                item["prev_delay_minutes"] = comp["delay_minutes"]
+                item["prev_gap_minutes"] = comp["gap_minutes"]
+                item["prev_incidents"] = comp["incidents"]
+            else:
+                item["prev_delay_minutes"] = 0
+                item["prev_gap_minutes"] = 0
+                item["prev_incidents"] = 0
+                
+        return current_data
 
 
 def get_route_delay_totals(
@@ -309,5 +390,42 @@ def get_hourly_by_category(mode: str, interval: dict[str, str], directions: list
             ORDER BY hour, category
             """,
             values,
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def get_routes_by_category(mode: str, interval: dict[str, str], directions: list[str], routes: list[str]):
+    where, values = build_where(mode, interval, directions, routes)
+    with get_conn() as conn:
+        # 1. Find top 5 routes by total delay
+        top_routes_rows = conn.execute(
+            f"""
+            SELECT route, SUM(min_delay) as total_delay
+            FROM delays
+            WHERE {where} AND route != ''
+            GROUP BY route
+            ORDER BY total_delay DESC
+            LIMIT 5
+            """,
+            values,
+        ).fetchall()
+        top_routes = [row["route"] for row in top_routes_rows]
+
+        if not top_routes:
+            return []
+
+        # 2. Get category breakdown for these 5 routes
+        placeholders = ", ".join("?" for _ in top_routes)
+        rows = conn.execute(
+            f"""
+            SELECT route,
+                   incident_category AS category,
+                   COALESCE(SUM(min_delay), 0) AS delay_minutes
+            FROM delays 
+            WHERE {where} AND route IN ({placeholders})
+            GROUP BY route, incident_category
+            ORDER BY route, category
+            """,
+            [*values, *top_routes],
         ).fetchall()
     return [dict(row) for row in rows]

@@ -1,13 +1,16 @@
 import type { ReactNode } from "react";
 import { ChartTypeSelect, type SelectOption } from "./ChartTypeSelect";
 
-interface Props<T extends string> {
+interface Props<T extends string, A extends string = string> {
   title: string;
   subtitle?: string;
   badge?: string;
   chartType?: T;
   options?: SelectOption<T>[];
   onChartTypeChange?: (value: T) => void;
+  aggType?: A;
+  aggOptions?: SelectOption<A>[];
+  onAggTypeChange?: (value: A) => void;
   legend?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -19,13 +22,16 @@ interface Props<T extends string> {
   fluid?: boolean;
 }
 
-export function ChartPanel<T extends string>({
+export function ChartPanel<T extends string, A extends string = string>({
   title,
   subtitle,
   badge,
   chartType,
   options,
   onChartTypeChange,
+  aggType,
+  aggOptions,
+  onAggTypeChange,
   legend,
   children,
   className = "",
@@ -35,7 +41,7 @@ export function ChartPanel<T extends string>({
   empty,
   emptyMessage = "No data for the current filters. Adjust the time range or directions.",
   fluid,
-}: Props<T>) {
+}: Props<T, A>) {
   const chartHeight = height ?? (compact ? 240 : primary ? 380 : 280);
 
   return (
@@ -49,14 +55,24 @@ export function ChartPanel<T extends string>({
             <h3 className="chart-panel__title">{title}</h3>
             {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
           </div>
-          {chartType && options && onChartTypeChange && (
-            <ChartTypeSelect
-              value={chartType}
-              options={options}
-              onChange={onChartTypeChange}
-              ariaLabel={`${title} visualization type`}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            {aggType && aggOptions && onAggTypeChange && (
+              <ChartTypeSelect
+                value={aggType}
+                options={aggOptions}
+                onChange={onAggTypeChange}
+                ariaLabel={`${title} aggregation type`}
+              />
+            )}
+            {chartType && options && onChartTypeChange && (
+              <ChartTypeSelect
+                value={chartType}
+                options={options}
+                onChange={onChartTypeChange}
+                ariaLabel={`${title} visualization type`}
+              />
+            )}
+          </div>
         </div>
         {legend && <div className="chart-panel__legend">{legend}</div>}
       </header>

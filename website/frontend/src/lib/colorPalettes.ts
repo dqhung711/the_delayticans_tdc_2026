@@ -22,7 +22,6 @@ const OVERLAY_BY_TYPE: Record<
     bus: string;
     streetcar: string;
     unknown: string;
-    construction: string;
     addressMarker: string;
     accessible: string;
   }
@@ -32,7 +31,6 @@ const OVERLAY_BY_TYPE: Record<
     bus: "#0072B2",
     streetcar: "#E69F00",
     unknown: "#999999",
-    construction: "#CC79A7",
     addressMarker: "#0072B2",
     accessible: "#009E73",
   },
@@ -41,7 +39,6 @@ const OVERLAY_BY_TYPE: Record<
     bus: "#005A9E",
     streetcar: "#D55E00",
     unknown: "#888888",
-    construction: "#C77CFF",
     addressMarker: "#005A9E",
     accessible: "#008272",
   },
@@ -50,7 +47,6 @@ const OVERLAY_BY_TYPE: Record<
     bus: "#D55E00",
     streetcar: "#CC79A7",
     unknown: "#999999",
-    construction: "#E69F00",
     addressMarker: "#D55E00",
     accessible: "#009E73",
   },
@@ -60,7 +56,6 @@ export const STANDARD_MODE = {
   bus: "#e53935",
   streetcar: "#ff6f61",
   unknown: "#9ca3af",
-  construction: "#f59e0b",
   addressMarker: "#da291c",
   accessible: "#0284c7",
   notAccessible: "#94a3b8",

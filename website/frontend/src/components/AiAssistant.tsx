@@ -22,27 +22,54 @@ export function AiAssistant() {
     },
   ]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
     
+    const userContent = input;
     const newUserMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: input,
+      content: userContent,
     };
     
     setMessages((prev) => [...prev, newUserMessage]);
     setInput("");
     
-    // Placeholder for AI response
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, newUserMessage].map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get response from AI");
+      }
+
+      const data = await response.json();
+      
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "I'm processing your request about the transit data. (Gemini API integration coming soon)",
+        content: data.content,
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 1000);
+    } catch (error) {
+      console.error("AI chat error:", error);
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Sorry, I encountered an error while processing your request. Please try again later.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    }
   };
 
   return (

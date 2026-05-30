@@ -1,8 +1,7 @@
+import { useState, useRef, useEffect } from "react";
 import type {
   Bucket,
-  CompareInterval,
   Direction,
-  Granularity,
   Mode,
   ViewMode,
 } from "../types";
@@ -10,10 +9,8 @@ import type {
 interface FilterBarProps {
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
-  granularity: Granularity;
-  onGranularityChange: (g: Granularity) => void;
-  timeToggle: "year" | "month";
-  onTimeToggleChange: (t: "year" | "month") => void;
+  timeToggle: "year" | "range";
+  onTimeToggleChange: (t: "year" | "range") => void;
   start: string;
   end: string;
   onStartChange: (v: string) => void;
@@ -25,8 +22,7 @@ interface FilterBarProps {
   routes: string[];
   onRoutesChange: (r: string[]) => void;
   availableRoutes: Array<{ route: string; incidents: number }>;
-  compareIntervals: CompareInterval[];
-  onCompareIntervalsChange: (intervals: CompareInterval[]) => void;
+  compLabel?: string;
   mode: Mode;
   onModeChange: (mode: Mode) => void;
 }
@@ -48,8 +44,6 @@ const StreetcarIcon = ({ className }: { className?: string }) => (
 export function FilterBar({
   view,
   onViewChange,
-  granularity,
-  onGranularityChange,
   timeToggle,
   onTimeToggleChange,
   start,
@@ -63,11 +57,14 @@ export function FilterBar({
   routes,
   onRoutesChange,
   availableRoutes,
-  compareIntervals,
-  onCompareIntervalsChange,
+  compLabel,
   mode,
   onModeChange,
 }: FilterBarProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const toggleDirection = (dir: Direction) => {
     if (directions.includes(dir)) {
       onDirectionsChange(directions.filter((d) => d !== dir));
@@ -76,21 +73,30 @@ export function FilterBar({
     }
   };
 
-  const addCompareInterval = () => {
-    if (compareIntervals.length >= 10) return;
-    onCompareIntervalsChange([
-      ...compareIntervals,
-      {
-        id: crypto.randomUUID(),
-        start,
-        end,
-        label: `Period ${compareIntervals.length + 1}`,
-      },
-    ]);
+  const toggleRoute = (route: string) => {
+    if (routes.includes(route)) {
+      onRoutesChange(routes.filter((r) => r !== route));
+    } else {
+      onRoutesChange([...routes, route]);
+    }
   };
 
+  const filteredRoutes = availableRoutes.filter((r) =>
+    r.route.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="filter-panel page-enter mb-6">
+    <div className="filter-panel page-enter mb-6 relative z-30">
       {/* Mode Selection */}
       <div className="flex items-center gap-8 mb-6 border-b border-[var(--border)] pb-4">
         {(
@@ -122,7 +128,7 @@ export function FilterBar({
         <div className="flex flex-col gap-2 pr-8">
           <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">View</p>
           <div className="flex items-center gap-5">
-            {(["overview", "compare"] as const).map((v) => (
+            {(["overview"] as const).map((v) => (
               <button
                 key={v}
                 onClick={() => onViewChange(v)}
@@ -149,21 +155,21 @@ export function FilterBar({
 
         {/* Time Range */}
         <div className="flex flex-col gap-2 px-8">
-          <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Time Range</p>
+          <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">
+            Time Range
+          </p>
           <div className="flex items-center gap-4">
-            {/* Year / Date toggle */}
+            {/* Year / Range toggle */}
             <div className="flex items-center gap-3">
-              {(["year", "month"] as const).map((t) => (
+              {(["year", "range"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => onTimeToggleChange(t)}
                   className={`relative text-xs font-medium pb-0.5 transition-all ${
-                    timeToggle === t
-                      ? "text-[var(--text)] font-bold"
-                      : "text-[var(--muted)]"
+                    timeToggle === t ? "text-[var(--text)] font-bold" : "text-[var(--muted)]"
                   }`}
                 >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                  {t === "year" ? "Year" : "Range"}
                   {timeToggle === t && (
                     <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
                   )}
@@ -180,7 +186,7 @@ export function FilterBar({
                     onStartChange(e.target.value);
                     onEndChange(e.target.value);
                   }}
-                  min={2000}
+                  min={2014}
                   max={2099}
                   className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-16"
                   style={{ colorScheme: "dark" }}
@@ -188,23 +194,90 @@ export function FilterBar({
               ) : (
                 <>
                   <input
-                    type="month"
+                    type="number"
                     value={start}
                     onChange={(e) => onStartChange(e.target.value)}
-                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-32"
+                    min={2014}
+                    max={2099}
+                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-16"
                     style={{ colorScheme: "dark" }}
                   />
                   <span className="text-[var(--muted)] font-medium text-xs">→</span>
                   <input
-                    type="month"
+                    type="number"
                     value={end}
                     onChange={(e) => onEndChange(e.target.value)}
-                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-32"
+                    min={2014}
+                    max={2099}
+                    className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none w-16"
                     style={{ colorScheme: "dark" }}
                   />
                 </>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="w-px self-stretch bg-[var(--border)] opacity-50 mx-2" />
+
+        {/* Comparing Against */}
+        {timeToggle === "year" && (
+          <>
+            <div className="flex flex-col gap-2 px-8">
+              <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">
+                Comparing Against
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-[var(--text)]">
+                  {compLabel || "None"}
+                </span>
+                {compLabel && (
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/10 text-green-500 uppercase tracking-tighter">
+                    {start === end ? "auto" : "auto mirror"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px self-stretch bg-[var(--border)] opacity-50 mx-2" />
+          </>
+        )}
+
+        {/* Chart Granularity */}
+        <div className="flex flex-col gap-2 px-8">
+          <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">
+            Chart Granularity
+          </p>
+          <div className="flex items-center gap-3">
+            {timeToggle === "year" ? (
+              <>
+                {(["day", "month"] as const).map((b) => (
+                  <button
+                    key={b}
+                    onClick={() => onBucketChange(b)}
+                    className={`relative text-xs font-medium pb-0.5 transition-all capitalize ${
+                      bucket === b ? "text-[var(--text)] font-bold" : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {b}ly
+                    {bucket === b && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
+                    )}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-[var(--text)] capitalize">
+                  Monthly
+                </span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-500/10 text-green-500 uppercase tracking-tighter">
+                  auto
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -237,54 +310,75 @@ export function FilterBar({
         <div className="w-px self-stretch bg-[var(--border)] opacity-50 mx-2" />
 
         {/* Routes */}
-        <div className="flex flex-col gap-2 px-8 ml-auto">
+        <div className="flex flex-col gap-2 px-8 ml-auto relative" ref={dropdownRef}>
           <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Routes</p>
-          <select
-            multiple
-            value={routes}
-            onChange={(e) => onRoutesChange(Array.from(e.target.selectedOptions, (o) => o.value))}
-            className="text-xs bg-[var(--control-bg)] border-[var(--border)] rounded-md h-10 w-40"
-          >
-            {availableRoutes.slice(0, 100).map((r) => (
-              <option key={r.route} value={r.route}>
-                {r.route} ({r.incidents})
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search routes..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setIsDropdownOpen(true);
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
+              className="text-xs bg-[var(--control-bg)] border border-[var(--border)] rounded-md h-9 w-44 px-3 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+            />
+            {routes.length > 0 && (
+              <div className="absolute -top-2 -right-2 bg-[var(--accent)] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {routes.length}
+              </div>
+            )}
+          </div>
+
+          {isDropdownOpen && (
+            <div className="absolute top-full left-8 right-0 mt-1 bg-[var(--control-bg)] border border-[var(--border)] rounded-md shadow-lg z-50 max-h-60 overflow-y-auto min-w-[180px]">
+              {filteredRoutes.length > 0 ? (
+                filteredRoutes.slice(0, 50).map((r) => (
+                  <button
+                    key={r.route}
+                    onClick={() => toggleRoute(r.route)}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-[var(--accent)] hover:text-white transition-colors flex items-center justify-between ${
+                      routes.includes(r.route) ? "bg-[var(--accent)]/10 text-[var(--accent)] font-bold" : "text-[var(--text)]"
+                    }`}
+                  >
+                    <span>{r.route}</span>
+                    <span className="opacity-60 text-[10px]">({r.incidents})</span>
+                  </button>
+                ))
+              ) : (
+                <div className="px-3 py-2 text-xs text-[var(--muted)]">No routes found</div>
+              )}
+            </div>
+          )}
+
+          {routes.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2 max-w-[200px]">
+              {routes.map((r) => (
+                <span
+                  key={r}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-bold rounded"
+                >
+                  {r}
+                  <button
+                    onClick={() => toggleRoute(r)}
+                    className="hover:text-red-500"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={() => onRoutesChange([])}
+                className="text-[10px] text-[var(--muted)] hover:text-[var(--accent)] font-bold ml-1"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {view === "compare" && (
-        <div className="mt-6 pt-4 border-t border-[var(--border)]">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Compare periods</p>
-            <button
-              type="button"
-              onClick={addCompareInterval}
-              disabled={compareIntervals.length >= 10}
-              className="text-xs font-bold text-[var(--accent)] hover:underline disabled:opacity-40"
-            >
-              + Add period
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {compareIntervals.map((interval, index) => (
-              <div
-                key={interval.id}
-                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--control-bg)] rounded-md text-xs font-medium"
-              >
-                <span>P{index + 1}: {interval.start} → {interval.end}</span>
-                <button
-                  onClick={() => onCompareIntervalsChange(compareIntervals.filter((i) => i.id !== interval.id))}
-                  className="text-[var(--accent)] hover:text-red-500"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

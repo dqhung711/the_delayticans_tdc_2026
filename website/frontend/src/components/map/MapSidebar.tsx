@@ -4,6 +4,9 @@ import type { GeocodeResult } from "../../lib/geoUtils";
 import type { LiveAdvisory, LiveSnapshot, Mode } from "../../types";
 import { LiveServiceAlerts } from "./LiveServiceAlerts";
 import { LiveRouteDetail } from "./LiveRouteDetail";
+import { getRouteName } from "../../lib/routeNames";
+import { getModeColors } from "../../lib/colorPalettes";
+import { useAccessibility } from "../../context/AccessibilityContext";
 
 export interface MapExploreState {
   histStart: string;
@@ -15,7 +18,7 @@ export interface MapExploreState {
   compareB: string;
   addressQuery: string;
   nearbyKm: number;
-  timeToggle: "year" | "date";
+  timeToggle: "year" | "range";
 }
 
 interface Props {
@@ -24,6 +27,7 @@ interface Props {
   explore: MapExploreState;
   onExploreChange: (patch: Partial<MapExploreState>) => void;
   routeRows: RouteDelayRow[];
+  rankedRoutes?: RouteDelayRow[];
   routeDetail: RouteDetail | null;
   compareDetailA: RouteDetail | null;
   compareDetailB: RouteDetail | null;
@@ -50,6 +54,7 @@ export function MapSidebar({
   explore,
   onExploreChange,
   routeRows,
+  rankedRoutes = [],
   routeDetail,
   compareDetailA,
   compareDetailB,
@@ -69,6 +74,16 @@ export function MapSidebar({
   liveRefreshing = false,
   onClearRouteDetail,
 }: Props) {
+  const { colorblindType } = useAccessibility();
+  const [activeMetric, setActiveMetric] = useState<"delay_minutes" | "gap_minutes" | "incidents" | "avg_delay">("delay_minutes");
+  
+  const metrics = [
+    { id: "delay_minutes", label: "Delay min" },
+    { id: "gap_minutes", label: "Gap min" },
+    { id: "incidents", label: "Incidents" },
+    { id: "avg_delay", label: "Avg delay" },
+  ] as const;
+
   const routeOptions = useMemo(
     () => routeRows.map((r) => r.route).filter(Boolean),
     [routeRows],
@@ -78,174 +93,140 @@ export function MapSidebar({
     <aside className="map-sidebar panel-scroll card-panel">
       {viewMode === "historical" ? (
         <div className="map-sidebar__section">
-          <p className="map-sidebar__heading">Historical delay layer</p>
-          <p className="map-sidebar__hint">
-            By default the map shows live-alert routes, the top delayed routes in your year range, or
-            routes you search — not the full network. Use &quot;Show route on map&quot; to highlight one line.
-            Heatmap mode hides route lines unless a live alert route is active or Display all is on.
-          </p>
-          <div className="map-sidebar__row">
-            <label className="map-sidebar__label">
-              From year
-              <input
-                type="number"
-                className="filter-input w-full"
-                min={2014}
-                max={2026}
-                value={explore.histStart}
-                onChange={(e) => onExploreChange({ histStart: e.target.value })}
-              />
-            </label>
-            <label className="map-sidebar__label">
-              To year
-              <input
-                type="number"
-                className="filter-input w-full"
-                min={2014}
-                max={2026}
-                value={explore.histEnd}
-                onChange={(e) => onExploreChange({ histEnd: e.target.value })}
-              />
-            </label>
-          </div>
-          <label className="map-sidebar__check">
-            <input
-              type="checkbox"
-              checked={explore.showAllRoutes}
-              onChange={(e) => onExploreChange({ showAllRoutes: e.target.checked })}
-            />
-            Display all routes on map
-          </label>
-          <label className="map-sidebar__check">
-            <input
-              type="checkbox"
-              checked={explore.showHeatmap}
-              onChange={(e) => onExploreChange({ showHeatmap: e.target.checked })}
-            />
-            Show delay heatmap
-          </label>
-
-          <p className="map-sidebar__heading">Route search</p>
-          <input
-            type="text"
-            className="filter-input w-full"
-            placeholder={`e.g. ${mode === "bus" ? "29" : "501"} (${mode})`}
-            value={explore.routeSearch}
-            onChange={(e) => onExploreChange({ routeSearch: e.target.value })}
-            list="map-route-list"
-          />
-          <datalist id="map-route-list">
-            {routeOptions.map((r) => (
-              <option key={r} value={r} />
-            ))}
-          </datalist>
-          <button
-            type="button"
-            className="map-sidebar__btn"
-            onClick={() => onSelectRoute(explore.routeSearch.trim())}
-          >
-            Show route on map
-          </button>
-
-          {routeDetail && (
-            <div className="map-sidebar__card">
-              <strong>Route {routeDetail.route}</strong>
-              <p>
-                {routeDetail.summary.incidents.toLocaleString()} incidents ·{" "}
-                {Math.round(routeDetail.summary.delay_minutes).toLocaleString()} min delay
-              </p>
-              <ul className="map-sidebar__list">
-                {routeDetail.categories.map((c) => (
-                  <li key={c.category}>
-                    {c.category}: {Math.round(c.delay_minutes).toLocaleString()} min
-                  </li>
-                ))}
-              </ul>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--muted)]" />
+              <h2 className="text-sm font-bold">Historical</h2>
             </div>
-          )}
-
-          <p className="map-sidebar__heading">Compare two routes</p>
-          <div className="map-sidebar__row">
-            <select
-              className="filter-input w-full"
-              value={explore.compareA}
-              onChange={(e) => onExploreChange({ compareA: e.target.value })}
-            >
-              <option value="">Route A</option>
-              {routeOptions.map((r) => (
-                <option key={`a-${r}`} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <select
-              className="filter-input w-full"
-              value={explore.compareB}
-              onChange={(e) => onExploreChange({ compareB: e.target.value })}
-            >
-              <option value="">Route B</option>
-              {routeOptions.map((r) => (
-                <option key={`b-${r}`} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            <span className="text-[11px] text-[var(--muted)] font-medium">
+              {explore.histStart === explore.histEnd ? explore.histStart : `${explore.histStart} — ${explore.histEnd}`}
+            </span>
           </div>
-          {compareDetailA && compareDetailB && (
-            <div className="map-sidebar__card">
-              <p>
-                <strong>{compareDetailA.route}</strong>:{" "}
-                {Math.round(compareDetailA.summary.delay_minutes).toLocaleString()} min
-              </p>
-              <p>
-                <strong>{compareDetailB.route}</strong>:{" "}
-                {Math.round(compareDetailB.summary.delay_minutes).toLocaleString()} min
-              </p>
-            </div>
-          )}
 
-          <p className="map-sidebar__heading">Address search</p>
-          <p className="map-sidebar__hint">
-            Search Toronto-area addresses and intersections. Suggestions appear as you type.
-          </p>
-          <div className="address-search">
-            <input
-              type="search"
-              className="filter-input w-full"
-              placeholder="e.g. 1 Front St E, or King and Bathurst"
-              value={explore.addressQuery}
-              onChange={(e) => onExploreChange({ addressQuery: e.target.value })}
-              onKeyDown={(e) => e.key === "Enter" && onGeocodeAddress()}
-              autoComplete="off"
-              aria-autocomplete="list"
-              aria-expanded={addressSuggestions.length > 0}
-            />
-            {addressSuggestions.length > 0 && (
-              <ul className="address-search__suggestions" role="listbox">
-                {addressSuggestions.map((hit) => (
-                  <li key={`${hit.lon}-${hit.lat}-${hit.display_name}`}>
-                    <button
-                      type="button"
-                      role="option"
-                      className="address-search__option"
-                      onClick={() => onPickAddressSuggestion?.(hit)}
+          <div className="mb-6">
+            <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-3">
+              Summary · {explore.histStart === explore.histEnd ? explore.histStart : `${explore.histStart}–${explore.histEnd}`}
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-[var(--control-bg)] border border-[var(--border)] rounded-lg p-3">
+                <p className="text-[10px] text-[var(--muted)] font-medium mb-1">Total incidents</p>
+                <p className="text-lg font-bold leading-tight">
+                  {(routeRows.reduce((sum, r) => sum + r.incidents, 0)).toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-[var(--control-bg)] border border-[var(--border)] rounded-lg p-3">
+                <p className="text-[10px] text-[var(--muted)] font-medium mb-1">Total delay</p>
+                <p className="text-lg font-bold leading-tight">
+                  {(() => {
+                    const total = routeRows.reduce((sum, r) => sum + r.delay_minutes, 0);
+                    return total >= 1000000 ? `${(total / 1000000).toFixed(1)}M` : `${Math.round(total / 1000)}k`;
+                  })()}
+                  <span className="text-[10px] ml-1 font-medium text-[var(--muted)]">min</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Routes Ranked</p>
+            </div>
+            
+            <div className="flex items-center gap-3 border-b border-[var(--border)] mb-4">
+              {metrics.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setActiveMetric(m.id)}
+                  className={`text-[11px] font-bold pb-1.5 transition-all relative ${
+                    activeMetric === m.id ? "text-[var(--accent)]" : "text-[var(--muted)]"
+                  }`}
+                >
+                  {m.label}
+                  {activeMetric === m.id && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--accent)]" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              {rankedRoutes
+                .sort((a, b) => {
+                  if (activeMetric === "avg_delay") {
+                    const avgA = a.incidents ? a.delay_minutes / a.incidents : 0;
+                    const avgB = b.incidents ? b.delay_minutes / b.incidents : 0;
+                    return avgB - avgA;
+                  }
+                  return b[activeMetric] - a[activeMetric];
+                })
+                .slice(0, 6)
+                .map((r, idx) => {
+                  const val = activeMetric === "avg_delay" 
+                    ? (r.incidents ? r.delay_minutes / r.incidents : 0)
+                    : r[activeMetric];
+                  const prevVal = activeMetric === "avg_delay"
+                    ? (r.prev_incidents ? (r.prev_delay_minutes ?? 0) / r.prev_incidents : 0)
+                    : (activeMetric === "delay_minutes" ? r.prev_delay_minutes : 
+                       activeMetric === "gap_minutes" ? r.prev_gap_minutes : 
+                       r.prev_incidents) ?? 0;
+                  
+                  const pct = prevVal > 0 ? ((val - prevVal) / prevVal) * 100 : 0;
+                  const maxVal = Math.max(...rankedRoutes.map(rr => 
+                    activeMetric === "avg_delay" 
+                      ? (rr.incidents ? rr.delay_minutes / rr.incidents : 0)
+                      : rr[activeMetric]
+                  ));
+
+                  return (
+                    <div 
+                      key={r.route} 
+                      className="flex items-center gap-3 py-2 px-1 hover:bg-[var(--accent)]/5 rounded-md cursor-pointer transition-colors group"
+                      onClick={() => onSelectRoute(r.route)}
                     >
-                      {hit.display_name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <span className="text-[11px] font-bold text-[var(--muted)] w-3">{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: getModeColors(colorblindType)[mode] }} />
+                            <span className="text-xs font-bold truncate">
+                              {r.route} {getRouteName(r.route)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-xs font-bold">
+                              {val >= 1000 ? `${Math.round(val / 1000)}k` : Math.round(val)}
+                            </span>
+                            {pct !== 0 && (
+                              <span className={`text-[10px] font-bold ${pct > 0 ? "text-red-500" : "text-green-500"}`}>
+                                {pct > 0 ? "↑" : "↓"}{Math.abs(Math.round(pct))}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-[var(--accent)] opacity-60 rounded-full transition-all duration-500"
+                            style={{ width: `${(val / maxVal) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           </div>
-          <button
-            type="button"
-            className="map-sidebar__btn"
-            onClick={onGeocodeAddress}
-            disabled={geocodeSearching}
+
+          <a 
+            href="/explorer"
+            className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-bold rounded-lg hover:bg-[var(--accent)]/20 transition-colors"
           >
-            {geocodeSearching ? "Searching…" : "Find on map"}
-          </button>
-          {geocodeStatus && <p className="map-sidebar__status">{geocodeStatus}</p>}
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 3v18h18" />
+              <path d="M18 9l-6 6-2-2-4 4" />
+            </svg>
+            Explore in Data Explorer
+            <span className="text-sm">→</span>
+          </a>
         </div>
       ) : (
         <div className="map-sidebar__live">

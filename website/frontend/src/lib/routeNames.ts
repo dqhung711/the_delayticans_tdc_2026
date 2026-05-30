@@ -1,0 +1,51 @@
+export const ROUTE_NAMES: Record<string, string> = {
+  // Streetcars
+  "301": "Queen",
+  "304": "King",
+  "306": "Carlton",
+  "310": "Spadina",
+  "501": "Queen",
+  "503": "Kingston Rd",
+  "504": "King",
+  "505": "Dundas",
+  "506": "Carlton",
+  "508": "Lake Shore",
+  "509": "Harbourfront",
+  "510": "Spadina",
+  "511": "Bathurst",
+  "512": "St Clair",
+
+  // Common Buses
+  "7": "Bathurst",
+  "29": "Dufferin",
+  "32": "Eglinton West",
+  "34": "Eglinton East",
+  "35": "Jane",
+  "36": "Finch West",
+  "39": "Finch East",
+  "52": "Lawrence West",
+  "54": "Lawrence East",
+  "60": "Steeles West",
+  "63": "Ossington",
+  "84": "Sheppard West",
+  "85": "Sheppard East",
+  "86": "Scarborough",
+  "89": "Weston",
+  "95": "York Mills",
+  "96": "Wilson",
+  "102": "Markham Rd",
+  "116": "Morningside",
+  "129": "McCowan North",
+  "165": "Weston Rd North",
+  "192": "Airport Rocket",
+  "900": "Airport Express",
+  "927": "Highway 27 Express",
+  "939": "Finch Express",
+  "954": "Lawrence East Express",
+  "984": "Sheppard West Express",
+  "985": "Sheppard East Express",
+};
+
+export function getRouteName(route: string): string {
+  return ROUTE_NAMES[route] || "";
+}

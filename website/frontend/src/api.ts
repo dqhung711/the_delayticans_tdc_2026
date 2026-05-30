@@ -6,7 +6,7 @@ export interface QueryParams {
   mode: Mode;
   view: ViewMode;
   granularity: Granularity;
-  timeToggle: "year" | "date";
+  timeToggle: "year" | "month";
   start: string;
   end: string;
   directions: Direction[];
@@ -125,6 +125,15 @@ export interface RouteDelayRow {
   delay_minutes: number;
   gap_minutes: number;
   incidents: number;
+  prev_delay_minutes?: number;
+  prev_gap_minutes?: number;
+  prev_incidents?: number;
+}
+
+export async function fetchRankedRoutes(params: QueryParams): Promise<RouteDelayRow[]> {
+  const res = await fetch(apiUrl(`/api/map/ranked-routes?${buildSearch(params)}`));
+  if (!res.ok) return [];
+  return res.json();
 }
 
 export interface RouteDetail {

@@ -10,6 +10,7 @@ import {
   clearMapStopsCache,
   clearRouteShapesCache,
   fetchRouteDelays,
+  fetchRankedRoutes,
   fetchRouteDetail,
   fetchRouteShapes,
   prefetchRouteShapes,
@@ -44,9 +45,6 @@ import {
   ACCESSIBLE_STOPS_SOURCE,
   accessibleStopFeatures,
   accessibleStopLabel,
-  CONSTRUCTION_LAYER,
-  CONSTRUCTION_SOURCE,
-  constructionAdvisoriesToGeoJSON,
   setOverlayVisibility,
   STOPS_LAYER,
   STOPS_SOURCE,
@@ -61,6 +59,8 @@ interface Props {
 }
 
 const DIRECTIONS: Direction[] = ["EB", "WB", "NB", "SB"];
+
+const EMPTY_GEOJSON: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
 
 const StreetcarIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -210,7 +210,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const showAllRoutesRef = useRef(false);
   const showStopsRef = useRef(true);
   const showAccessibleStopsRef = useRef(false);
-  const showConstructionRef = useRef(false);
   const colorblindRef = useRef(colorblindType);
   const modeRef = useRef(mode);
   const stopsGeoRef = useRef<GeoJSON.FeatureCollection | null>(null);
@@ -248,7 +247,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const [viewMode, setViewMode] = useState<"live" | "historical">("live");
   const [showStops, setShowStops] = useState(true);
   const [showAccessibleStops, setShowAccessibleStops] = useState(true);
-  const [showConstruction, setShowConstruction] = useState(false);
   const [accessibleStopCount, setAccessibleStopCount] = useState(0);
   const [explore, setExplore] = useState<MapExploreState>({
     histStart: "2014",
@@ -266,8 +264,8 @@ export function TransitMap({ mode, onModeChange }: Props) {
   showAllRoutesRef.current = explore.showAllRoutes;
   showStopsRef.current = showStops;
   showAccessibleStopsRef.current = showAccessibleStops;
-  showConstructionRef.current = showConstruction;
   const [routeRows, setRouteRows] = useState<RouteDelayRow[]>([]);
+  const [rankedRoutes, setRankedRoutes] = useState<RouteDelayRow[]>([]);
   const [routeDetail, setRouteDetail] = useState<RouteDetail | null>(null);
   const [compareA, setCompareA] = useState<RouteDetail | null>(null);
   const [compareB, setCompareB] = useState<RouteDetail | null>(null);
@@ -284,13 +282,13 @@ export function TransitMap({ mode, onModeChange }: Props) {
     () => ({
       mode,
       view: "overview" as const,
-      granularity: explore.timeToggle === "year" ? ("year" as const) : ("month" as const),
+      granularity: explore.timeToggle === "year" ? ("year" as const) : ("range" as const),
       timeToggle: explore.timeToggle,
       start: explore.histStart,
       end: explore.histEnd,
       directions: [] as Direction[],
       routes: [],
-      bucket: explore.timeToggle === "year" ? ("year" as const) : ("month" as const),
+      bucket: "month" as const,
     }),
     [mode, explore.histStart, explore.histEnd, explore.timeToggle],
   );
@@ -309,7 +307,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     if (!map.getSource("ttc-routes")) {
       map.addSource("ttc-routes", {
         type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
+        data: EMPTY_GEOJSON,
       });
       map.addLayer({
         id: "ttc-routes-line",
@@ -343,7 +341,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     if (!map.getSource("delay-heat")) {
       map.addSource("delay-heat", {
         type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
+        data: EMPTY_GEOJSON,
       });
       map.addLayer(
         {
@@ -396,7 +394,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     const empty: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
 
     if (!map.getSource(STOPS_SOURCE)) {
-      map.addSource(STOPS_SOURCE, { type: "geojson", data: empty });
+      map.addSource(STOPS_SOURCE, { type: "geojson", data: EMPTY_GEOJSON });
       map.addLayer(
         {
           id: STOPS_LAYER,
@@ -417,31 +415,10 @@ export function TransitMap({ mode, onModeChange }: Props) {
       );
     }
 
-    if (!map.getSource(CONSTRUCTION_SOURCE)) {
-      map.addSource(CONSTRUCTION_SOURCE, { type: "geojson", data: empty });
-      map.addLayer(
-        {
-          id: CONSTRUCTION_LAYER,
-          type: "circle",
-          source: CONSTRUCTION_SOURCE,
-          minzoom: 9,
-          layout: { visibility: showConstructionRef.current ? "visible" : "none" },
-          paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 7, 13, 11, 16, 14],
-            "circle-color": getModeColors(colorblindRef.current).construction,
-            "circle-opacity": 0.85,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#ffffff",
-          },
-        },
-        "ttc-routes-highlight",
-      );
-    }
-
     if (!map.getSource("live-advisories")) {
       map.addSource("live-advisories", {
         type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
+        data: EMPTY_GEOJSON,
         promoteId: "id",
       });
       map.addLayer({
@@ -522,7 +499,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
 
     if (!map.getSource(ACCESSIBLE_STOPS_SOURCE)) {
       ensureAccessibleStopIcon(map, getModeColors(colorblindRef.current).accessible);
-      map.addSource(ACCESSIBLE_STOPS_SOURCE, { type: "geojson", data: empty });
+      map.addSource(ACCESSIBLE_STOPS_SOURCE, { type: "geojson", data: EMPTY_GEOJSON });
       map.addLayer({
         id: ACCESSIBLE_STOPS_LAYER,
         type: "symbol",
@@ -557,9 +534,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
       const accessibleSource = map.getSource(ACCESSIBLE_STOPS_SOURCE) as
         | maplibregl.GeoJSONSource
         | undefined;
-      const constructionSource = map.getSource(CONSTRUCTION_SOURCE) as
-        | maplibregl.GeoJSONSource
-        | undefined;
 
       if (stopsSource && stops) {
         stopsSource.setData(stops);
@@ -569,11 +543,9 @@ export function TransitMap({ mode, onModeChange }: Props) {
         setAccessibleStopCount(accessible.features.length);
         accessibleSource.setData(accessible);
       }
-      constructionSource?.setData(constructionAdvisoriesToGeoJSON(advisories));
 
       setOverlayVisibility(map, STOPS_LAYER, showStopsRef.current);
       setOverlayVisibility(map, ACCESSIBLE_STOPS_LAYER, showAccessibleStopsRef.current);
-      setOverlayVisibility(map, CONSTRUCTION_LAYER, showConstructionRef.current);
     },
     [],
   );
@@ -742,7 +714,8 @@ export function TransitMap({ mode, onModeChange }: Props) {
         : collectLiveAdvisoryRouteIds(liveAdvisories, activeMode);
 
       const showAll = explore.showAllRoutes;
-      const lineFeatures = selectMapRouteFeatures({
+      const empty = EMPTY_GEOJSON;
+    const lineFeatures = selectMapRouteFeatures({
         collection: routes,
         activeMode,
         showAllRoutes: showAll,
@@ -831,9 +804,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
     if (map.getLayer("delay-heat-layer")) {
       map.setPaintProperty("delay-heat-layer", "heatmap-color", heatRamp);
     }
-    if (map.getLayer(CONSTRUCTION_LAYER)) {
-      map.setPaintProperty(CONSTRUCTION_LAYER, "circle-color", palette.construction);
-    }
     if (map.getLayer(ACCESSIBLE_STOPS_LAYER)) {
       ensureAccessibleStopIcon(map, palette.accessible);
       map.triggerRepaint();
@@ -848,7 +818,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
         if (map.getLayer("delay-heat-layer")) {
           map.setLayoutProperty("delay-heat-layer", "visibility", "none");
         }
-        heatSource?.setData({ type: "FeatureCollection", features: [] });
+        heatSource?.setData(EMPTY_GEOJSON);
         setRouteLinePaint(map, false, showAllRoutesRef.current);
         return;
       }
@@ -1335,13 +1305,8 @@ export function TransitMap({ mode, onModeChange }: Props) {
   }, [showAccessibleStops, mapReady]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapReady) return;
-    setOverlayVisibility(map, CONSTRUCTION_LAYER, showConstruction);
-  }, [showConstruction, mapReady]);
-
-  useEffect(() => {
     fetchRouteDelays(mapQuery).then(setRouteRows).catch(() => setRouteRows([]));
+    fetchRankedRoutes(mapQuery).then(setRankedRoutes).catch(() => setRankedRoutes([]));
     prefetchDelayHotspots(mapQuery);
   }, [mapQuery]);
 
@@ -1554,19 +1519,20 @@ export function TransitMap({ mode, onModeChange }: Props) {
             <span className="map-filter-label">Time Range</span>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                {(["year", "month"] as const).map((t) => (
+                {(["year", "range"] as const).map((t) => (
                   <button
                     key={t}
                     onClick={() => {
                       setExplore((p) => {
                         const patch: Partial<MapExploreState> = { timeToggle: t };
                         if (t === "year") {
-                          const y = p.histStart.slice(0, 4);
+                          const y = p.histStart.includes("-") ? p.histStart.slice(0, 4) : p.histStart;
                           patch.histStart = y;
                           patch.histEnd = y;
-                        } else if (p.histStart.length === 4) {
-                          patch.histStart = `${p.histStart}-01`;
-                          patch.histEnd = `${p.histStart}-12`;
+                        } else {
+                          const y = p.histStart.length === 4 ? p.histStart : p.histStart.slice(0, 4);
+                          patch.histStart = y;
+                          patch.histEnd = String(parseInt(y, 10) + 1);
                         }
                         return { ...p, ...patch };
                       });
@@ -1575,7 +1541,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
                       explore.timeToggle === t ? "text-[var(--text)]" : "text-[var(--muted)]"
                     }`}
                   >
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                    {t === "year" ? "Year" : "Range"}
                     {explore.timeToggle === t && (
                       <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
                     )}
@@ -1591,24 +1557,28 @@ export function TransitMap({ mode, onModeChange }: Props) {
                       const val = e.target.value;
                       setExplore((p) => ({ ...p, histStart: val, histEnd: val }));
                     }}
-                    min={2000}
+                    min={2014}
                     max={2099}
                     className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-16"
                   />
                 ) : (
                   <>
                     <input
-                      type="month"
+                      type="number"
                       value={explore.histStart}
                       onChange={(e) => setExplore((p) => ({ ...p, histStart: e.target.value }))}
-                      className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-28"
+                      min={2014}
+                      max={2099}
+                      className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-16"
                     />
                     <span className="text-[var(--muted)] text-[10px]">→</span>
                     <input
-                      type="month"
+                      type="number"
                       value={explore.histEnd}
                       onChange={(e) => setExplore((p) => ({ ...p, histEnd: e.target.value }))}
-                      className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-28"
+                      min={2014}
+                      max={2099}
+                      className="bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none w-16"
                     />
                   </>
                 )}
@@ -1637,15 +1607,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
                 onChange={(e) => setShowAccessibleStops(e.target.checked)}
               />
               Accessible stops
-            </label>
-            <label className="map-checkbox-item">
-              <input
-                type="checkbox"
-                className="map-checkbox"
-                checked={showConstruction}
-                onChange={(e) => setShowConstruction(e.target.checked)}
-              />
-              Construction
             </label>
             <label className="map-checkbox-item">
               <input
@@ -1723,7 +1684,6 @@ export function TransitMap({ mode, onModeChange }: Props) {
                 {accessibleStopCount === 0 ? " (reload API)" : ` (${accessibleStopCount.toLocaleString()})`}
               </span>
             )}
-            {showConstruction && <span className="text-[var(--muted)]">· Construction</span>}
             <span className="text-[var(--muted)]">
               {explore.showHeatmap
                 ? colorblindMode
@@ -1745,6 +1705,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
           explore={explore}
           onExploreChange={(patch) => setExplore((p) => ({ ...p, ...patch }))}
           routeRows={routeRows}
+          rankedRoutes={rankedRoutes}
           routeDetail={routeDetail}
           compareDetailA={compareA}
           compareDetailB={compareB}

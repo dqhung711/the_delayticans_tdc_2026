@@ -2,7 +2,7 @@ export type Tab = "live" | "explorer";
 export type Mode = "streetcar" | "bus";
 export type ViewMode = "overview" | "compare";
 export type Granularity = "year" | "month" | "date" | "datetime" | "quarter";
-export type TimeToggle = "year" | "month";
+export type TimeToggle = "year" | "range";
 export type Bucket = "hour" | "day" | "month" | "year";
 export type Direction = "EB" | "WB" | "NB" | "SB";
 
@@ -24,6 +24,11 @@ export interface OverviewCharts {
     delay_minutes: number;
     gap_minutes: number;
   }>;
+  dailyTotals?: Array<{
+    day: number;
+    delay_minutes: number;
+    gap_minutes: number;
+  }>;
   categories: Array<{
     category: string;
     delay_minutes: number;
@@ -31,6 +36,11 @@ export interface OverviewCharts {
   }>;
   hourlyByCategory: Array<{
     hour: number;
+    category: string;
+    delay_minutes: number;
+  }>;
+  routesByCategory?: Array<{
+    route: string;
     category: string;
     delay_minutes: number;
   }>;

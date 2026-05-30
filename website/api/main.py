@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 
 import advisories
+import ai
 import db
 import geocode_search
 from filters import parse_query
@@ -29,6 +30,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
 
 scheduler = AsyncIOScheduler()
 
@@ -106,10 +109,16 @@ def charts_overview(request: Request):
                     "hourlyTotals": db.get_hourly_totals(
                         query["mode"], interval, query["directions"], query["routes"]
                     ),
+                    "dailyTotals": db.get_daily_totals(
+                        query["mode"], interval, query["directions"], query["routes"]
+                    ),
                     "categories": db.get_categories(
                         query["mode"], interval, query["directions"], query["routes"]
                     ),
                     "hourlyByCategory": db.get_hourly_by_category(
+                        query["mode"], interval, query["directions"], query["routes"]
+                    ),
+                    "routesByCategory": db.get_routes_by_category(
                         query["mode"], interval, query["directions"], query["routes"]
                     ),
                 }
@@ -125,10 +134,16 @@ def charts_overview(request: Request):
         "hourlyTotals": db.get_hourly_totals(
             query["mode"], interval, query["directions"], query["routes"]
         ),
+        "dailyTotals": db.get_daily_totals(
+            query["mode"], interval, query["directions"], query["routes"]
+        ),
         "categories": db.get_categories(
             query["mode"], interval, query["directions"], query["routes"]
         ),
         "hourlyByCategory": db.get_hourly_by_category(
+            query["mode"], interval, query["directions"], query["routes"]
+        ),
+        "routesByCategory": db.get_routes_by_category(
             query["mode"], interval, query["directions"], query["routes"]
         ),
     }
@@ -181,6 +196,34 @@ def map_route_delays(request: Request):
     interval = query["intervals"][0]
     rows = db.get_route_delay_totals(
         query["mode"], interval, query["directions"], query["routes"]
+    )
+    return rows
+
+
+@app.get("/api/map/ranked-routes")
+def map_ranked_routes(request: Request):
+    query = parse_query(request.url.query)
+    interval = query["intervals"][0]
+    
+    # Calculate comparison interval if not provided but we are in a single year or range
+    comp_interval = None
+    if len(query["intervals"]) > 1:
+        comp_interval = query["intervals"][1]
+    else:
+        # Fallback logic similar to DataExplorer.tsx
+        start = request.query_params.get("start", "2014")
+        end = request.query_params.get("end", "2026")
+        if start.isdigit() and end.isdigit():
+            s_year = int(start)
+            e_year = int(end)
+            diff = e_year - s_year + 1
+            prev_start = str(s_year - diff)
+            prev_end = str(s_year - 1)
+            from filters import interval_from_granularity
+            comp_interval = interval_from_granularity("year", prev_start, prev_end)
+
+    rows = db.get_ranked_routes_with_comparison(
+        query["mode"], interval, comp_interval, query["directions"], query["routes"]
     )
     return rows
 

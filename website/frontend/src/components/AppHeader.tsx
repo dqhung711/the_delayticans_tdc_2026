@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Mode, Tab } from "../types";
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
   onModeChange: (mode: Mode) => void;
   yearRange: string;
   incidentCount: string;
-  themeToggle: React.ReactNode;
+  themeToggle: ReactNode;
 }
 
 export function AppHeader({

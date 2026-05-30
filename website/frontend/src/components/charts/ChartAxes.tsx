@@ -13,7 +13,7 @@ interface XProps {
   angle?: number;
   textAnchor?: "end" | "middle" | "start";
   height?: number;
-  tickFormatter?: (v: string) => string;
+  tickFormatter?: (v: any) => string;
   ticks?: Array<string | number>;
 }
 
@@ -22,7 +22,7 @@ interface YProps {
   width?: number;
   type?: "category" | "number";
   dataKey?: string;
-  tickFormatter?: (v: number) => string;
+  tickFormatter?: (v: any) => string;
   ticks?: number[];
   yMax?: number;
 }
@@ -34,7 +34,7 @@ interface MilestoneLinesProps {
 
 export function ChartXAxis({
   theme,
-  dataKey = "label",
+  dataKey,
   type,
   tickSmall,
   interval = 0,
@@ -43,7 +43,8 @@ export function ChartXAxis({
   height,
   tickFormatter,
   ticks,
-}: XProps) {
+  domain,
+}: XProps & { domain?: any }) {
   const p = chartPalette(theme);
   const tick = { 
     ...(tickSmall ? chartTickSmall(theme) : chartTick(theme)), 
@@ -51,12 +52,15 @@ export function ChartXAxis({
     fontSize: 10,
     fontWeight: 500
   };
+  const finalDataKey = dataKey ?? (type === "category" ? "label" : undefined);
+
   return (
     <XAxis
-      dataKey={dataKey}
+      dataKey={finalDataKey}
       type={type}
       tick={tick}
       ticks={ticks}
+      domain={domain}
       interval={ticks ? 0 : interval}
       minTickGap={0}
       angle={angle}
@@ -87,6 +91,7 @@ export function ChartYAxis({
     fontWeight: 500
   };
   const top = yMax ?? (ticks?.length ? ticks[ticks.length - 1] : undefined);
+  const isNumber = type === "number" || !type;
 
   return (
     <YAxis
@@ -95,7 +100,7 @@ export function ChartYAxis({
       tick={tick}
       width={width}
       ticks={ticks}
-      domain={top != null ? [0, top] : [0, "auto"]}
+      domain={isNumber ? (top != null ? [0, top] : [0, "auto"]) : undefined}
       allowDecimals={false}
       tickFormatter={tickFormatter}
       tickLine={{ stroke: p.grid, strokeWidth: 1 }}

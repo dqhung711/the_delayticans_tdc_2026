@@ -98,9 +98,14 @@ export function LiveRouteDetail({ routeDetail, mode, onBack }: Props) {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Vehicles on route now</h3>
-          <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 text-green-700 rounded text-[10px] font-bold uppercase">
-            <span className="w-1 h-1 bg-green-500 rounded-full" />
-            Live
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 uppercase tracking-tighter">
+              Mockup
+            </span>
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 text-green-700 rounded text-[10px] font-bold uppercase">
+              <span className="w-1 h-1 bg-green-500 rounded-full" />
+              Live
+            </div>
           </div>
         </div>
         <div className="space-y-3">
@@ -149,7 +154,12 @@ export function LiveRouteDetail({ routeDetail, mode, onBack }: Props) {
       <section className="mb-8 pt-6 border-t border-[var(--border)]">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Next Departures</h3>
-          <span className="text-[10px] text-[var(--muted)] font-medium">Dufferin Loop</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 uppercase tracking-tighter">
+              Mockup
+            </span>
+            <span className="text-[10px] text-[var(--muted)] font-medium">Dufferin Loop</span>
+          </div>
         </div>
         <div className="space-y-4">
           {MOCK_DEPARTURES.map((d, i) => {
@@ -189,7 +199,12 @@ export function LiveRouteDetail({ routeDetail, mode, onBack }: Props) {
 
       {/* Busy by Hour */}
       <section className="mb-8 pt-6 border-t border-[var(--border)]">
-        <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-4">Busy by hour</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Busy by hour</h3>
+          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 uppercase tracking-tighter">
+            Mockup
+          </span>
+        </div>
         <div className="h-24 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={MOCK_HOURLY}>
@@ -219,7 +234,12 @@ export function LiveRouteDetail({ routeDetail, mode, onBack }: Props) {
 
       {/* Busy by Day of Week */}
       <section className="mb-8 pt-6 border-t border-[var(--border)]">
-        <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-4">Busy by day of week</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Busy by day of week</h3>
+          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 uppercase tracking-tighter">
+            Mockup
+          </span>
+        </div>
         <div className="h-24 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={MOCK_DAILY}>
@@ -257,7 +277,12 @@ export function LiveRouteDetail({ routeDetail, mode, onBack }: Props) {
       </section>
 
       {/* KPI Grid */}
-      <section className="grid grid-cols-2 gap-3 pt-6 border-t border-[var(--border)]">
+      <section className="grid grid-cols-2 gap-3 pt-6 border-t border-[var(--border)] relative">
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 uppercase tracking-tighter">
+            Mockup Data
+          </span>
+        </div>
         <div className="bg-gray-50 p-3 rounded-xl">
           <span className="text-[10px] text-[var(--muted)] font-bold uppercase">Avg delay</span>
           <div className="flex items-baseline gap-1 mt-1">

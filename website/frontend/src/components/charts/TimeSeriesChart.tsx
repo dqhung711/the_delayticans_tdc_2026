@@ -4,6 +4,7 @@ import {
   Line,
   LineChart,
   Tooltip,
+  ReferenceArea,
   type TooltipProps,
 } from "recharts";
 import { useTheme } from "../../context/ThemeContext";
@@ -79,8 +80,8 @@ export function TimeSeriesChart({
   const anim = CHART_ANIMATION;
   const colors = chartPalette(theme);
   const legendItems = [
-    { label: "Delay minutes", color: colors.primary },
-    { label: "Gap minutes", color: colors.secondary, dashed: true },
+    { label: "Delay min", color: colors.primary },
+    { label: "Gap min", color: colors.secondary, dashed: true },
   ];
 
   const formatted = useMemo(() => {
@@ -202,8 +203,8 @@ export function TimeSeriesChart({
     payload,
   ) => tooltipYearLabel(bucket, payload?.[0]?.payload as SeriesRow | undefined);
 
-  const axes = (
-    <>
+  const renderChart = (width: number, chartHeight: number) => (
+    <LineChart width={width} height={chartHeight} data={formatted} margin={margin}>
       <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} vertical={false} />
       <ChartMilestoneLines theme={theme} ticks={yTicks} />
       <ChartXAxis 
@@ -216,12 +217,15 @@ export function TimeSeriesChart({
         tickFormatter={formatXAxis}
       />
       <ChartYAxis theme={theme} ticks={yTicks} yMax={yMax} width={68} />
-    </>
-  );
-
-  const renderChart = (width: number, chartHeight: number) => (
-    <LineChart width={width} height={chartHeight} data={formatted} margin={margin}>
-      {axes}
+      {((bucket === "year" && formatted.some(d => d.bucket === "2020")) || 
+        (bucket === "month" && formatted.some(d => d.bucket.startsWith("2020")))) && (
+        <ReferenceArea 
+          x1={new Date("2020-01-01T00:00:00").getTime()} 
+          x2={new Date("2020-12-31T23:59:59").getTime()} 
+          fill="rgba(220, 38, 38, 0.05)" 
+          label={{ position: 'top', value: 'COVID', fill: '#dc2626', fontSize: 10, fontWeight: 700 }}
+        />
+      )}
       <Tooltip {...baseTooltip} labelFormatter={tooltipLabelFormatter} />
       <Line
         type="monotone"
@@ -229,7 +233,28 @@ export function TimeSeriesChart({
         name={delayName}
         stroke={colors.primary}
         strokeWidth={2.5}
-        dot={{ r: 3, fill: colors.primary, strokeWidth: 0 }}
+        dot={(props: any) => {
+          const { cx, cy, payload } = props;
+          const isMax = payload.delay_minutes === Math.max(...formatted.map(d => d.delay_minutes));
+          if (isMax && formatted.length > 1) {
+            return (
+              <g key={`dot-${payload.bucket}`}>
+                <circle cx={cx} cy={cy} r={4} fill={colors.primary} />
+                <text 
+                  x={cx} 
+                  y={cy - 10} 
+                  textAnchor="middle" 
+                  fontSize={10} 
+                  fontWeight={700} 
+                  fill={colors.primary}
+                >
+                  {payload.label.split(' ')[0]} peak
+                </text>
+              </g>
+            );
+          }
+          return <circle key={`dot-${payload.bucket}`} cx={cx} cy={cy} r={3} fill={colors.primary} strokeWidth={0} />;
+        }}
         activeDot={{ r: 5 }}
         {...anim}
       />
@@ -246,10 +271,20 @@ export function TimeSeriesChart({
     </LineChart>
   );
 
+  const dynamicTitle = useMemo(() => {
+    if (title) return title;
+    const range = rangeStart === rangeEnd ? rangeStart : `${rangeStart}–${rangeEnd}`;
+    return `Delay & gap minutes · ${range}`;
+  }, [title, rangeStart, rangeEnd]);
+
+  const dynamicSubtitle = useMemo(() => {
+    return `${bucket.charAt(0).toUpperCase() + bucket.slice(1)}ly breakdown · auto`;
+  }, [bucket]);
+
   return (
     <ChartPanel
-      title={title ?? "Delay minutes & gap minutes over time"}
-      subtitle="Annual totals from TTC open-data delay reports (Min Delay + Min Gap)"
+      title={dynamicTitle}
+      subtitle={dynamicSubtitle}
       badge={isPrimary && showDevUI ? "Primary" : undefined}
       compact={compact}
       primary={isPrimary}
