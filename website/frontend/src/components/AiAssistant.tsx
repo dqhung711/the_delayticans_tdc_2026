@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiUrl } from "../lib/appConfig";
 
 interface Message {
   id: string;
@@ -36,7 +37,7 @@ export function AiAssistant() {
     setInput("");
     
     try {
-      const response = await fetch("/api/ai/chat", {
+      const response = await fetch(apiUrl("/api/ai/chat"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
