@@ -1,14 +1,12 @@
 import { routeIsVisible } from "./visibleRoutes";
 import type { Mode } from "../types";
 
-/** Same rule for bus and streetcar: every line segment tagged with this mode in route-shapes.json. */
+/** Mode-specific files from /api/route-shapes?mode=… — every feature is already scoped. */
 export function allModeLineFeatures(
   collection: GeoJSON.FeatureCollection,
-  activeMode: Mode,
+  _activeMode: Mode,
 ): GeoJSON.Feature[] {
-  return collection.features.filter(
-    (f) => String(f.properties?.mode ?? "") === activeMode,
-  );
+  return collection.features;
 }
 
 /** Filtered map: only routes in the visible set (delays, alerts, search, etc.). */
@@ -19,7 +17,6 @@ export function filteredModeLineFeatures(
 ): GeoJSON.Feature[] {
   if (!visibleRouteIds.size) return [];
   return collection.features.filter((f) => {
-    if (String(f.properties?.mode ?? "") !== activeMode) return false;
     const route = String(f.properties?.route ?? "");
     return routeIsVisible(route, visibleRouteIds, activeMode);
   });

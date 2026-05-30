@@ -9,11 +9,19 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 STOPS_LOOKUP_PATH = DATA_DIR / "stops-lookup.json"
-ROUTE_SHAPES_PATH = DATA_DIR / "route-shapes.json"
+ROUTE_SHAPES_BUS_PATH = DATA_DIR / "route-shapes-bus.json"
+ROUTE_SHAPES_STREETCAR_PATH = DATA_DIR / "route-shapes-streetcar.json"
+STOPS_GEOJSON_PATH = DATA_DIR / "stops.geojson"
 
-# Greater Toronto surface transit area (exclude bad geocodes outside the city)
-TORONTO_LON_MIN, TORONTO_LON_MAX = -79.65, -79.11
-TORONTO_LAT_MIN, TORONTO_LAT_MAX = 43.58, 43.86
+_shapes_cache: dict[str, dict] = {}
+_shapes_bytes: dict[str, tuple[bytes, str, bool]] = {}
+_shape_file_mtimes: dict[str, float] = {}
+_stops_cache: dict | None = None
+_stops_bytes: tuple[bytes, str] | None = None
+
+# City of Toronto — keep in sync with frontend/src/lib/torontoBounds.ts
+TORONTO_LON_MIN, TORONTO_LON_MAX = -79.639, -79.115
+TORONTO_LAT_MIN, TORONTO_LAT_MAX = 43.581, 43.855
 
 
 def in_toronto_bbox(lon: float, lat: float) -> bool:
@@ -68,6 +76,135 @@ def filter_stops_geojson(data: dict) -> dict:
         if not in_toronto_bbox(lon, lat):
             continue
         features.append(feat)
+    return {"type": "FeatureCollection", "features": features}
+
+
+def route_shapes_path_for_mode(mode: str | None) -> Path:
+    if mode == "streetcar":
+        return ROUTE_SHAPES_STREETCAR_PATH
+    return ROUTE_SHAPES_BUS_PATH
+
+
+def _load_route_shapes_from_disk(mode: str) -> dict:
+    path = route_shapes_path_for_mode(mode)
+    if not path.exists():
+        return {"type": "FeatureCollection", "features": []}
+    return json.loads(path.read_text())
+
+
+def get_route_shapes_geojson(mode: str | None = None) -> dict:
+    """Cached route lines from per-mode files built by fetch-network."""
+    if mode not in ("bus", "streetcar"):
+        return {"type": "FeatureCollection", "features": []}
+
+    cache_key = mode
+    path = route_shapes_path_for_mode(mode)
+    mtime = path.stat().st_mtime if path.exists() else 0.0
+    if cache_key in _shapes_cache and _shape_file_mtimes.get(cache_key) == mtime:
+        cached = _shapes_cache[cache_key]
+        if cached.get("features") or not path.exists() or path.stat().st_size <= 64:
+            return cached
+        del _shapes_cache[cache_key]
+        _shapes_bytes.pop(mode, None)
+
+    if not path.exists():
+        empty = {"type": "FeatureCollection", "features": []}
+        _shapes_cache[cache_key] = empty
+        _shape_file_mtimes[cache_key] = 0.0
+        return empty
+
+    data = _load_route_shapes_from_disk(mode)
+    _shapes_cache[cache_key] = data
+    _shape_file_mtimes[cache_key] = mtime
+    return data
+
+
+def warm_map_payloads() -> None:
+    """Pre-load and serialize map GeoJSON once at startup for fast responses."""
+    global _stops_bytes
+    for mode in ("bus", "streetcar"):
+        get_route_shapes_response(mode)
+
+    stops = get_stops_geojson()
+    if STOPS_GEOJSON_PATH.exists():
+        etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"'
+    else:
+        etag = '"0"'
+    _stops_bytes = (
+        json.dumps(stops, separators=(",", ":")).encode(),
+        etag,
+    )
+
+
+def _gzip_path_for(path: Path) -> Path:
+    return Path(f"{path}.gz")
+
+
+def get_route_shapes_response(mode: str | None = None) -> tuple[bytes, str, bool] | None:
+    """Return (body, etag, is_precompressed). Reloads when data files change."""
+    if mode not in ("bus", "streetcar"):
+        return None
+
+    path = route_shapes_path_for_mode(mode)
+    if not path.exists():
+        return None
+
+    mtime = path.stat().st_mtime
+    etag = f'"{int(mtime)}"'
+    prev = _shapes_bytes.get(mode)
+    if prev and _shape_file_mtimes.get(mode) == mtime:
+        return prev
+
+    get_route_shapes_geojson(mode)
+    gz_path = _gzip_path_for(path)
+    if gz_path.exists() and gz_path.stat().st_mtime >= mtime:
+        packed: tuple[bytes, str, bool] = (gz_path.read_bytes(), etag, True)
+    else:
+        data = _shapes_cache[mode]
+        packed = (json.dumps(data, separators=(",", ":")).encode(), etag, False)
+
+    _shapes_bytes[mode] = packed
+    _shape_file_mtimes[mode] = mtime
+    return packed
+
+
+def get_stops_response(mode: str | None = None) -> tuple[bytes, str] | None:
+    global _stops_bytes
+    if mode and mode in ("bus", "streetcar"):
+        data = get_stops_geojson(mode)
+        if STOPS_GEOJSON_PATH.exists():
+            etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"'
+        else:
+            etag = '"0"'
+        return json.dumps(data, separators=(",", ":")).encode(), etag
+    if _stops_bytes:
+        return _stops_bytes
+    data = get_stops_geojson()
+    etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"' if STOPS_GEOJSON_PATH.exists() else '"0"'
+    body = json.dumps(data, separators=(",", ":")).encode()
+    _stops_bytes = (body, etag)
+    return body, etag
+
+
+def get_stops_geojson(mode: str | None = None) -> dict:
+    global _stops_cache
+    if _stops_cache is None:
+        if not STOPS_GEOJSON_PATH.exists():
+            _stops_cache = {"type": "FeatureCollection", "features": []}
+        else:
+            _stops_cache = filter_stops_geojson(json.loads(STOPS_GEOJSON_PATH.read_text()))
+
+    if not mode or mode not in ("bus", "streetcar"):
+        return _stops_cache
+
+    features = [
+        f
+        for f in _stops_cache.get("features", [])
+        if mode
+        in (f.get("properties") or {}).get(
+            "modes", [(f.get("properties") or {}).get("mode")]
+        )
+    ]
     return {"type": "FeatureCollection", "features": features}
 
 
@@ -286,27 +423,36 @@ def geocode_advisory_text(
 
 @lru_cache(maxsize=1)
 def get_route_shapes() -> dict[str, list[tuple[float, float]]]:
-    """Route id -> line coordinates (lon, lat)."""
-    if not ROUTE_SHAPES_PATH.exists():
-        return {}
-    try:
-        data = json.loads(ROUTE_SHAPES_PATH.read_text())
-    except json.JSONDecodeError:
-        return {}
+    """Route id -> line coordinates (lon, lat) from split bus/streetcar files."""
     out: dict[str, list[tuple[float, float]]] = {}
-    for feature in data.get("features", []):
-        geom = feature.get("geometry") or {}
-        if geom.get("type") != "LineString":
+    for mode in ("bus", "streetcar"):
+        path = route_shapes_path_for_mode(mode)
+        if not path.exists():
             continue
-        route = str((feature.get("properties") or {}).get("route", "")).strip()
-        if not route:
+        try:
+            data = json.loads(path.read_text())
+        except json.JSONDecodeError:
             continue
-        coords = [(float(c[0]), float(c[1])) for c in geom.get("coordinates", []) if len(c) >= 2]
-        if coords:
+        for feature in data.get("features", []):
+            geom = feature.get("geometry") or {}
+            if geom.get("type") != "LineString":
+                continue
+            route = str((feature.get("properties") or {}).get("route", "")).strip()
+            if not route:
+                continue
+            coords = [
+                (float(c[0]), float(c[1]))
+                for c in geom.get("coordinates", [])
+                if len(c) >= 2
+            ]
+            if not coords:
+                continue
             key = route.upper()
-            out[key] = coords
+            if key not in out or len(coords) > len(out[key]):
+                out[key] = coords
             norm = route.lstrip("0").upper() or key
-            out.setdefault(norm, coords)
+            if norm not in out or len(coords) > len(out[norm]):
+                out[norm] = coords
     return out
 
 

@@ -56,7 +56,7 @@ website/
   data/         # SQLite + map assets (see data/README.md)
 ```
 
-Dev-only ingest scripts, backups, and caches live in `.dev/` and are **gitignored** (not needed to run the app).
+Dev ingest scripts and GTFS rebuild tools live in `.dev/tools/` (included in the repo).
 
 ## Production
 
@@ -75,4 +75,4 @@ npm run setup
 npm run rebuild-data   # writes data/delays.db + GTFS map files
 ```
 
-Scripts: `.dev/tools/` (not published; keep a copy locally or use `git add -f` if you must share them).
+Scripts: `.dev/tools/` (ingest + GTFS network build).

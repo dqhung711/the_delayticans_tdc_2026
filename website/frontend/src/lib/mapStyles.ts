@@ -9,12 +9,11 @@ export const BASEMAP: Record<Theme, string> = {
 
 export const TORONTO_CENTER: [number, number] = [-79.3832, 43.6532];
 
-export { TORONTO_BBOX, TORONTO_MAX_BOUNDS, inTorontoBbox } from "./torontoBounds";
+export { TORONTO_BBOX, TORONTO_MAX_BOUNDS, TORONTO_MIN_ZOOM, inTorontoBbox } from "./torontoBounds";
 
 export const MODE_COLORS = {
   bus: "#e53935",
   streetcar: "#ff6f61",
-  subway: "#ffcc33",
   unknown: "#9ca3af",
 } as const;
 

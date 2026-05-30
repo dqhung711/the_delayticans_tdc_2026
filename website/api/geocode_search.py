@@ -9,7 +9,7 @@ import httpx
 from gtfs_data import in_toronto_bbox
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-TORONTO_VIEWBOX = "-79.64,43.58,-79.12,43.86"
+TORONTO_VIEWBOX = "-79.639,43.581,-79.115,43.855"
 USER_AGENT = "TTC-Delays-Dashboard/1.0 (university project; contact via repo)"
 
 GTA_PATTERN = re.compile(

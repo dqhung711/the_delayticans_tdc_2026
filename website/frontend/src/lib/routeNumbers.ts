@@ -1,13 +1,6 @@
 import { normalizeRouteId } from "./mapStyles";
 import type { Mode } from "../types";
 
-type SurfaceMode = Extract<Mode, "streetcar" | "bus">;
-
-function asSurfaceMode(mode?: Mode): SurfaceMode | undefined {
-  if (mode === "streetcar" || mode === "bus") return mode;
-  return undefined;
-}
-
 /** Strip branch suffix: 504A → 504, 301B → 301 */
 export function routeNumberBase(route: string): string {
   const norm = normalizeRouteId(route.trim().toUpperCase());
@@ -30,8 +23,7 @@ export function expandRouteIdsForMap(route: string, activeMode?: Mode): string[]
   const upper = trimmed.toUpperCase();
   const base = routeNumberBase(trimmed);
   const ids = new Set<string>([trimmed, norm, upper, base]);
-  const surfaceMode = asSurfaceMode(activeMode);
-  if (surfaceMode === "streetcar") {
+  if (activeMode === "streetcar") {
     const alias = STREETCAR_LIVE_SHAPE_ALIASES[base] ?? STREETCAR_LIVE_SHAPE_ALIASES[upper];
     if (alias) ids.add(alias);
   }

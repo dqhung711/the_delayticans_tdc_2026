@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import csv
+import gzip
 import hashlib
 import io
 import json
+import math
 import zipfile
 from collections import defaultdict
 from pathlib import Path
@@ -14,7 +16,6 @@ from pathlib import Path
 import httpx
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-ROUTES_OUT = DATA_DIR / "route-shapes.json"
 ROUTES_BUS_OUT = DATA_DIR / "route-shapes-bus.json"
 ROUTES_STREETCAR_OUT = DATA_DIR / "route-shapes-streetcar.json"
 ROUTE_MODES_PATH = DATA_DIR / "route-modes.json"
@@ -27,13 +28,19 @@ GTFS_URLS = [
 ]
 
 SUBWAY_SHORT_NAMES = frozenset({"1", "2", "3", "4", "5", "6"})
+# GTFS duplicates of 501–512; keep canonical public route numbers only.
+LEGACY_STREETCAR_ROUTES = frozenset({"301", "304", "305", "306", "310", "312"})
+SKIP_ROUTE_SHORTS = LEGACY_STREETCAR_ROUTES | frozenset({"705"})
 MAX_SHAPES_PER_ROUTE_BUS = 4
 MAX_SHAPES_PER_ROUTE_STREETCAR = 24
 
-TORONTO_LON_MIN, TORONTO_LON_MAX = -79.65, -79.11
-TORONTO_LAT_MIN, TORONTO_LAT_MAX = 43.58, 43.86
-MAP_COORD_DECIMALS = 5
-MAP_DECIMATE_STEP = 4
+TORONTO_LON_MIN, TORONTO_LON_MAX = -79.639, -79.115
+TORONTO_LAT_MIN, TORONTO_LAT_MAX = 43.581, 43.855
+# ~5 m bus / ~3 m streetcar at Toronto latitude — keeps corners while dropping redundant vertices.
+SIMPLIFY_EPSILON_BUS = 0.00005
+SIMPLIFY_EPSILON_STREETCAR = 0.00003
+MAP_COORD_DECIMALS_BUS = 4
+MAP_COORD_DECIMALS_STREETCAR = 5
 
 
 def in_toronto_bbox(lon: float, lat: float) -> bool:
@@ -43,30 +50,59 @@ def in_toronto_bbox(lon: float, lat: float) -> bool:
     )
 
 
-def clip_line_coords(coords: list[list[float]]) -> list[list[float]] | None:
+def clip_line_coords(coords: list[list[float]], mode: str = "bus") -> list[list[float]] | None:
     clipped = [[lon, lat] for lon, lat in coords if in_toronto_bbox(lon, lat)]
     if len(clipped) < 2:
         return None
-    return optimize_line_coords(clipped)
+    return optimize_line_coords(clipped, mode)
 
 
-def optimize_line_coords(coords: list[list[float]]) -> list[list[float]]:
-    """Fewer points + fixed precision — map tiles do not need sub-metre detail."""
+def point_line_distance(
+    px: float, py: float, x1: float, y1: float, x2: float, y2: float
+) -> float:
+    dx, dy = x2 - x1, y2 - y1
+    if dx == 0 and dy == 0:
+        return math.hypot(px - x1, py - y1)
+    t = max(0.0, min(1.0, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)))
+    return math.hypot(px - (x1 + t * dx), py - (y1 + t * dy))
+
+
+def douglas_peucker(coords: list[list[float]], epsilon: float) -> list[list[float]]:
+    """Drop collinear vertices; preserves bends better than fixed-step decimation."""
     if len(coords) <= 2:
-        d = MAP_COORD_DECIMALS
-        return [[round(lon, d), round(lat, d)] for lon, lat in coords]
-    step = MAP_DECIMATE_STEP
-    picked: list[list[float]] = [coords[0]]
-    for i in range(step, len(coords) - 1, step):
-        picked.append(coords[i])
-    if picked[-1] != coords[-1]:
-        picked.append(coords[-1])
-    d = MAP_COORD_DECIMALS
-    return [[round(lon, d), round(lat, d)] for lon, lat in picked]
+        return coords
+    start, end = coords[0], coords[-1]
+    max_dist = 0.0
+    index = 0
+    for i in range(1, len(coords) - 1):
+        dist = point_line_distance(
+            coords[i][0], coords[i][1], start[0], start[1], end[0], end[1]
+        )
+        if dist > max_dist:
+            max_dist = dist
+            index = i
+    if max_dist > epsilon:
+        left = douglas_peucker(coords[: index + 1], epsilon)
+        right = douglas_peucker(coords[index:], epsilon)
+        return left[:-1] + right
+    return [start, end]
+
+
+def optimize_line_coords(coords: list[list[float]], mode: str = "bus") -> list[list[float]]:
+    """Simplify + round — enough detail for zoom 9–16 city map tiles."""
+    epsilon = SIMPLIFY_EPSILON_STREETCAR if mode == "streetcar" else SIMPLIFY_EPSILON_BUS
+    decimals = MAP_COORD_DECIMALS_STREETCAR if mode == "streetcar" else MAP_COORD_DECIMALS_BUS
+    simplified = douglas_peucker(coords, epsilon)
+    if len(simplified) < 2:
+        simplified = coords[:2]
+    return [[round(lon, decimals), round(lat, decimals)] for lon, lat in simplified]
 
 
 def write_geojson(path: Path, data: dict) -> None:
-    path.write_text(json.dumps(data, separators=(",", ":")))
+    text = json.dumps(data, separators=(",", ":"))
+    path.write_text(text)
+    gzip_path = Path(f"{path}.gz")
+    gzip_path.write_bytes(gzip.compress(text.encode(), compresslevel=9))
 
 
 def parse_csv(text: str) -> list[dict[str, str]]:
@@ -189,7 +225,7 @@ def merge_routes_from_zip(
     for row in routes:
         rid = row["route_id"]
         short = row.get("route_short_name", "").strip()
-        if not short or short in SUBWAY_SHORT_NAMES:
+        if not short or short in SUBWAY_SHORT_NAMES or short in SKIP_ROUTE_SHORTS:
             continue
         route_short[rid] = short
         route_mode[rid] = line_mode_for_route(
@@ -222,6 +258,8 @@ def merge_routes_from_zip(
 
     shape_added = 0
     for short, shape_ids in route_shape_ids.items():
+        if short in SKIP_ROUTE_SHORTS:
+            continue
         rid = next((r for r, s in route_short.items() if s == short), "")
         mode = route_mode.get(rid) or route_mode_for_short(
             short, rid, route_mode, db_route_modes
@@ -241,7 +279,7 @@ def merge_routes_from_zip(
             prev = merged_lines.get(key)
             if prev and shape_length(prev["coords"]) >= shape_length(coords):
                 continue
-            clipped = clip_line_coords(coords)
+            clipped = clip_line_coords(coords, mode)
             if not clipped:
                 continue
             merged_lines[key] = {
@@ -278,7 +316,7 @@ def merge_routes_from_zip(
     fallback_added = 0
     for route_id, trip_id in trip_by_route.items():
         short = route_short.get(route_id, "")
-        if not short or short in route_shape_ids:
+        if not short or short in route_shape_ids or short in SKIP_ROUTE_SHORTS:
             continue
         rows = sorted(
             stop_times_by_trip.get(trip_id, []),
@@ -299,7 +337,7 @@ def merge_routes_from_zip(
         if key in merged_lines:
             continue
         mode = route_mode.get(route_id, "bus")
-        clipped = clip_line_coords(coords)
+        clipped = clip_line_coords(coords, mode)
         if not clipped:
             continue
         merged_lines[key] = {
@@ -327,6 +365,7 @@ def trip_coords_from_stops(
     trip_id: str,
     stop_times_by_trip: dict[str, list[dict[str, str]]],
     stop_lookup: dict[str, dict],
+    mode: str = "bus",
 ) -> list[list[float]] | None:
     rows = sorted(
         stop_times_by_trip.get(trip_id, []),
@@ -340,7 +379,7 @@ def trip_coords_from_stops(
         point = [stop["lon"], stop["lat"]]
         if not coords or coords[-1] != point:
             coords.append(point)
-    return clip_line_coords(coords)
+    return clip_line_coords(coords, mode)
 
 
 def backfill_mode_routes(
@@ -367,7 +406,7 @@ def backfill_mode_routes(
     for row in routes:
         rid = row["route_id"]
         short = row.get("route_short_name", "").strip()
-        if not short or short in SUBWAY_SHORT_NAMES:
+        if not short or short in SUBWAY_SHORT_NAMES or short in SKIP_ROUTE_SHORTS:
             continue
         route_short[rid] = short
         route_mode[rid] = line_mode_for_route(
@@ -401,10 +440,12 @@ def backfill_mode_routes(
 
     added = 0
     for short in sorted(missing):
+        if short in SKIP_ROUTE_SHORTS:
+            continue
         best_coords: list[list[float]] | None = None
         best_len = 0.0
         for trip_id in trips_by_short.get(short, []):
-            coords = trip_coords_from_stops(trip_id, stop_times_by_trip, stop_lookup)
+            coords = trip_coords_from_stops(trip_id, stop_times_by_trip, stop_lookup, mode)
             if not coords:
                 continue
             length = shape_length(coords)
@@ -472,7 +513,12 @@ def write_stops_from_zip(content: bytes, db_route_modes: dict[str, str]) -> tupl
             continue
         modes = sorted(stop_modes.get(stop_id, {"bus"}))
         primary_mode = "streetcar" if "streetcar" in modes else modes[0] if modes else "bus"
-        stop_lookup[stop_id] = {"lat": lat, "lon": lon, "name": name, "modes": modes}
+        stop_lookup[stop_id] = {
+            "lat": round(lat, MAP_COORD_DECIMALS_STREETCAR),
+            "lon": round(lon, MAP_COORD_DECIMALS_STREETCAR),
+            "name": name,
+            "modes": modes,
+        }
         stop_lookup[name.lower()] = stop_lookup[stop_id]
         stop_features.append(
             {
@@ -483,7 +529,13 @@ def write_stops_from_zip(content: bytes, db_route_modes: dict[str, str]) -> tupl
                     "mode": primary_mode,
                     "modes": modes,
                 },
-                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        round(lon, MAP_COORD_DECIMALS_STREETCAR),
+                        round(lat, MAP_COORD_DECIMALS_STREETCAR),
+                    ],
+                },
             }
         )
     return stop_features, stop_lookup
@@ -511,31 +563,29 @@ def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     if not merged_lines:
-        ROUTES_OUT.write_text(json.dumps({"type": "FeatureCollection", "features": []}))
+        write_geojson(ROUTES_BUS_OUT, {"type": "FeatureCollection", "features": []})
+        write_geojson(ROUTES_STREETCAR_OUT, {"type": "FeatureCollection", "features": []})
         STOPS_OUT.write_text(json.dumps({"type": "FeatureCollection", "features": []}))
         STOPS_LOOKUP_OUT.write_text("{}")
         print("GTFS download failed; wrote empty map files.")
         return
 
-    route_features = [
-        {
+    by_mode: dict[str, list[dict]] = defaultdict(list)
+    for (route, _shape_id), meta in sorted(merged_lines.items()):
+        if route in SKIP_ROUTE_SHORTS:
+            continue
+        feat = {
             "type": "Feature",
             "properties": {
                 "route": route,
-                "mode": meta["mode"],
                 "color": meta["color"],
-                "shape_id": meta["shape_id"],
             },
             "geometry": {"type": "LineString", "coordinates": meta["coords"]},
         }
-        for (route, _shape_id), meta in sorted(merged_lines.items())
-    ]
+        by_mode[meta["mode"]].append(feat)
 
-    by_mode: dict[str, list[dict]] = defaultdict(list)
-    for feat in route_features:
-        by_mode[feat["properties"]["mode"]].append(feat)
+    route_features = by_mode["bus"] + by_mode["streetcar"]
 
-    write_geojson(ROUTES_OUT, {"type": "FeatureCollection", "features": route_features})
     write_geojson(ROUTES_BUS_OUT, {"type": "FeatureCollection", "features": by_mode["bus"]})
     write_geojson(
         ROUTES_STREETCAR_OUT,
@@ -553,8 +603,9 @@ def main() -> None:
     routes_unique = len({f["properties"]["route"] for f in route_features})
     bus_mb = ROUTES_BUS_OUT.stat().st_size / 1_000_000 if ROUTES_BUS_OUT.exists() else 0
     sc_mb = ROUTES_STREETCAR_OUT.stat().st_size / 1_000_000 if ROUTES_STREETCAR_OUT.exists() else 0
-    print(f"Routes: {len(route_features)} lines ({routes_unique} unique route numbers) -> {ROUTES_OUT}")
-    print(f"  bus {len(by_mode['bus'])} lines ({bus_mb:.2f} MB), streetcar {len(by_mode['streetcar'])} lines ({sc_mb:.2f} MB)")
+    print(f"Routes: {len(route_features)} lines ({routes_unique} unique route numbers)")
+    print(f"  bus {len(by_mode['bus'])} lines ({bus_mb:.2f} MB) -> {ROUTES_BUS_OUT}")
+    print(f"  streetcar {len(by_mode['streetcar'])} lines ({sc_mb:.2f} MB) -> {ROUTES_STREETCAR_OUT}")
     print(f"Stops: {len(stop_features)} points -> {STOPS_OUT}")
     print(f"Stop lookup: {len(stop_lookup)} keys -> {STOPS_LOOKUP_OUT}")
 

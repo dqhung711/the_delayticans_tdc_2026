@@ -76,11 +76,25 @@ export async function fetchRouteModes(): Promise<Record<string, string>> {
   return res.json();
 }
 
-export async function fetchRouteShapes(): Promise<GeoJSON.FeatureCollection> {
-  const res = await fetch(apiUrl("/api/route-shapes"));
+export async function fetchRouteShapes(
+  mode: "streetcar" | "bus",
+): Promise<GeoJSON.FeatureCollection> {
+  const hit = routeShapesCache.get(mode);
+  if (hit) return hit;
+  const res = await fetch(apiUrl(`/api/route-shapes?mode=${mode}`));
   if (!res.ok) return { type: "FeatureCollection", features: [] };
-  return res.json();
+  const data = (await res.json()) as GeoJSON.FeatureCollection;
+  routeShapesCache.set(mode, data);
+  return data;
 }
+
+/** Load the other mode in the background so tab switches feel instant. */
+export function prefetchRouteShapes(mode: "streetcar" | "bus"): void {
+  if (routeShapesCache.has(mode)) return;
+  void fetchRouteShapes(mode);
+}
+
+const routeShapesCache = new Map<string, GeoJSON.FeatureCollection>();
 
 export async function fetchMapStops(mode: Mode): Promise<GeoJSON.FeatureCollection> {
   const res = await fetch(apiUrl(`/api/map/stops?mode=${mode}`));

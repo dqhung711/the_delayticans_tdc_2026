@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download TTC GTFS and export route shapes for map highlighting."""
+"""Legacy script — use fetch_gtfs_network.py instead (writes split bus/streetcar files)."""
 
 import csv
 import io

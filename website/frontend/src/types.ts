@@ -1,5 +1,5 @@
 export type Tab = "live" | "explorer";
-export type Mode = "streetcar" | "bus" | "subway";
+export type Mode = "streetcar" | "bus";
 export type ViewMode = "overview" | "compare";
 export type Granularity = "year" | "month" | "date" | "datetime" | "quarter";
 export type TimeToggle = "year" | "date";

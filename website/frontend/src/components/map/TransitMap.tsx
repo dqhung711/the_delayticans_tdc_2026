@@ -7,6 +7,7 @@ import {
   fetchRouteDelays,
   fetchRouteDetail,
   fetchRouteShapes,
+  prefetchRouteShapes,
   type RouteDelayRow,
   type RouteDetail,
 } from "../../api";
@@ -28,9 +29,9 @@ import {
   ROUTE_LINE_WIDTH_EXPR,
   TORONTO_CENTER,
   TORONTO_MAX_BOUNDS,
+  TORONTO_MIN_ZOOM,
   inTorontoBbox,
 } from "../../lib/mapStyles";
-import { filterRouteShapesToToronto } from "../../lib/torontoBounds";
 import { selectMapRouteFeatures } from "../../lib/routeNetworkFilter";
 import { collectLiveAdvisoryRouteIds } from "../../lib/visibleRoutes";
 import type { Direction, LiveAdvisory, LiveSnapshot, Mode } from "../../types";
@@ -43,15 +44,15 @@ interface Props {
 
 const DIRECTIONS: Direction[] = ["EB", "WB", "NB", "SB"];
 
-const SubwayIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2c-4.42 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-6H6V6h5v5zm5.5 6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM18 11h-5V6h5v5z" />
-  </svg>
-);
-
 const StreetcarIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M19 16.94V8c0-2.79-2.68-3.98-6.04-3.98h-.03C9.67 4.02 7 5.22 7 8v8.94l-1.45 1.45c-.18.18-.29.43-.29.68V20c0 .55.45 1 1 1h2.58l1.7-1.71h2.92l1.7 1.71H18.74c.55 0 1-.45 1-1v-.93c0-.25-.11-.5-.29-.68L19 16.94zM8.5 15c-.83 0-1.5-.67-1.5-1.5S7.67 12 8.5 12s1.5.67 1.5 1.5S9.33 15 8.5 15zm7 0c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm1.5-5H9V8h8v2z" />
+  </svg>
+);
+
+const BusIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78A2.99 2.99 0 0020 16V6c0-3.5-3.58-4-8-4S4 2.5 4 6v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h14v5z" />
   </svg>
 );
 
@@ -560,7 +561,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       if (!routes?.features.length) {
         if (showDevUI) {
           setNetworkHint(
-            "Missing data/route-shapes.json — see website/data/README.md",
+            "Missing route shapes — run: cd website && npm run fetch-network",
           );
         }
         setNetworkLoaded(false);
@@ -633,6 +634,10 @@ export function TransitMap({ mode, onModeChange }: Props) {
       });
 
       setRoutesShownCount(routeFeatures.length);
+
+      if (!routeFeatures.length && routes.features.length && !showAll) {
+        setNetworkHint("No live alert routes — check Display all routes on map");
+      }
 
       const routeSource = map.getSource("ttc-routes") as maplibregl.GeoJSONSource;
       routeSource?.setData({ type: "FeatureCollection", features: routeFeatures });
@@ -898,6 +903,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       style: BASEMAP[themeRef.current],
       center: TORONTO_CENTER,
       zoom: 11.3,
+      minZoom: TORONTO_MIN_ZOOM,
       pitch: pitchForZoom(11.3),
       bearing: -18,
       maxBounds: TORONTO_MAX_BOUNDS,
@@ -1030,19 +1036,20 @@ export function TransitMap({ mode, onModeChange }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    fetchRouteShapes()
+    setRouteShapesReady(false);
+    fetchRouteShapes(mode)
       .then((raw) => {
         if (cancelled) return;
-        const data = filterRouteShapesToToronto(raw);
-        routeShapesCache.current = data;
-        routesRef.current = data;
+        routeShapesCache.current = raw;
+        routesRef.current = raw;
         setRouteShapesReady(true);
-        if (data.features.length) {
+        if (raw.features.length) {
           setNetworkLoaded(true);
           setNetworkHint(null);
         } else if (showDevUI) {
           setNetworkHint("Run: cd website && npm run fetch-network");
         }
+        prefetchRouteShapes(mode === "bus" ? "streetcar" : "bus");
       })
       .catch(() => {
         if (!cancelled && showDevUI) {
@@ -1052,7 +1059,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [mode]);
 
   useEffect(() => {
     fetchRouteDelays(mapQuery).then(setRouteRows).catch(() => setRouteRows([]));
@@ -1215,18 +1222,18 @@ export function TransitMap({ mode, onModeChange }: Props) {
           <button
             type="button"
             onClick={() => onModeChange("streetcar")}
-            className={`map-nav-tab ${mode === "streetcar" || mode === "bus" ? "map-nav-tab--active" : ""}`}
+            className={`map-nav-tab ${mode === "streetcar" ? "map-nav-tab--active" : ""}`}
           >
             <StreetcarIcon className="w-4 h-4" />
-            Streetcar / Bus
+            Streetcar
           </button>
           <button
             type="button"
-            onClick={() => onModeChange("subway")}
-            className={`map-nav-tab ${mode === "subway" ? "map-nav-tab--active" : ""}`}
+            onClick={() => onModeChange("bus")}
+            className={`map-nav-tab ${mode === "bus" ? "map-nav-tab--active" : ""}`}
           >
-            <SubwayIcon className="w-4 h-4" />
-            Subway
+            <BusIcon className="w-4 h-4" />
+            Bus
           </button>
         </div>
 
@@ -1400,14 +1407,11 @@ export function TransitMap({ mode, onModeChange }: Props) {
           <div className="map-legend map-legend--wide">
             <span><i className="legend-dot legend-dot--bus" /> Bus</span>
             <span><i className="legend-dot legend-dot--streetcar" /> Streetcar</span>
-            <span><i className="legend-dot legend-dot--subway" /> Subway</span>
             <span className="text-[var(--muted)]">
               {explore.showHeatmap
                 ? "Red heat = delay density · route lines faded"
                 : explore.showAllRoutes
-                  ? mode === "streetcar" || mode === "bus"
-                    ? "All streetcar / bus lines · pins = live"
-                    : "All subway lines · pins = live"
+                  ? `All ${mode} lines · pins = live`
                   : "Live alert routes only · Display all for full network"}
             </span>
           </div>

@@ -10,6 +10,7 @@ Not required to run the app — only when rebuilding data or route shapes.
 
 `fetch_gtfs_network.py` downloads TTC **SurfaceGTFS** from Toronto Open Data and writes:
 
-- `data/route-shapes.json` — per-route line geometries with GTFS colors
+- `data/route-shapes-bus.json` — bus line geometries
+- `data/route-shapes-streetcar.json` — streetcar line geometries
 - `data/stops.geojson` — all bus/streetcar stop locations
 - `data/stops-lookup.json` — stop ID/name → coordinates for live advisory pins

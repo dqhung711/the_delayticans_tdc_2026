@@ -129,7 +129,7 @@ export function MapSidebar({
           <input
             type="text"
             className="filter-input w-full"
-            placeholder={`e.g. 501 (${mode === "subway" ? "subway" : "streetcar / bus"})`}
+            placeholder={`e.g. ${mode === "bus" ? "29" : "501"} (${mode})`}
             value={explore.routeSearch}
             onChange={(e) => onExploreChange({ routeSearch: e.target.value })}
             list="map-route-list"
