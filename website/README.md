@@ -4,10 +4,19 @@ Historical **bus & streetcar** delay explorer and live service map.
 
 ## Quick start (clone & run)
 
+Works on **macOS, Linux, and Windows** (PowerShell or Command Prompt).
+
 ```bash
 cd website
 npm run setup    # Python venv + npm deps (first time)
-npm run build    # optional for production; dev uses Vite on :5173
+npm run dev
+```
+
+PowerShell (Windows):
+
+```powershell
+cd website
+npm run setup
 npm run dev
 ```
 
@@ -15,6 +24,15 @@ npm run dev
 - API: http://localhost:8000  
 
 Historical data ships as `data/delays.db.gz` (~48 MB). `npm run setup` unpacks it to `delays.db`.
+
+### Python venv paths (for IDE)
+
+| OS | Interpreter |
+|----|-------------|
+| macOS / Linux | `website/.venv/bin/python` |
+| Windows | `website/.venv/Scripts/python.exe` |
+
+All `npm` scripts use `scripts/run-python.cjs`, which picks the correct path automatically.
 
 ## Live data source (bus & streetcar)
 
