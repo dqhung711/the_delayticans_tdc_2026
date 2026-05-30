@@ -1,19 +1,28 @@
+import gzip
 import json
 from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.gzip import GZipMiddleware
 
 import advisories
 import db
 import geocode_search
 from filters import parse_query
-from gtfs_data import filter_route_shapes_geojson, filter_stops_geojson
+from gtfs_data import (
+    get_route_shapes_geojson,
+    get_route_shapes_response,
+    get_stops_geojson,
+    get_stops_response,
+    warm_map_payloads,
+)
 
 app = FastAPI(title="TTC Delays API")
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,6 +35,18 @@ scheduler = AsyncIOScheduler()
 
 @app.on_event("startup")
 async def startup() -> None:
+    try:
+        warm_map_payloads()
+        db.warm_delay_hotspots()
+        acc = sum(
+            1
+            for f in get_stops_geojson("bus").get("features", [])
+            if (f.get("properties") or {}).get("wheelchair_boarding") == 1
+        )
+        print(f"Warmed map payloads and delay hotspots ({acc} accessible bus stops)")
+    except Exception as exc:
+        print(f"Map payload warm failed: {exc}")
+
     try:
         data = await advisories.refresh_advisories()
         cats = data.get("categories") or []
@@ -135,12 +156,23 @@ def route_modes():
 
 
 @app.get("/api/route-shapes")
-def route_shapes():
-    shapes_path = Path(__file__).resolve().parents[1] / "data" / "route-shapes.json"
-    if not shapes_path.exists():
-        return {"type": "FeatureCollection", "features": []}
-    raw = json.loads(shapes_path.read_text())
-    return filter_route_shapes_geojson(raw)
+def route_shapes(response: Response, mode: str | None = None):
+    if mode and mode not in ("bus", "streetcar"):
+        return Response(
+            content=b'{"type":"FeatureCollection","features":[]}',
+            media_type="application/json",
+        )
+    packed = get_route_shapes_response(mode)
+    if packed:
+        body, etag, precompressed = packed
+        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+        response.headers["ETag"] = etag
+        if precompressed:
+            # Serve plain JSON — GZipMiddleware compresses on the wire.
+            # Raw .gz bytes break fetch().json() when Content-Encoding is stripped.
+            body = gzip.decompress(body)
+        return Response(content=body, media_type="application/json")
+    return get_route_shapes_geojson(mode)
 
 
 @app.get("/api/map/route-delays")
@@ -181,19 +213,16 @@ def map_route_detail(route_id: str, request: Request):
 
 
 @app.get("/api/map/stops")
-def map_stops(mode: str | None = None):
-    stops_path = Path(__file__).resolve().parents[1] / "data" / "stops.geojson"
-    if not stops_path.exists():
-        return {"type": "FeatureCollection", "features": []}
-    collection = filter_stops_geojson(json.loads(stops_path.read_text()))
-    if not mode or mode not in ("bus", "streetcar"):
-        return collection
-    features = [
-        f
-        for f in collection.get("features", [])
-        if mode in (f.get("properties") or {}).get("modes", [f.get("properties", {}).get("mode")])
-    ]
-    return {"type": "FeatureCollection", "features": features}
+def map_stops(response: Response, mode: str | None = None):
+    if mode and mode not in ("bus", "streetcar"):
+        mode = None
+    packed = get_stops_response(mode)
+    if packed:
+        body, etag = packed
+        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+        response.headers["ETag"] = etag
+        return Response(content=body, media_type="application/json")
+    return get_stops_geojson(mode)
 
 
 client_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchMeta } from "./api";
 import { AppHeader } from "./components/AppHeader";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { ColorblindToggle } from "./components/ColorblindToggle";
 import { TransitMap } from "./components/map/TransitMap";
 import { DataExplorer } from "./pages/DataExplorer";
 import type { Meta, Mode, Tab } from "./types";
@@ -37,7 +38,12 @@ export default function App() {
         onModeChange={setMode}
         yearRange={yearRange}
         incidentCount={incidentCount}
-        themeToggle={<ThemeToggle />}
+        themeToggle={
+          <>
+            <ColorblindToggle />
+            <ThemeToggle />
+          </>
+        }
       />
 
       <main key={`${tab}-${tabAnim}`} className="app-main">

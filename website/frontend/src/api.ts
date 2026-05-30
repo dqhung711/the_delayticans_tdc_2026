@@ -76,16 +76,48 @@ export async function fetchRouteModes(): Promise<Record<string, string>> {
   return res.json();
 }
 
-export async function fetchRouteShapes(): Promise<GeoJSON.FeatureCollection> {
-  const res = await fetch(apiUrl("/api/route-shapes"));
+export async function fetchRouteShapes(
+  mode: "streetcar" | "bus",
+): Promise<GeoJSON.FeatureCollection> {
+  const hit = routeShapesCache.get(mode);
+  if (hit?.features?.length) return hit;
+  const res = await fetch(apiUrl(`/api/route-shapes?mode=${mode}`));
   if (!res.ok) return { type: "FeatureCollection", features: [] };
-  return res.json();
+  const data = (await res.json()) as GeoJSON.FeatureCollection;
+  if (!Array.isArray(data?.features)) {
+    routeShapesCache.delete(mode);
+    return { type: "FeatureCollection", features: [] };
+  }
+  routeShapesCache.set(mode, data);
+  return data;
+}
+
+/** Load the other mode in the background so tab switches feel instant. */
+export function prefetchRouteShapes(mode: "streetcar" | "bus"): void {
+  if (routeShapesCache.get(mode)?.features?.length) return;
+  void fetchRouteShapes(mode);
+}
+
+const routeShapesCache = new Map<string, GeoJSON.FeatureCollection>();
+
+export function clearRouteShapesCache(): void {
+  routeShapesCache.clear();
+}
+const mapStopsCache = new Map<string, GeoJSON.FeatureCollection>();
+
+export function clearMapStopsCache(): void {
+  mapStopsCache.clear();
 }
 
 export async function fetchMapStops(mode: Mode): Promise<GeoJSON.FeatureCollection> {
+  if (mode !== "bus" && mode !== "streetcar") {
+    return { type: "FeatureCollection", features: [] };
+  }
   const res = await fetch(apiUrl(`/api/map/stops?mode=${mode}`));
   if (!res.ok) return { type: "FeatureCollection", features: [] };
-  return res.json();
+  const data = (await res.json()) as GeoJSON.FeatureCollection;
+  mapStopsCache.set(mode, data);
+  return data;
 }
 
 export interface RouteDelayRow {
@@ -107,12 +139,39 @@ export async function fetchRouteDelays(params: QueryParams): Promise<RouteDelayR
   return res.json();
 }
 
+const delayHotspotsCache = new Map<string, GeoJSON.FeatureCollection>();
+
+function delayHotspotsCacheKey(params: QueryParams): string {
+  return buildSearch(params);
+}
+
+export function getCachedDelayHotspots(
+  params: QueryParams,
+): GeoJSON.FeatureCollection | undefined {
+  const hit = delayHotspotsCache.get(delayHotspotsCacheKey(params));
+  if (hit?.features?.length) return hit;
+  return undefined;
+}
+
+/** Load heatmap in the background so toggling the layer feels instant. */
+export function prefetchDelayHotspots(params: QueryParams): void {
+  if (getCachedDelayHotspots(params)) return;
+  void fetchDelayHotspots(params);
+}
+
 export async function fetchDelayHotspots(
   params: QueryParams,
 ): Promise<GeoJSON.FeatureCollection> {
-  const res = await fetch(apiUrl(`/api/map/delay-hotspots?${buildSearch(params)}`));
+  const key = delayHotspotsCacheKey(params);
+  const hit = delayHotspotsCache.get(key);
+  if (hit?.features?.length) return hit;
+  const res = await fetch(apiUrl(`/api/map/delay-hotspots?${key}`));
   if (!res.ok) return { type: "FeatureCollection", features: [] };
-  return res.json();
+  const data = (await res.json()) as GeoJSON.FeatureCollection;
+  if (Array.isArray(data?.features) && data.features.length) {
+    delayHotspotsCache.set(key, data);
+  }
+  return data;
 }
 
 export async function fetchRouteDetail(

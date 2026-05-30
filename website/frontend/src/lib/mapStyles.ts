@@ -9,14 +9,9 @@ export const BASEMAP: Record<Theme, string> = {
 
 export const TORONTO_CENTER: [number, number] = [-79.3832, 43.6532];
 
-export { TORONTO_BBOX, TORONTO_MAX_BOUNDS, inTorontoBbox } from "./torontoBounds";
+export { TORONTO_BBOX, TORONTO_MAX_BOUNDS, TORONTO_MIN_ZOOM, inTorontoBbox } from "./torontoBounds";
 
-export const MODE_COLORS = {
-  bus: "#e53935",
-  streetcar: "#ff6f61",
-  subway: "#ffcc33",
-  unknown: "#9ca3af",
-} as const;
+export { STANDARD_MODE as MODE_COLORS } from "./colorPalettes";
 
 /** Keeps HTML markers glued to map coordinates when the view is pitched or zoomed out. */
 export const MAP_ALIGNED_MARKER = {
@@ -60,25 +55,7 @@ export const MAP_SMOOTH_OPTIONS = {
 export const MAP_EASE_MS = 450;
 
 /** Red density ramp for MapLibre heatmap layer (heatmap-density 0–1). */
-export const HEATMAP_RED_COLOR_RAMP: ExpressionSpecification = [
-  "interpolate",
-  ["linear"],
-  ["heatmap-density"],
-  0,
-  "rgba(0, 0, 0, 0)",
-  0.1,
-  "rgba(255, 200, 150, 0.15)",
-  0.25,
-  "rgba(255, 120, 80, 0.35)",
-  0.45,
-  "rgba(255, 60, 40, 0.55)",
-  0.65,
-  "rgba(230, 30, 30, 0.72)",
-  0.85,
-  "rgba(200, 0, 0, 0.88)",
-  1,
-  "rgba(140, 0, 0, 0.95)",
-];
+export { HEATMAP_STANDARD as HEATMAP_RED_COLOR_RAMP } from "./colorPalettes";
 
 export const ROUTE_LINE_WIDTH_EXPR: ExpressionSpecification = [
   "case",

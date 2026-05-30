@@ -1,16 +1,19 @@
-/** Greater Toronto transit area — keep in sync with website/api/gtfs_data.py */
+/** City of Toronto — keep in sync with website/api/gtfs_data.py and fetch_gtfs_network.py */
 export const TORONTO_BBOX = {
-  west: -79.65,
-  east: -79.11,
-  south: 43.58,
-  north: 43.86,
+  west: -79.639,
+  east: -79.115,
+  south: 43.581,
+  north: 43.855,
 } as const;
 
-/** Slightly padded bounds for MapLibre maxBounds (SW, NE). */
+/** Tight maxBounds so the map cannot pan outside Toronto. */
 export const TORONTO_MAX_BOUNDS: [[number, number], [number, number]] = [
-  [-79.72, 43.52],
-  [-79.04, 43.92],
+  [TORONTO_BBOX.west - 0.015, TORONTO_BBOX.south - 0.015],
+  [TORONTO_BBOX.east + 0.015, TORONTO_BBOX.north + 0.015],
 ];
+
+/** Prevent zooming out to empty areas outside the city. */
+export const TORONTO_MIN_ZOOM = 9.5;
 
 export function inTorontoBbox(lon: number, lat: number): boolean {
   return (

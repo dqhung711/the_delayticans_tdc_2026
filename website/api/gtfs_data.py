@@ -4,16 +4,42 @@ from __future__ import annotations
 
 import json
 import re
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 STOPS_LOOKUP_PATH = DATA_DIR / "stops-lookup.json"
-ROUTE_SHAPES_PATH = DATA_DIR / "route-shapes.json"
+ROUTE_SHAPES_BUS_PATH = DATA_DIR / "route-shapes-bus.json"
+ROUTE_SHAPES_STREETCAR_PATH = DATA_DIR / "route-shapes-streetcar.json"
+STOPS_GEOJSON_PATH = DATA_DIR / "stops.geojson"
 
-# Greater Toronto surface transit area (exclude bad geocodes outside the city)
-TORONTO_LON_MIN, TORONTO_LON_MAX = -79.65, -79.11
-TORONTO_LAT_MIN, TORONTO_LAT_MAX = 43.58, 43.86
+_shapes_cache: dict[str, dict] = {}
+_shapes_bytes: dict[str, tuple[bytes, str, bool]] = {}
+_shape_file_mtimes: dict[str, float] = {}
+_stops_cache: dict | None = None
+_stops_bytes: tuple[bytes, str] | None = None
+_stops_file_mtime: float = 0.0
+
+
+def _load_stops_from_disk() -> dict:
+    """Load stops.geojson; reload when the file changes on disk."""
+    global _stops_cache, _stops_bytes, _stops_file_mtime
+    if not STOPS_GEOJSON_PATH.exists():
+        _stops_cache = {"type": "FeatureCollection", "features": []}
+        _stops_file_mtime = 0.0
+        return _stops_cache
+    mtime = STOPS_GEOJSON_PATH.stat().st_mtime
+    if _stops_cache is not None and _stops_file_mtime == mtime:
+        return _stops_cache
+    _stops_cache = filter_stops_geojson(json.loads(STOPS_GEOJSON_PATH.read_text()))
+    _stops_file_mtime = mtime
+    _stops_bytes = None
+    return _stops_cache
+
+# City of Toronto — keep in sync with frontend/src/lib/torontoBounds.ts
+TORONTO_LON_MIN, TORONTO_LON_MAX = -79.639, -79.115
+TORONTO_LAT_MIN, TORONTO_LAT_MAX = 43.581, 43.855
 
 
 def in_toronto_bbox(lon: float, lat: float) -> bool:
@@ -71,6 +97,132 @@ def filter_stops_geojson(data: dict) -> dict:
     return {"type": "FeatureCollection", "features": features}
 
 
+def route_shapes_path_for_mode(mode: str | None) -> Path:
+    if mode == "streetcar":
+        return ROUTE_SHAPES_STREETCAR_PATH
+    return ROUTE_SHAPES_BUS_PATH
+
+
+def _load_route_shapes_from_disk(mode: str) -> dict:
+    path = route_shapes_path_for_mode(mode)
+    if not path.exists():
+        return {"type": "FeatureCollection", "features": []}
+    return json.loads(path.read_text())
+
+
+def get_route_shapes_geojson(mode: str | None = None) -> dict:
+    """Cached route lines from per-mode files built by fetch-network."""
+    if mode not in ("bus", "streetcar"):
+        return {"type": "FeatureCollection", "features": []}
+
+    cache_key = mode
+    path = route_shapes_path_for_mode(mode)
+    mtime = path.stat().st_mtime if path.exists() else 0.0
+    if cache_key in _shapes_cache and _shape_file_mtimes.get(cache_key) == mtime:
+        cached = _shapes_cache[cache_key]
+        if cached.get("features") or not path.exists() or path.stat().st_size <= 64:
+            return cached
+        del _shapes_cache[cache_key]
+        _shapes_bytes.pop(mode, None)
+
+    if not path.exists():
+        empty = {"type": "FeatureCollection", "features": []}
+        _shapes_cache[cache_key] = empty
+        _shape_file_mtimes[cache_key] = 0.0
+        return empty
+
+    data = _load_route_shapes_from_disk(mode)
+    _shapes_cache[cache_key] = data
+    _shape_file_mtimes[cache_key] = mtime
+    return data
+
+
+def warm_map_payloads() -> None:
+    """Pre-load and serialize map GeoJSON once at startup for fast responses."""
+    global _stops_bytes
+    warm_location_geocoder()
+    for mode in ("bus", "streetcar"):
+        get_route_shapes_response(mode)
+
+    _load_stops_from_disk()
+    stops = get_stops_geojson()
+    if STOPS_GEOJSON_PATH.exists():
+        etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"'
+    else:
+        etag = '"0"'
+    _stops_bytes = (
+        json.dumps(stops, separators=(",", ":")).encode(),
+        etag,
+    )
+
+
+def _gzip_path_for(path: Path) -> Path:
+    return Path(f"{path}.gz")
+
+
+def get_route_shapes_response(mode: str | None = None) -> tuple[bytes, str, bool] | None:
+    """Return (body, etag, is_precompressed). Reloads when data files change."""
+    if mode not in ("bus", "streetcar"):
+        return None
+
+    path = route_shapes_path_for_mode(mode)
+    if not path.exists():
+        return None
+
+    mtime = path.stat().st_mtime
+    etag = f'"{int(mtime)}"'
+    prev = _shapes_bytes.get(mode)
+    if prev and _shape_file_mtimes.get(mode) == mtime:
+        return prev
+
+    get_route_shapes_geojson(mode)
+    gz_path = _gzip_path_for(path)
+    if gz_path.exists() and gz_path.stat().st_mtime >= mtime:
+        packed: tuple[bytes, str, bool] = (gz_path.read_bytes(), etag, True)
+    else:
+        data = _shapes_cache[mode]
+        packed = (json.dumps(data, separators=(",", ":")).encode(), etag, False)
+
+    _shapes_bytes[mode] = packed
+    _shape_file_mtimes[mode] = mtime
+    return packed
+
+
+def get_stops_response(mode: str | None = None) -> tuple[bytes, str] | None:
+    global _stops_bytes
+    if mode and mode in ("bus", "streetcar"):
+        data = get_stops_geojson(mode)
+        if STOPS_GEOJSON_PATH.exists():
+            etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"'
+        else:
+            etag = '"0"'
+        return json.dumps(data, separators=(",", ":")).encode(), etag
+    if _stops_bytes:
+        return _stops_bytes
+    data = get_stops_geojson()
+    etag = f'"{int(STOPS_GEOJSON_PATH.stat().st_mtime)}"' if STOPS_GEOJSON_PATH.exists() else '"0"'
+    body = json.dumps(data, separators=(",", ":")).encode()
+    _stops_bytes = (body, etag)
+    return body, etag
+
+
+def get_stops_geojson(mode: str | None = None) -> dict:
+    data = _load_stops_from_disk()
+
+    if not mode or mode not in ("bus", "streetcar"):
+        return data
+
+    features = [
+        f
+        for f in data.get("features", [])
+        if mode
+        in (f.get("properties") or {}).get(
+            "modes", [(f.get("properties") or {}).get("mode")]
+        )
+    ]
+    return {"type": "FeatureCollection", "features": features}
+
+
 @lru_cache(maxsize=1)
 def get_stops_lookup() -> dict:
     if not STOPS_LOOKUP_PATH.exists():
@@ -88,6 +240,37 @@ def lookup_stop(stop_id: str) -> tuple[float, float] | None:
     return float(entry["lon"]), float(entry["lat"])
 
 
+_STOP_TOKEN_INDEX: dict[str, list[tuple[float, float, str]]] | None = None
+
+
+def _build_stop_token_index() -> dict[str, list[tuple[float, float, str]]]:
+    """Word → stops on that street; speeds up intersection / corridor geocoding."""
+    index: dict[str, list[tuple[float, float, str]]] = defaultdict(list)
+    lookup = get_stops_lookup()
+    for name, entry in lookup.items():
+        if len(name) < 5 or "lat" not in entry:
+            continue
+        lon, lat = float(entry["lon"]), float(entry["lat"])
+        if not in_toronto_bbox(lon, lat):
+            continue
+        for token in set(re.findall(r"[a-z0-9']{3,}", name)):
+            index[token].append((lon, lat, name))
+    return dict(index)
+
+
+def _stop_token_index() -> dict[str, list[tuple[float, float, str]]]:
+    global _STOP_TOKEN_INDEX
+    if _STOP_TOKEN_INDEX is None:
+        _STOP_TOKEN_INDEX = _build_stop_token_index()
+    return _STOP_TOKEN_INDEX
+
+
+def warm_location_geocoder() -> None:
+    """Build stop token index once for fast heatmap geocoding."""
+    _stop_token_index()
+
+
+@lru_cache(maxsize=8192)
 def lookup_stop_name(text: str) -> tuple[float, float] | None:
     key = text.strip().lower()
     if not key:
@@ -148,15 +331,13 @@ def lookup_intersection(text: str) -> tuple[float, float] | None:
     streets = _street_tokens(text)
     if len(streets) < 2:
         return None
-    lookup = get_stops_lookup()
+    index = _stop_token_index()
+    candidates = index.get(streets[0], [])
+    if not candidates:
+        return None
     points: list[tuple[float, float]] = []
-    for name, entry in lookup.items():
-        if len(name) < 6 or "lat" not in entry:
-            continue
+    for lon, lat, name in candidates:
         if not all(_street_matches_stop_name(name, s) for s in streets[:2]):
-            continue
-        lon, lat = float(entry["lon"]), float(entry["lat"])
-        if not in_toronto_bbox(lon, lat):
             continue
         points.append((lon, lat))
     return _median_centroid(points)
@@ -167,20 +348,16 @@ def lookup_street_corridor(text: str) -> tuple[float, float] | None:
     if len(streets) != 1:
         return None
     street = streets[0]
-    lookup = get_stops_lookup()
-    points: list[tuple[float, float]] = []
-    for name, entry in lookup.items():
-        if len(name) < 5 or "lat" not in entry:
-            continue
-        if not _street_matches_stop_name(name, street):
-            continue
-        lon, lat = float(entry["lon"]), float(entry["lat"])
-        if not in_toronto_bbox(lon, lat):
-            continue
-        points.append((lon, lat))
+    index = _stop_token_index()
+    points = [
+        (lon, lat)
+        for lon, lat, name in index.get(street, [])
+        if _street_matches_stop_name(name, street)
+    ]
     return _median_centroid(points)
 
 
+@lru_cache(maxsize=8192)
 def lookup_delay_location(text: str) -> tuple[float, float] | None:
     """Resolve delay CSV Location to coordinates using GTFS stop names."""
     if not (text or "").strip():
@@ -286,27 +463,36 @@ def geocode_advisory_text(
 
 @lru_cache(maxsize=1)
 def get_route_shapes() -> dict[str, list[tuple[float, float]]]:
-    """Route id -> line coordinates (lon, lat)."""
-    if not ROUTE_SHAPES_PATH.exists():
-        return {}
-    try:
-        data = json.loads(ROUTE_SHAPES_PATH.read_text())
-    except json.JSONDecodeError:
-        return {}
+    """Route id -> line coordinates (lon, lat) from split bus/streetcar files."""
     out: dict[str, list[tuple[float, float]]] = {}
-    for feature in data.get("features", []):
-        geom = feature.get("geometry") or {}
-        if geom.get("type") != "LineString":
+    for mode in ("bus", "streetcar"):
+        path = route_shapes_path_for_mode(mode)
+        if not path.exists():
             continue
-        route = str((feature.get("properties") or {}).get("route", "")).strip()
-        if not route:
+        try:
+            data = json.loads(path.read_text())
+        except json.JSONDecodeError:
             continue
-        coords = [(float(c[0]), float(c[1])) for c in geom.get("coordinates", []) if len(c) >= 2]
-        if coords:
+        for feature in data.get("features", []):
+            geom = feature.get("geometry") or {}
+            if geom.get("type") != "LineString":
+                continue
+            route = str((feature.get("properties") or {}).get("route", "")).strip()
+            if not route:
+                continue
+            coords = [
+                (float(c[0]), float(c[1]))
+                for c in geom.get("coordinates", [])
+                if len(c) >= 2
+            ]
+            if not coords:
+                continue
             key = route.upper()
-            out[key] = coords
+            if key not in out or len(coords) > len(out[key]):
+                out[key] = coords
             norm = route.lstrip("0").upper() or key
-            out.setdefault(norm, coords)
+            if norm not in out or len(coords) > len(out[norm]):
+                out[norm] = coords
     return out
 
 

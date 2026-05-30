@@ -169,17 +169,35 @@ def get_route_delay_totals(
     return [dict(row) for row in rows]
 
 
+_hotspot_cache: dict[tuple, tuple[float, dict]] = {}
+
+
 def get_delay_hotspots_geojson(
     mode: str,
     interval: dict[str, str],
     directions: list[str],
     routes: list[str],
-    limit: int = 500,
+    limit: int = 350,
 ):
-    from gtfs_data import in_toronto_bbox, lookup_delay_location
+    from gtfs_data import in_toronto_bbox, lookup_delay_location, warm_location_geocoder
+
+    warm_location_geocoder()
+
+    cache_key = (
+        mode,
+        interval["start"],
+        interval["end"],
+        tuple(sorted(directions)),
+        tuple(sorted(routes)),
+        limit,
+    )
+    db_mtime = DB_PATH.stat().st_mtime if DB_PATH.exists() else 0.0
+    cached = _hotspot_cache.get(cache_key)
+    if cached and cached[0] == db_mtime:
+        return cached[1]
 
     where, values = build_where(mode, interval, directions, routes)
-    sql_limit = min(max(limit * 4, 800), 2500)
+    sql_limit = min(max(limit * 3, 600), 1500)
     with get_conn() as conn:
         rows = conn.execute(
             f"""
@@ -214,10 +232,6 @@ def get_delay_hotspots_geojson(
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
                 "properties": {
-                    "location": row["location"],
-                    "delay_minutes": row["delay_minutes"],
-                    "incidents": row["incidents"],
-                    "weight": weight,
                     "weight_norm": 0.0,
                 },
             }
@@ -228,7 +242,23 @@ def get_delay_hotspots_geojson(
         for feat, w in zip(features, weights):
             feat["properties"]["weight_norm"] = round(w / max_w, 4)
 
-    return {"type": "FeatureCollection", "features": features}
+    result = {"type": "FeatureCollection", "features": features}
+    _hotspot_cache[cache_key] = (db_mtime, result)
+    return result
+
+
+def warm_delay_hotspots() -> None:
+    """Pre-compute default map heatmaps so the first toggle is instant."""
+    from filters import interval_from_granularity
+    from gtfs_data import warm_location_geocoder
+
+    warm_location_geocoder()
+    interval = interval_from_granularity("year", "2014", "2026")
+    for mode in ("streetcar", "bus"):
+        try:
+            get_delay_hotspots_geojson(mode, interval, [], [])
+        except FileNotFoundError:
+            break
 
 
 def get_route_detail(

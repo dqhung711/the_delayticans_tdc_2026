@@ -25,11 +25,6 @@ const StreetcarIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const SubwayIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2c-4.42 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-6H6V6h5v5zm5.5 6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM18 11h-5V6h5v5z" />
-  </svg>
-);
 
 export function LiveServiceAlerts({
   snapshot,
@@ -45,10 +40,9 @@ export function LiveServiceAlerts({
     fetchRouteModes().then(setRouteModes).catch(() => setRouteModes({}));
   }, []);
 
-  const filteredAdvisories = advisories.filter((a) => {
-    if (mode === "subway") return a.mode === "subway";
-    return a.mode === "bus" || a.mode === "streetcar" || a.mode === "unknown";
-  });
+  const filteredAdvisories = advisories.filter(
+    (a) => a.mode === mode || a.mode === "unknown",
+  );
 
   return (
     <div className="live-panel-v2">
@@ -77,7 +71,7 @@ export function LiveServiceAlerts({
           else if (delayVal >= 5) delayColor = "text-orange-600";
           else delayColor = "text-yellow-600";
 
-          const Icon = a.mode === "subway" ? SubwayIcon : a.mode === "bus" ? BusIcon : StreetcarIcon;
+          const Icon = a.mode === "bus" ? BusIcon : StreetcarIcon;
 
           return (
             <button
@@ -122,7 +116,7 @@ export function LiveServiceAlerts({
 
       {!filteredAdvisories.length && (
         <div className="py-12 text-center">
-          <p className="text-sm text-[var(--muted)]">No active delays for {mode === "subway" ? "subway" : "streetcar / bus"}.</p>
+          <p className="text-sm text-[var(--muted)]">No active delays for {mode}.</p>
         </div>
       )}
 
