@@ -3,6 +3,7 @@ import type { RouteDelayRow, RouteDetail } from "../../api";
 import type { GeocodeResult } from "../../lib/geoUtils";
 import type { LiveAdvisory, LiveSnapshot, Mode } from "../../types";
 import { LiveServiceAlerts } from "./LiveServiceAlerts";
+import { LiveRouteDetail } from "./LiveRouteDetail";
 
 export interface MapExploreState {
   histStart: string;
@@ -14,10 +15,12 @@ export interface MapExploreState {
   compareB: string;
   addressQuery: string;
   nearbyKm: number;
+  timeToggle: "year" | "date";
 }
 
 interface Props {
   mode: Mode;
+  viewMode: "live" | "historical";
   explore: MapExploreState;
   onExploreChange: (patch: Partial<MapExploreState>) => void;
   routeRows: RouteDelayRow[];
@@ -38,10 +41,12 @@ interface Props {
   onSelectAlert?: (alertId: string) => void;
   onRefreshLive?: () => void;
   liveRefreshing?: boolean;
+  onClearRouteDetail?: () => void;
 }
 
 export function MapSidebar({
   mode,
+  viewMode,
   explore,
   onExploreChange,
   routeRows,
@@ -62,37 +67,16 @@ export function MapSidebar({
   onSelectAlert,
   onRefreshLive,
   liveRefreshing = false,
+  onClearRouteDetail,
 }: Props) {
-  const [tab, setTab] = useState<"explore" | "live">("explore");
-
   const routeOptions = useMemo(
     () => routeRows.map((r) => r.route).filter(Boolean),
     [routeRows],
   );
 
-  const liveTotal =
-    liveSnapshot?.categories.reduce((n, c) => n + c.totalCount, 0) ?? advisories.length;
-
   return (
     <aside className="map-sidebar panel-scroll card-panel">
-      <div className="map-sidebar__tabs">
-        <button
-          type="button"
-          className={tab === "explore" ? "map-sidebar__tab--active" : ""}
-          onClick={() => setTab("explore")}
-        >
-          Routes & delays
-        </button>
-        <button
-          type="button"
-          className={tab === "live" ? "map-sidebar__tab--active" : ""}
-          onClick={() => setTab("live")}
-        >
-          Live ({liveTotal})
-        </button>
-      </div>
-
-      {tab === "explore" && (
+      {viewMode === "historical" ? (
         <div className="map-sidebar__section">
           <p className="map-sidebar__heading">Historical delay layer</p>
           <p className="map-sidebar__hint">
@@ -145,7 +129,7 @@ export function MapSidebar({
           <input
             type="text"
             className="filter-input w-full"
-            placeholder={`e.g. 501 (${mode})`}
+            placeholder={`e.g. 501 (${mode === "subway" ? "subway" : "streetcar / bus"})`}
             value={explore.routeSearch}
             onChange={(e) => onExploreChange({ routeSearch: e.target.value })}
             list="map-route-list"
@@ -263,43 +247,23 @@ export function MapSidebar({
           </button>
           {geocodeStatus && <p className="map-sidebar__status">{geocodeStatus}</p>}
         </div>
-      )}
-
-      {tab === "live" && (
+      ) : (
         <div className="map-sidebar__live">
-          <LiveServiceAlerts
-            snapshot={liveSnapshot}
-            mode={mode}
-            onSelectRoute={onSelectLiveRoute}
-            onSelectAlert={onSelectAlert}
-            onRefresh={onRefreshLive}
-            refreshing={liveRefreshing}
-          />
-          {advisories.length > 0 && (
-            <>
-              <p className="map-sidebar__heading map-sidebar__heading--spaced">
-                Map pins ({advisories.length} exact locations)
-              </p>
-              <ul className="map-sidebar__advisories">
-                {advisories.map((a) => (
-                  <li key={a.id}>
-                    <button
-                      type="button"
-                      onClick={() => onSelectAdvisory(a)}
-                      className={`advisory-card w-full text-left ${selectedAdvisory?.id === a.id ? "advisory-card--selected" : ""}`}
-                    >
-                      <span className="advisory-card__category">{a.category ?? a.effect}</span>
-                      <p className="mt-1 font-medium leading-snug">{a.title}</p>
-                      {a.routes.length > 0 && (
-                        <p className="mt-1 text-xs text-[var(--accent)]">
-                          Routes {a.routes.join(", ")}
-                        </p>
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
+          {routeDetail && viewMode === "live" ? (
+            <LiveRouteDetail
+              routeDetail={routeDetail}
+              mode={mode}
+              onBack={onClearRouteDetail}
+            />
+          ) : (
+            <LiveServiceAlerts
+              snapshot={liveSnapshot}
+              mode={mode}
+              advisories={advisories}
+              onSelectAdvisory={onSelectAdvisory}
+              onRefresh={onRefreshLive}
+              refreshing={liveRefreshing}
+            />
           )}
         </div>
       )}

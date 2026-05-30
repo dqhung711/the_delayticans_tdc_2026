@@ -41,6 +41,20 @@ interface Props {
   onModeChange: (m: Mode) => void;
 }
 
+const DIRECTIONS: Direction[] = ["EB", "WB", "NB", "SB"];
+
+const SubwayIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2c-4.42 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-6H6V6h5v5zm5.5 6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM18 11h-5V6h5v5z" />
+  </svg>
+);
+
+const StreetcarIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 16.94V8c0-2.79-2.68-3.98-6.04-3.98h-.03C9.67 4.02 7 5.22 7 8v8.94l-1.45 1.45c-.18.18-.29.43-.29.68V20c0 .55.45 1 1 1h2.58l1.7-1.71h2.92l1.7 1.71H18.74c.55 0 1-.45 1-1v-.93c0-.25-.11-.5-.29-.68L19 16.94zM8.5 15c-.83 0-1.5-.67-1.5-1.5S7.67 12 8.5 12s1.5.67 1.5 1.5S9.33 15 8.5 15zm7 0c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm1.5-5H9V8h8v2z" />
+  </svg>
+);
+
 function popupHtml(advisory: LiveAdvisory): string {
   const routes = advisory.routes.length
     ? `<p class="map-popup__routes">Routes ${advisory.routes.join(", ")}</p>`
@@ -166,6 +180,8 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const clearMapFocus = useCallback(() => {
     setMapFocusedRoutes([]);
     setSelected(null);
+    setRouteDetail(null);
+    setExplore((p) => ({ ...p, routeSearch: "" }));
   }, []);
 
   const focusMapRoutes = useCallback((routes: string[]) => {
@@ -181,6 +197,10 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const [routeShapesReady, setRouteShapesReady] = useState(false);
   const [routesShownCount, setRoutesShownCount] = useState(0);
   const [networkHint, setNetworkHint] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"live" | "historical">("live");
+  const [showStops, setShowStops] = useState(true);
+  const [showShelters, setShowShelters] = useState(true);
+  const [showConstruction, setShowConstruction] = useState(false);
   const [explore, setExplore] = useState<MapExploreState>({
     histStart: "2014",
     histEnd: "2026",
@@ -191,6 +211,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     compareB: "",
     addressQuery: "",
     nearbyKm: 1,
+    timeToggle: "year",
   });
   showHeatmapRef.current = explore.showHeatmap;
   showAllRoutesRef.current = explore.showAllRoutes;
@@ -210,15 +231,15 @@ export function TransitMap({ mode, onModeChange }: Props) {
     () => ({
       mode,
       view: "overview" as const,
-      granularity: "year" as const,
-      timeToggle: "year" as const,
+      granularity: explore.timeToggle === "year" ? ("year" as const) : ("date" as const),
+      timeToggle: explore.timeToggle,
       start: explore.histStart,
       end: explore.histEnd,
       directions: [] as Direction[],
       routes: [],
-      bucket: "year" as const,
+      bucket: explore.timeToggle === "year" ? ("year" as const) : ("day" as const),
     }),
-    [mode, explore.histStart, explore.histEnd],
+    [mode, explore.histStart, explore.histEnd, explore.timeToggle],
   );
 
   const filtered = useMemo(() => {
@@ -1187,49 +1208,139 @@ export function TransitMap({ mode, onModeChange }: Props) {
   };
 
   return (
-    <div className="page-enter">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex gap-2">
-          {(["streetcar", "bus", "subway"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => onModeChange(m)}
-              className={`mode-chip capitalize ${mode === m ? "mode-chip--active" : ""}`}
-            >
-              {m}
-            </button>
-          ))}
+    <div className="page-enter explorer-layout">
+      {/* Top Nav Bar */}
+      <div className="map-nav-bar">
+        <div className="map-nav-tabs">
+          <button
+            type="button"
+            onClick={() => onModeChange("streetcar")}
+            className={`map-nav-tab ${mode === "streetcar" || mode === "bus" ? "map-nav-tab--active" : ""}`}
+          >
+            <StreetcarIcon className="w-4 h-4" />
+            Streetcar / Bus
+          </button>
+          <button
+            type="button"
+            onClick={() => onModeChange("subway")}
+            className={`map-nav-tab ${mode === "subway" ? "map-nav-tab--active" : ""}`}
+          >
+            <SubwayIcon className="w-4 h-4" />
+            Subway
+          </button>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-[var(--muted)]">
-            {snapshot
-              ? `Updated ${new Date(snapshot.updatedAt).toLocaleString()} · auto every ${snapshot.refreshIntervalMinutes} min`
-              : "Loading…"}
-            {networkLoaded &&
-              (routesShownCount > 0
-                ? ` · ${routesShownCount} route line${routesShownCount === 1 ? "" : "s"}`
-                : " · live alert routes only — or Display all")}
-          </p>
-          <button
-            type="button"
-            className={`map-live-refresh-btn ${explore.showAllRoutes ? "map-live-refresh-btn--active" : ""}`}
-            onClick={() =>
-              setExplore((p) => ({ ...p, showAllRoutes: !p.showAllRoutes }))
-            }
-            aria-pressed={explore.showAllRoutes}
-          >
-            {explore.showAllRoutes ? "Filtered routes" : "Display all"}
-          </button>
-          <button
-            type="button"
-            className="map-live-refresh-btn"
-            onClick={() => void handleRefreshLive()}
-            disabled={liveRefreshing}
-            aria-busy={liveRefreshing}
-          >
-            {liveRefreshing ? "Refreshing…" : "Refresh now"}
-          </button>
+
+        <div className="map-badge-live">
+          <span className="badge-live">Live</span>
+          <span className="badge-active-delays">
+            {filtered.length} active delays
+          </span>
+        </div>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="map-filter-bar">
+        <div className="map-filter-group map-filter-group--vertical">
+          <span className="map-filter-label">View</span>
+          <div className="map-view-toggle">
+            <button
+              type="button"
+              onClick={() => setViewMode("live")}
+              className={`map-view-btn ${viewMode === "live" ? "map-view-btn--active" : ""}`}
+            >
+              <span className={`map-view-dot ${viewMode === "live" ? "map-view-dot--active" : "map-view-dot--inactive"}`} />
+              Live
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("historical")}
+              className={`map-view-btn ${viewMode === "historical" ? "map-view-btn--active" : ""}`}
+            >
+              <span className={`map-view-dot ${viewMode === "historical" ? "map-view-dot--active" : "map-view-dot--inactive"}`} />
+              Historical
+            </button>
+          </div>
+        </div>
+
+        {viewMode === "historical" && (
+          <div className="map-filter-group map-filter-group--vertical px-4 border-l border-[var(--border)]">
+            <span className="map-filter-label">Time Range</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                {(["year", "date"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setExplore((p) => ({ ...p, timeToggle: t }))}
+                    className={`relative text-[11px] font-bold pb-0.5 transition-all ${
+                      explore.timeToggle === t ? "text-[var(--text)]" : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                    {explore.timeToggle === t && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type={explore.timeToggle === "year" ? "number" : "date"}
+                  value={explore.histStart}
+                  onChange={(e) => setExplore((p) => ({ ...p, histStart: e.target.value }))}
+                  className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none ${explore.timeToggle === "year" ? "w-16" : "w-28"}`}
+                />
+                <span className="text-[var(--muted)] text-[10px]">→</span>
+                <input
+                  type={explore.timeToggle === "year" ? "number" : "date"}
+                  value={explore.histEnd}
+                  onChange={(e) => setExplore((p) => ({ ...p, histEnd: e.target.value }))}
+                  className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-xs font-bold text-center focus:ring-0 focus:outline-none ${explore.timeToggle === "year" ? "w-16" : "w-28"}`}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="map-filter-group map-filter-group--vertical px-4 border-l border-[var(--border)]">
+          <span className="map-filter-label">Show</span>
+          <div className="map-show-toggle">
+            <label className="map-checkbox-item">
+              <input
+                type="checkbox"
+                className="map-checkbox"
+                checked={showStops}
+                onChange={(e) => setShowStops(e.target.checked)}
+              />
+              Stops
+            </label>
+            <label className="map-checkbox-item">
+              <input
+                type="checkbox"
+                className="map-checkbox"
+                checked={showShelters}
+                onChange={(e) => setShowShelters(e.target.checked)}
+              />
+              Shelters
+            </label>
+            <label className="map-checkbox-item">
+              <input
+                type="checkbox"
+                className="map-checkbox"
+                checked={showConstruction}
+                onChange={(e) => setShowConstruction(e.target.checked)}
+              />
+              Construction
+            </label>
+            <label className="map-checkbox-item">
+              <input
+                type="checkbox"
+                className="map-checkbox"
+                checked={explore.showHeatmap}
+                onChange={(e) => setExplore((p) => ({ ...p, showHeatmap: e.target.checked }))}
+              />
+              Delay heat
+            </label>
+          </div>
         </div>
       </div>
 
@@ -1241,7 +1352,50 @@ export function TransitMap({ mode, onModeChange }: Props) {
       )}
 
       <div className="map-layout">
-        <div className="map-shell map-shell--network">
+        <div className="map-shell map-shell--network relative">
+          {/* Floating Search Bar */}
+          <div className="map-search-container">
+            <svg className="map-search-icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              className="map-search-input"
+              placeholder="Search address or route..."
+              value={explore.addressQuery || explore.routeSearch}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d+$/.test(val)) {
+                  setExplore((p) => ({ ...p, routeSearch: val, addressQuery: "" }));
+                } else {
+                  setExplore((p) => ({ ...p, addressQuery: val, routeSearch: "" }));
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (explore.routeSearch) handleSelectRoute(explore.routeSearch);
+                  else handleGeocodeAddress();
+                }
+              }}
+            />
+            {addressSuggestions.length > 0 && (
+              <ul className="address-search__suggestions" style={{ top: '100%', left: 0, right: 0, position: 'absolute', zIndex: 50 }}>
+                {addressSuggestions.map((hit) => (
+                  <li key={`${hit.lon}-${hit.lat}-${hit.display_name}`}>
+                    <button
+                      type="button"
+                      className="address-search__option"
+                      onClick={() => handlePickAddressSuggestion(hit)}
+                    >
+                      {hit.display_name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <div ref={mapContainer} className="map-canvas map-canvas--tall" />
           <div className="map-legend map-legend--wide">
             <span><i className="legend-dot legend-dot--bus" /> Bus</span>
@@ -1251,9 +1405,9 @@ export function TransitMap({ mode, onModeChange }: Props) {
               {explore.showHeatmap
                 ? "Red heat = delay density · route lines faded"
                 : explore.showAllRoutes
-                  ? mode === "streetcar"
-                    ? "All streetcar lines · pins = live"
-                    : "All bus lines · pins = live"
+                  ? mode === "streetcar" || mode === "bus"
+                    ? "All streetcar / bus lines · pins = live"
+                    : "All subway lines · pins = live"
                   : "Live alert routes only · Display all for full network"}
             </span>
           </div>
@@ -1261,6 +1415,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
 
         <MapSidebar
           mode={mode}
+          viewMode={viewMode}
           explore={explore}
           onExploreChange={(patch) => setExplore((p) => ({ ...p, ...patch }))}
           routeRows={routeRows}
@@ -1281,6 +1436,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
           onSelectAlert={focusAdvisoryById}
           onRefreshLive={() => void handleRefreshLive()}
           liveRefreshing={liveRefreshing}
+          onClearRouteDetail={clearMapFocus}
         />
       </div>
 

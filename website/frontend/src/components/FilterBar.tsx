@@ -33,6 +33,24 @@ interface FilterBarProps {
 
 const DIRECTIONS: Direction[] = ["EB", "WB", "NB", "SB"];
 
+const SubwayIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2c-4.42 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-6H6V6h5v5zm5.5 6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM18 11h-5V6h5v5z" />
+  </svg>
+);
+
+const BusIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78A2.99 2.99 0 0020 16V6c0-3.5-3.58-4-8-4S4 2.5 4 6v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h14v5z" />
+  </svg>
+);
+
+const StreetcarIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 16.94V8c0-2.79-2.68-3.98-6.04-3.98h-.03C9.67 4.02 7 5.22 7 8v8.94l-1.45 1.45c-.18.18-.29.43-.29.68V20c0 .55.45 1 1 1h2.58l1.7-1.71h2.92l1.7 1.71H18.74c.55 0 1-.45 1-1v-.93c0-.25-.11-.5-.29-.68L19 16.94zM8.5 15c-.83 0-1.5-.67-1.5-1.5S7.67 12 8.5 12s1.5.67 1.5 1.5S9.33 15 8.5 15zm7 0c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm1.5-5H9V8h8v2z" />
+  </svg>
+);
+
 export function FilterBar({
   view,
   onViewChange,
@@ -81,78 +99,67 @@ export function FilterBar({
     <div className="filter-panel page-enter mb-6">
       {/* Mode Selection */}
       <div className="flex items-center gap-8 mb-6 border-b border-[var(--border)] pb-4">
-        <button
-          onClick={() => onModeChange("streetcar")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-            mode === "streetcar"
-              ? "text-[var(--accent)] border-b-2 border-[var(--accent)] font-bold"
-              : "text-[var(--muted)] hover:text-[var(--text)]"
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m0 0V5a2 2 0 00-2-2H8a2 2 0 00-2 2v2m10 0v2M6 7v2m10 11a2 2 0 01-2 2H8a2 2 0 01-2-2v-3a2 2 0 012-2h6a2 2 0 012 2v3z" />
-          </svg>
-          Streetcar
-        </button>
-        <button
-          onClick={() => onModeChange("bus")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-            mode === "bus"
-              ? "text-[var(--accent)] border-b-2 border-[var(--accent)] font-bold"
-              : "text-[var(--muted)] hover:text-[var(--text)]"
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m0 0V5a2 2 0 00-2-2H8a2 2 0 00-2 2v2m10 0v2M6 7v2m10 11a2 2 0 01-2 2H8a2 2 0 01-2-2v-3a2 2 0 012-2h6a2 2 0 012 2v3z" />
-          </svg>
-          Bus
-        </button>
-        <button
-          onClick={() => onModeChange("subway")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-            mode === "subway"
-              ? "text-[var(--accent)] border-b-2 border-[var(--accent)] font-bold"
-              : "text-[var(--muted)] hover:text-[var(--text)]"
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-          </svg>
-          Subway
-        </button>
+        {(
+          [
+            { key: "streetcar", label: "Streetcar", Icon: StreetcarIcon },
+            { key: "bus", label: "Bus", Icon: BusIcon },
+            { key: "subway", label: "Subway", Icon: SubwayIcon },
+          ] as const
+        ).map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            onClick={() => onModeChange(key)}
+            className={`relative flex items-center gap-2 pb-1.5 transition-all ${
+              mode === key
+                ? "text-[var(--accent)] font-bold"
+                : "text-[var(--muted)] hover:text-[var(--text)]"
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+            {label}
+            {mode === key && (
+              <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50 rounded-none" />
+            )}
+          </button>
+        ))}
       </div>
 
-      <div className="flex flex-wrap items-start gap-x-12 gap-y-6">
+      <div className="flex flex-wrap items-start gap-x-0 gap-y-6">
         {/* View Selection */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 pr-8">
           <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">View</p>
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => onViewChange("overview")}
-              className={`flex items-center gap-2 text-sm font-medium transition-all ${
-                view === "overview" ? "text-[var(--accent)]" : "text-[var(--muted)]"
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${view === "overview" ? "bg-[var(--accent)]" : "bg-transparent"}`} />
-              Overview
-            </button>
-            <button
-              onClick={() => onViewChange("compare")}
-              className={`flex items-center gap-2 text-sm font-medium transition-all ${
-                view === "compare" ? "text-[var(--accent)]" : "text-[var(--muted)]"
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${view === "compare" ? "bg-[var(--accent)]" : "bg-transparent"}`} />
-              Compare
-            </button>
+          <div className="flex items-center gap-5">
+            {(["overview", "compare"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => onViewChange(v)}
+                className={`relative flex items-center gap-2 text-sm font-medium pb-1 transition-all ${
+                  view === v ? "text-[var(--text)] font-bold" : "text-[var(--muted)]"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                    view === v ? "bg-[var(--accent)]" : "bg-[var(--muted)] opacity-40"
+                  }`}
+                />
+                {v.charAt(0).toUpperCase() + v.slice(1)}
+                {view === v && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="w-px self-stretch bg-[var(--border)] opacity-50 mx-2" />
+
         {/* Time Range */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-8">
           <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Time Range</p>
           <div className="flex items-center gap-4">
-            <div className="flex items-center bg-[var(--control-bg)] rounded-md p-0.5">
+            {/* Year / Date toggle */}
+            <div className="flex items-center gap-3">
               {(["year", "date"] as const).map((t) => (
                 <button
                   key={t}
@@ -160,64 +167,78 @@ export function FilterBar({
                     onTimeToggleChange(t);
                     onGranularityChange(t === "year" ? "year" : granularity === "year" ? "date" : granularity);
                   }}
-                  className={`px-3 py-1 text-xs font-medium rounded transition-all ${
-                    timeToggle === t ? "bg-white text-[var(--text)] shadow-sm" : "text-[var(--muted)]"
+                  className={`relative text-xs font-medium pb-0.5 transition-all ${
+                    timeToggle === t
+                      ? "text-[var(--text)] font-bold"
+                      : "text-[var(--muted)]"
                   }`}
                 >
                   {t.charAt(0).toUpperCase() + t.slice(1)}
+                  {timeToggle === t && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
+                  )}
                 </button>
               ))}
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="relative flex items-center">
-                <input
-                  type={timeToggle === "year" ? "number" : "date"}
-                  value={start}
-                  onChange={(e) => onStartChange(e.target.value)}
-                  className="bg-transparent border-none text-sm font-bold w-20 p-0 focus:ring-0"
-                />
-                <svg className="w-4 h-4 text-[var(--accent)] ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span className="text-[var(--muted)] font-medium">→</span>
-              <div className="relative flex items-center">
-                <input
-                  type={timeToggle === "year" ? "number" : "date"}
-                  value={end}
-                  onChange={(e) => onEndChange(e.target.value)}
-                  className="bg-transparent border-none text-sm font-bold w-20 p-0 focus:ring-0"
-                />
-                <svg className="w-4 h-4 text-[var(--accent)] ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+              <input
+                type={timeToggle === "year" ? "number" : "date"}
+                value={start}
+                onChange={(e) => onStartChange(e.target.value)}
+                min={timeToggle === "year" ? 2000 : undefined}
+                max={timeToggle === "year" ? 2099 : undefined}
+                className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none ${
+                  timeToggle === "year" ? "w-16" : "w-32"
+                }`}
+                style={{ colorScheme: "dark" }}
+              />
+              <span className="text-[var(--muted)] font-medium text-xs">→</span>
+              <input
+                type={timeToggle === "year" ? "number" : "date"}
+                value={end}
+                onChange={(e) => onEndChange(e.target.value)}
+                min={timeToggle === "year" ? 2000 : undefined}
+                max={timeToggle === "year" ? 2099 : undefined}
+                className={`bg-transparent border-b-[1px] border-[var(--muted)] border-opacity-40 text-sm font-bold text-center focus:ring-0 focus:outline-none ${
+                  timeToggle === "year" ? "w-16" : "w-32"
+                }`}
+                style={{ colorScheme: "dark" }}
+              />
             </div>
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="w-px self-stretch bg-[var(--border)] opacity-50 mx-2" />
+
         {/* Direction */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-8">
           <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Direction</p>
           <div className="flex gap-4">
             {DIRECTIONS.map((dir) => (
               <button
                 key={dir}
                 onClick={() => toggleDirection(dir)}
-                className={`flex items-center gap-1.5 text-sm font-medium transition-all ${
-                  directions.includes(dir) ? "text-[var(--accent)]" : "text-[var(--muted)]"
+                className={`relative flex items-center gap-1.5 text-sm font-medium pb-1 transition-all ${
+                  directions.includes(dir) ? "text-[var(--accent)] font-bold" : "text-[var(--muted)]"
                 }`}
               >
                 <span className="text-xs">{dir === "EB" ? "→" : dir === "WB" ? "←" : dir === "NB" ? "↑" : "↓"}</span>
                 {dir}
+                {directions.includes(dir) && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--accent)] opacity-50" />
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Routes (Optional, keeping it but making it more compact) */}
-        <div className="flex flex-col gap-2 ml-auto">
+        {/* Divider */}
+        <div className="w-px self-stretch bg-[var(--border)] opacity-50 mx-2" />
+
+        {/* Routes */}
+        <div className="flex flex-col gap-2 px-8 ml-auto">
           <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Routes</p>
           <select
             multiple

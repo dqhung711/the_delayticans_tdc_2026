@@ -3,6 +3,7 @@ import { fetchOverview, fetchRoutes, fetchSummary, type QueryParams } from "../a
 import { showDevUI } from "../lib/appConfig";
 import { ExplorerKpis } from "../components/ExplorerKpis";
 import { FilterBar } from "../components/FilterBar";
+import { AiAssistant } from "../components/AiAssistant";
 import { CategoryChart } from "../components/charts/CategoryChart";
 import { HourlyStackedChart } from "../components/charts/HourlyStackedChart";
 import { HourlyTotalsChart } from "../components/charts/HourlyTotalsChart";
@@ -152,41 +153,47 @@ export function DataExplorer({ mode, meta, onModeChange }: Props) {
       {error && <p className="explorer-error">{error}</p>}
 
       {view === "overview" && (
-        <>
-          <ExplorerKpis
-            loading={loading}
-            incidents={summary?.incidents}
-            totalDelay={summary?.total_delay}
-            totalGap={summary?.total_gap}
-          />
-
-          <section className="main-chart-section">
-            <TimeSeriesChart
-              key={`${mode}-${start}-${end}-${bucket}-${directions.join(",")}`}
-              data={timeSeriesData}
-              title="Delay minutes & gap minutes over time"
-              primary
-              mode={mode}
-              bucket={bucket}
-              rangeStart={start}
-              rangeEnd={end}
-            />
-            {!loading && charts && timeSeriesData.length === 0 && (
-              <p className="explorer-error mt-2">
-                No rows in this range. Try clearing route filters or widening the year range.
-              </p>
-            )}
-          </section>
-        </>
+        <ExplorerKpis
+          loading={loading}
+          incidents={summary?.incidents}
+          totalDelay={summary?.total_delay}
+          totalGap={summary?.total_gap}
+        />
       )}
 
-      {charts && !charts.compare && view === "overview" && (
-        <div className="explorer-charts-row">
-          <HourlyTotalsChart data={charts.hourlyTotals} mode={mode} />
-          <CategoryChart data={charts.categories} mode={mode} />
-          <HourlyStackedChart rows={charts.hourlyByCategory} mode={mode} />
+      <div className={view === "overview" ? "explorer-grid" : ""}>
+        <div className="explorer-main flex flex-col gap-4">
+          {view === "overview" && (
+            <section className="main-chart-section">
+              <TimeSeriesChart
+                key={`${mode}-${start}-${end}-${bucket}-${directions.join(",")}`}
+                data={timeSeriesData}
+                title="Delay minutes & gap minutes over time"
+                primary
+                mode={mode}
+                bucket={bucket}
+                rangeStart={start}
+                rangeEnd={end}
+              />
+              {!loading && charts && timeSeriesData.length === 0 && (
+                <p className="explorer-error mt-2">
+                  No rows in this range. Try clearing route filters or widening the year range.
+                </p>
+              )}
+            </section>
+          )}
+
+          {charts && !charts.compare && view === "overview" && (
+            <div className="explorer-charts-row">
+              <HourlyTotalsChart data={charts.hourlyTotals} mode={mode} />
+              <CategoryChart data={charts.categories} mode={mode} />
+              <HourlyStackedChart rows={charts.hourlyByCategory} mode={mode} />
+            </div>
+          )}
         </div>
-      )}
+
+        {view === "overview" && <AiAssistant />}
+      </div>
 
       {charts?.compare && charts.periods && (
         <div className="explorer-compare">
