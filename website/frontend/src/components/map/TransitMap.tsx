@@ -4,6 +4,7 @@ import {
   fetchDelayHotspots,
   fetchLive,
   refreshLive,
+  fetchMapStops,
   fetchRouteDelays,
   fetchRouteDetail,
   fetchRouteShapes,
@@ -33,6 +34,16 @@ import {
   inTorontoBbox,
 } from "../../lib/mapStyles";
 import { selectMapRouteFeatures } from "../../lib/routeNetworkFilter";
+import {
+  CONSTRUCTION_LAYER,
+  CONSTRUCTION_SOURCE,
+  constructionAdvisoriesToGeoJSON,
+  setOverlayVisibility,
+  SHELTERS_LAYER,
+  SHELTERS_SOURCE,
+  STOPS_LAYER,
+  STOPS_SOURCE,
+} from "../../lib/mapOverlays";
 import { collectLiveAdvisoryRouteIds } from "../../lib/visibleRoutes";
 import type { Direction, LiveAdvisory, LiveSnapshot, Mode } from "../../types";
 import { MapSidebar, type MapExploreState } from "./MapSidebar";
@@ -167,7 +178,10 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const prevThemeRef = useRef(theme);
   const showHeatmapRef = useRef(false);
   const showAllRoutesRef = useRef(false);
+  const showStopsRef = useRef(true);
+  const showConstructionRef = useRef(false);
   const modeRef = useRef(mode);
+  const stopsGeoRef = useRef<GeoJSON.FeatureCollection | null>(null);
   themeRef.current = theme;
   modeRef.current = mode;
 
@@ -200,7 +214,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
   const [networkHint, setNetworkHint] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"live" | "historical">("live");
   const [showStops, setShowStops] = useState(true);
-  const [showShelters, setShowShelters] = useState(true);
+  const [showShelters, setShowShelters] = useState(false);
   const [showConstruction, setShowConstruction] = useState(false);
   const [explore, setExplore] = useState<MapExploreState>({
     histStart: "2014",
@@ -216,6 +230,8 @@ export function TransitMap({ mode, onModeChange }: Props) {
   });
   showHeatmapRef.current = explore.showHeatmap;
   showAllRoutesRef.current = explore.showAllRoutes;
+  showStopsRef.current = showStops;
+  showConstructionRef.current = showConstruction;
   const [routeRows, setRouteRows] = useState<RouteDelayRow[]>([]);
   const [routeDetail, setRouteDetail] = useState<RouteDetail | null>(null);
   const [compareA, setCompareA] = useState<RouteDetail | null>(null);
@@ -341,6 +357,72 @@ export function TransitMap({ mode, onModeChange }: Props) {
       );
     }
 
+    const empty: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+
+    if (!map.getSource(STOPS_SOURCE)) {
+      map.addSource(STOPS_SOURCE, { type: "geojson", data: empty });
+      map.addLayer(
+        {
+          id: STOPS_LAYER,
+          type: "circle",
+          source: STOPS_SOURCE,
+          minzoom: 11,
+          layout: { visibility: showStopsRef.current ? "visible" : "none" },
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2, 14, 4, 16, 5],
+            "circle-color": "#64748b",
+            "circle-opacity": 0.55,
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#ffffff",
+            "circle-stroke-opacity": 0.35,
+          },
+        },
+        "ttc-routes-line",
+      );
+    }
+
+    if (!map.getSource(SHELTERS_SOURCE)) {
+      map.addSource(SHELTERS_SOURCE, { type: "geojson", data: empty });
+      map.addLayer(
+        {
+          id: SHELTERS_LAYER,
+          type: "circle",
+          source: SHELTERS_SOURCE,
+          minzoom: 11,
+          layout: { visibility: "none" },
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 4, 14, 6, 16, 7],
+            "circle-color": "#0284c7",
+            "circle-opacity": 0.75,
+            "circle-stroke-width": 1.5,
+            "circle-stroke-color": "#ffffff",
+          },
+        },
+        STOPS_LAYER,
+      );
+    }
+
+    if (!map.getSource(CONSTRUCTION_SOURCE)) {
+      map.addSource(CONSTRUCTION_SOURCE, { type: "geojson", data: empty });
+      map.addLayer(
+        {
+          id: CONSTRUCTION_LAYER,
+          type: "circle",
+          source: CONSTRUCTION_SOURCE,
+          minzoom: 9,
+          layout: { visibility: showConstructionRef.current ? "visible" : "none" },
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 7, 13, 11, 16, 14],
+            "circle-color": "#f59e0b",
+            "circle-opacity": 0.85,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#ffffff",
+          },
+        },
+        "ttc-routes-highlight",
+      );
+    }
+
     if (!map.getSource("live-advisories")) {
       map.addSource("live-advisories", {
         type: "geojson",
@@ -423,6 +505,29 @@ export function TransitMap({ mode, onModeChange }: Props) {
       });
     }
   }, []);
+
+  const syncMapOverlays = useCallback(
+    (map: maplibregl.Map, advisories: LiveAdvisory[]) => {
+      const stops = stopsGeoRef.current;
+      const stopsSource = map.getSource(STOPS_SOURCE) as maplibregl.GeoJSONSource | undefined;
+      const sheltersSource = map.getSource(SHELTERS_SOURCE) as maplibregl.GeoJSONSource | undefined;
+      const constructionSource = map.getSource(CONSTRUCTION_SOURCE) as
+        | maplibregl.GeoJSONSource
+        | undefined;
+
+      if (stopsSource && stops) {
+        stopsSource.setData(stops);
+      }
+      // Shelters: placeholder toggle — no layer data yet.
+      sheltersSource?.setData({ type: "FeatureCollection", features: [] });
+      constructionSource?.setData(constructionAdvisoriesToGeoJSON(advisories));
+
+      setOverlayVisibility(map, STOPS_LAYER, showStopsRef.current);
+      setOverlayVisibility(map, SHELTERS_LAYER, false);
+      setOverlayVisibility(map, CONSTRUCTION_LAYER, showConstructionRef.current);
+    },
+    [],
+  );
 
   const setupRouteHover = useCallback((map: maplibregl.Map) => {
     if (routeInteractionsBound.current) return;
@@ -932,6 +1037,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       setupRouteClick(map);
       setupLivePinInteractions(map);
       setupMapFocusHandlers(map);
+      syncMapOverlays(map, liveAdvisoriesRef.current);
       syncPitch();
       setMapReady(true);
     });
@@ -974,6 +1080,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
         explore.showHeatmap,
       );
       syncLivePins(map, filtered, hoveredId, selected?.id ?? null, mapFocusedRoutes);
+      syncMapOverlays(map, filtered);
       void applyHeatmap(map, explore.showHeatmap);
     });
   }, [
@@ -985,6 +1092,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
     addNetworkLayers,
     applyNetworkData,
     syncLivePins,
+    syncMapOverlays,
     setupRouteHover,
     routeRows,
     addressCenter,
@@ -1060,6 +1168,43 @@ export function TransitMap({ mode, onModeChange }: Props) {
       cancelled = true;
     };
   }, [mode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMapStops(mode)
+      .then((data) => {
+        if (cancelled) return;
+        stopsGeoRef.current = data;
+        const map = mapRef.current;
+        if (map && mapReady) {
+          syncMapOverlays(map, filtered);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) stopsGeoRef.current = null;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, mapReady, filtered, syncMapOverlays]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    syncMapOverlays(map, filtered);
+  }, [filtered, mapReady, syncMapOverlays]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    setOverlayVisibility(map, STOPS_LAYER, showStops);
+  }, [showStops, mapReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    setOverlayVisibility(map, CONSTRUCTION_LAYER, showConstruction);
+  }, [showConstruction, mapReady]);
 
   useEffect(() => {
     fetchRouteDelays(mapQuery).then(setRouteRows).catch(() => setRouteRows([]));
@@ -1407,12 +1552,14 @@ export function TransitMap({ mode, onModeChange }: Props) {
           <div className="map-legend map-legend--wide">
             <span><i className="legend-dot legend-dot--bus" /> Bus</span>
             <span><i className="legend-dot legend-dot--streetcar" /> Streetcar</span>
+            {showStops && <span className="text-[var(--muted)]">· Stops (zoom in)</span>}
+            {showConstruction && <span className="text-[var(--muted)]">· Construction</span>}
             <span className="text-[var(--muted)]">
               {explore.showHeatmap
-                ? "Red heat = delay density · route lines faded"
+                ? " · Red heat = delay density"
                 : explore.showAllRoutes
-                  ? `All ${mode} lines · pins = live`
-                  : "Live alert routes only · Display all for full network"}
+                  ? ` · All ${mode} lines · pins = live`
+                  : " · Live alert routes only"}
             </span>
           </div>
         </div>

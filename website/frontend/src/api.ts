@@ -95,11 +95,19 @@ export function prefetchRouteShapes(mode: "streetcar" | "bus"): void {
 }
 
 const routeShapesCache = new Map<string, GeoJSON.FeatureCollection>();
+const mapStopsCache = new Map<string, GeoJSON.FeatureCollection>();
 
 export async function fetchMapStops(mode: Mode): Promise<GeoJSON.FeatureCollection> {
+  if (mode !== "bus" && mode !== "streetcar") {
+    return { type: "FeatureCollection", features: [] };
+  }
+  const hit = mapStopsCache.get(mode);
+  if (hit) return hit;
   const res = await fetch(apiUrl(`/api/map/stops?mode=${mode}`));
   if (!res.ok) return { type: "FeatureCollection", features: [] };
-  return res.json();
+  const data = (await res.json()) as GeoJSON.FeatureCollection;
+  mapStopsCache.set(mode, data);
+  return data;
 }
 
 export interface RouteDelayRow {
