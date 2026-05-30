@@ -1,11 +1,8 @@
-# Runtime data
+# Map and analytics data
 
-| File | In git? | Purpose |
-|------|---------|---------|
-| `delays.db.gz` | Yes (~48 MB) | Historical delays (compressed) |
-| `delays.db` | No (local) | Unpacked SQLite; run `npm run prepare-data` |
-| `route-shapes-bus.json`, `route-shapes-streetcar.json` (+ `.json.gz` sidecars) | Yes | Map route lines (Toronto-clipped, simplified) |
+Bundled files used at runtime:
 
-After clone: `cd website && npm run setup` (unpacks the database).
-
-Maintainers: rebuild with `npm run rebuild-data` (scripts in `.dev/tools/`).
+- **delays.db.gz** — compressed historical delay database (unpacked when the server starts).
+- **route-shapes-*.json** — bus and streetcar route lines for the map.
+- **stops.geojson** — stop locations and accessibility attributes.
+- **stops-lookup.json**, **route-modes.json** — supporting lookup tables for geocoding and routing.

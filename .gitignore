@@ -2,6 +2,7 @@
 .idea/
 
 # Website app (see website/.gitignore)
+website/api/.env
 website/node_modules/
 website/frontend/node_modules/
 website/.venv/

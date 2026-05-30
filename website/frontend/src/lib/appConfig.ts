@@ -1,10 +1,11 @@
 /**
- * Developer-only UI (setup commands, PRIMARY badge, GTFS labels).
- * Set VITE_SHOW_DEV_UI=true in frontend/.env.local to enable while developing.
+ * Developer-only hints (npm commands, debug badges). Off in production builds.
+ * Local: set VITE_SHOW_DEV_UI=true in frontend/.env.local
  */
-export const showDevUI = import.meta.env.VITE_SHOW_DEV_UI === "true";
+export const showDevUI =
+  import.meta.env.DEV && import.meta.env.VITE_SHOW_DEV_UI === "true";
 
-/** Backend origin (no trailing slash). Empty = same host; dev uses Vite proxy. */
+/** Backend origin (no trailing slash). Empty = same host as the UI. */
 export const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
 export function apiUrl(path: string): string {

@@ -865,7 +865,7 @@ export function TransitMap({ mode, onModeChange }: Props) {
       })
         .setLngLat(coords)
         .setHTML(
-          `<div class="map-popup"><strong>${escapeHtml(label)}</strong><p class="map-popup__hint">GTFS wheelchair boarding available</p></div>`,
+          `<div class="map-popup"><strong>${escapeHtml(label)}</strong><p class="map-popup__hint">Step-free boarding available</p></div>`,
         )
         .addTo(map);
     });
