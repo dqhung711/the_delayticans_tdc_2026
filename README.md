@@ -94,3 +94,11 @@ Historical figures come from archived TTC delay reports. Live information reflec
   Then open **http://localhost:8000**.
 
 More detail: [website/README.md](website/README.md).
+
+## Team
+
+**The Delayticans** — TDC 2026
+
+- [Quang Hung Dang](https://github.com/dqhung711)
+- [Khanh Phu Tran](https://github.com/FuTran-2)
+- [Richelle Hoang](https://github.com/hoangha5)
