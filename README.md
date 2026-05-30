@@ -1,8 +1,20 @@
 # TTC Delays
 
-**Live site:** [the-delayticans-tdc-2026.vercel.app](https://the-delayticans-tdc-2026.vercel.app/)
+Built for **TDC 2026** by The Delayticans.
 
 Explore more than a decade of Toronto Transit Commission **bus and streetcar** delay history, then switch to a **live map** of current service alerts—all in one place.
+
+## TDC 2026 submission
+
+| Deliverable | Link |
+|-------------|------|
+| **Working prototype** | [the-delayticans-tdc-2026.vercel.app](https://the-delayticans-tdc-2026.vercel.app/) |
+| **Technical report** (PDF; max. 15 pages excl. references & appendices) | [scripts/technical_report.pdf](scripts/technical_report.pdf) |
+| **Data sources statement** (Section 4.4) | [data-license/README.md](data-license/README.md) |
+| **Video walkthrough** (max. 3 min) | [YouTube](https://www.youtube.com/) |
+| **Source code repository** | [github.com/dqhung711/the_delayticans_tdc_2026](https://github.com/dqhung711/the_delayticans_tdc_2026) — see [Run locally](#run-locally) below |
+
+The live prototype is functional at submission and will remain accessible through **July 31, 2026**.
 
 ## What you can do
 
@@ -36,8 +48,6 @@ Explore more than a decade of Toronto Transit Commission **bus and streetcar** d
 | **Transit network geometry** | Route lines and stop locations on the map |
 
 Historical figures come from archived TTC delay reports. Live information reflects conditions at refresh time and may change without notice. This project is for **information and research**; for official service status, use [ttc.ca](https://www.ttc.ca).
-
-**Data Sources Statement** (datasets, licences, no PII): [data-license/README.md](data-license/README.md).
 
 ## Run locally
 
@@ -84,7 +94,3 @@ Historical figures come from archived TTC delay reports. Live information reflec
   Then open **http://localhost:8000**.
 
 More detail: [website/README.md](website/README.md).
-
-## Team
-
-Built for **TDC 2026** by The Delayticans.
