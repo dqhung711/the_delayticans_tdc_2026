@@ -23,6 +23,26 @@
         "panel": "shared"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Build Technical Report PDF",
+      "type": "shell",
+      "command": "/Library/TeX/texbin/pdflatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-output-directory=${workspaceFolder}/scripts",
+        "${workspaceFolder}/scripts/technical_report.tex"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/scripts"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 }

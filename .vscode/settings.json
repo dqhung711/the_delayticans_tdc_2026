@@ -4,6 +4,26 @@
   "latex-workshop.latex.autoBuild.run": "onSave",
   "latex-workshop.latex.autoClean.run": "onBuilt",
   "latex-workshop.latex.outDir": "%DIR%",
+  "latex-workshop.latex.recipe.default": "technical-report-pdflatex",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "technical-report-pdflatex",
+      "tools": ["pdflatex"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "pdflatex",
+      "command": "/Library/TeX/texbin/pdflatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-output-directory=%DIR%",
+        "%DOC%"
+      ]
+    }
+  ],
   "latex-workshop.view.pdf.viewer": "tab",
   "latex-workshop.synctex.afterBuild.enabled": true,
   "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
