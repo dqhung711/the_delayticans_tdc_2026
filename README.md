@@ -11,7 +11,7 @@ Explore more than a decade of Toronto Transit Commission **bus and streetcar** d
 | **Working prototype** | [the-delayticans-tdc-2026.vercel.app](https://the-delayticans-tdc-2026.vercel.app/) |
 | **Technical report** (PDF; max. 15 pages excl. references & appendices) | [scripts/technical_report.pdf](technical_report.pdf) |
 | **Data sources statement** (Section 4.4) | [data-license/README.md](data-license/README.md) |
-| **Video walkthrough** (max. 3 min) | [YouTube](https://www.youtube.com/) |
+| **Video walkthrough** (max. 3 min) | [YouTube](https://youtu.be/BBIYPVwSNjA) |
 | **Source code repository** | [github.com/dqhung711/the_delayticans_tdc_2026](https://github.com/dqhung711/the_delayticans_tdc_2026/tree/main/website) — see [Run locally](#run-locally) below |
 
 The live prototype is functional at submission and will remain accessible through **July 31, 2026**.
